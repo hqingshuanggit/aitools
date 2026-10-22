@@ -109,10 +109,8 @@ thead th.nosort{cursor:default}
 /* 厂商列冻结宽度由 JS 实测写入 --c1w，避免写死数值与内容宽度错位 */
 th.col-sticky,td.col-sticky{position:sticky;left:0;z-index:6;background:#fff;white-space:nowrap}
 thead th.col-sticky{z-index:11;background:#f8f9fb}
-th.col-sticky2,td.col-sticky2{position:sticky;left:var(--c1w,80px);z-index:6;background:#fff}
-thead th.col-sticky2{z-index:11;background:#f8f9fb}
 tbody tr:hover td{background:#f8fbff}
-tbody tr:hover td.col-sticky,tbody tr:hover td.col-sticky2{background:#f2f7fe}
+tbody tr:hover td.col-sticky{background:#f2f7fe}
 td{padding:6px 6px;border-bottom:1px solid #eef0f3;vertical-align:middle}
 td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
 td.model{font-weight:600;color:var(--text);min-width:104px;max-width:140px}
@@ -122,6 +120,9 @@ td.model{font-weight:600;color:var(--text);min-width:104px;max-width:140px}
 /* 单行截断容器：架构 / 协议 / 备注等长文本列统一限宽，全值通过 title 悬浮查看 */
 .tc{display:block;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-sm{display:block;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 架构列压缩：132px → 88px（缩 1/3）；主行只留架构名，工艺/补充说明折入副行小字 */
+.tc-node{display:block;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-node .sub{max-width:88px}
 .badge{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10.5px;line-height:1.5;white-space:nowrap}
 .b-ok{background:var(--ok-soft);color:var(--ok)}
 .b-warn{background:var(--warn-soft);color:var(--warn)}
@@ -232,8 +233,7 @@ table.diff td.now{color:var(--ok);font-weight:600}
   <table id="tbl">
     <thead>
       <tr>
-        <th class="col-sticky nosort">厂商</th>
-        <th class="col-sticky2 nosort">型号</th>
+        <th class="col-sticky nosort">型号</th>
         <th data-k="cls" title="芯片类型（GPU / NPU·ASIC / DCU·GPGPU）">类型</th>
         <th data-k="node" title="制程 / 架构">架构</th>
         <th data-k="f4n" title="FP4 稠密峰值，单位 PFLOPS">FP4<b>(P)</b> <span class="arw">▼</span></th>
@@ -252,102 +252,30 @@ table.diff td.now{color:var(--ok);font-weight:600}
   </table>
 </div>
 
-<div class="grid2">
-  <div class="panel">
-    <h2>数据可信度图例</h2>
-    <div class="kv"><b><span class="badge b-ok">官方 datasheet</span></b><span>厂商公开发布的规格书 / 官网参数页，可直接引用。</span></div>
-    <div class="kv"><b><span class="badge b-blue">厂商发布口径</span></b><span>发布会 / 官方 PPT / 官方新闻稿 / 官网规格页揭示值，随版本可能调整。</span></div>
-    <div class="kv"><b><span class="badge b-warn">第三方估算</span></b><span>媒体、拆机分析或研究机构推算，<b>存在多个互相冲突的口径</b>，选型前必须原厂确认。</span></div>
-    <div class="kv"><b><span class="badge b-danger">未公开</span></b><span>厂商未披露完整参数（尤其国产新卡），仅能标注已确认的片段。</span></div>
-    <div class="kv"><b><span class="q">?</span></b><span>单元格内的具体数值落在第三方口径或口径存在冲突。</span></div>
-  </div>
-  <div class="panel">
-    <h2>速判：按场景先筛哪几个字段</h2>
-    <table class="mini">
-      <tr><th>场景</th><th>先看</th><th>再看</th></tr>
-      <tr><td>大模型预训练</td><td>FP8/FP4 稠密、卡间互联</td><td>显存带宽、万卡线性度、HBM 供应</td></tr>
-      <tr><td>推理（decode）</td><td>显存带宽、单卡显存</td><td>FP4/FP8、功耗与机房风冷上限</td></tr>
-      <tr><td>长上下文 prefill</td><td>FP8 稠密算力</td><td>互联拓扑、KV Cache 容量</td></tr>
-      <tr><td>科学计算 / HPC</td><td>FP64 / FP32</td><td>x86 与 CUDA 生态兼容性</td></tr>
-      <tr><td>信创 / 政务</td><td>国产化率、安全可靠测评</td><td>本地化服务与交期</td></tr>
-    </table>
-    <p style="font-size:12px;color:var(--text-2);margin:10px 0 0">
-      横向对比注意：<b>国产卡的官方算力多为自定义精度（如 HiF8/HiF4/MXFP8），与 NVFP4/FP8 不可直接等价换算</b>；
-      且单卡算力差距远小于<b>集群互联带宽与软件栈成熟度</b>带来的差距。
-    </p>
-  </div>
+<div class="panel" style="margin-top:14px">
+  <h2>数据可信度图例 <span style="font-size:11.5px;color:var(--text-3);font-weight:400">（对应表格最右「可信度」列；紧凑模式显示缩写，点「完整列宽」显示全称）</span></h2>
+  <div class="kv"><b><span class="badge b-ok">官方</span></b><span><b>官方 datasheet</b>：厂商公开发布的规格书 / 官网参数页，可直接引用。</span></div>
+  <div class="kv"><b><span class="badge b-blue">发布</span></b><span><b>厂商发布口径</b>：发布会 / 官方 PPT / 官方新闻稿 / 官网规格页揭示值，随版本可能调整。</span></div>
+  <div class="kv"><b><span class="badge b-warn">估算</span></b><span><b>第三方估算</b>：媒体、拆机分析或研究机构推算，<b>存在多个互相冲突的口径</b>，选型前必须原厂确认。</span></div>
+  <div class="kv"><b><span class="badge b-danger">未公开</span></b><span>厂商未披露完整参数（尤其国产新卡），仅能标注已确认的片段。</span></div>
+  <div class="kv"><b><span class="q">?</span></b><span>单元格内数值口径存疑（第三方口径 / 官方未给该精度分列值 / 来源冲突），与行级可信度徽标互补：行标「官方」的卡个别数值也可能带 ?。</span></div>
 </div>
 
 <div class="panel" style="margin-top:14px">
-  <h2>v2 数据订正清单（v1 → v2，逐条比官网核实）</h2>
-  <p style="font-size:12px;color:var(--text-2);margin:0 0 6px">
-    v2 的核心修订来自一个统一口径问题：<b>NVIDIA 与 AMD 官方 datasheet 的 Tensor Core 峰值默认按「含稀疏（2:4 structured sparsity）」标注，数值是稠密的 2 倍</b>。
-    v1 在同一张表里混用了两种口径（FP8/FP16 取稠密、INT8 取含稀疏），导致部分型号横向不可比。v2 一律折算为稠密值，并在备注里写明官方原始标注。
-  </p>
-  <table class="diff">
-    <tr><th style="width:110px">型号</th><th style="width:150px">字段</th><th style="width:150px">v1（错）</th><th style="width:150px">v2（订正后）</th><th>依据</th></tr>
-    <tr><td rowspan="2">H100 SXM</td><td>FP8</td><td class="was">0.99 PFLOPS</td><td class="now">1.98 PFLOPS</td><td rowspan="2">NVIDIA 官网：FP8 3,958 / FP16 1,979 / INT8 3,958 TOPS <b>*With sparsity</b> → 稠密 ÷2</td></tr>
-    <tr><td>INT8</td><td class="was">1,979 TOPS</td><td class="now">1,979 TOPS（无误，基线）</td></tr>
-    <tr><td>H200 SXM</td><td>FP8</td><td class="was">0.99 PFLOPS</td><td class="now">1.98 PFLOPS</td><td>NVIDIA 官网 H200 表（含稀疏注释 ²），算力与 H100 相同</td></tr>
-    <tr><td rowspan="2">H20</td><td>FP8 / FP16</td><td class="was">0.148 P / 74 T</td><td class="now">0.296 P / 148 T</td><td rowspan="2">NVIDIA H20 规格表为 296 / 148 / 296 TOPS 且<b>未标注含稀疏</b>；部分二手整理按减半处理过 → 已按官方表取值并标注冲突</td></tr>
-    <tr><td>INT8</td><td class="was">296（与 FP8 自相矛盾）</td><td class="now">296 TOPS</td></tr>
-    <tr><td>L40</td><td>INT8</td><td class="was">724 TOPS（含稀疏）</td><td class="now">362 TOPS</td><td>NVIDIA L40 datasheet：INT8 362 | 724*</td></tr>
-    <tr><td>L40S</td><td>INT8</td><td class="was">1,466 TOPS（含稀疏）</td><td class="now">733 TOPS</td><td>NVIDIA L40S datasheet：INT8 733 | 1,466*</td></tr>
-    <tr><td rowspan="2">B200</td><td>INT8</td><td class="was">9,000 TOPS</td><td class="now">4,500 TOPS</td><td rowspan="2">NVIDIA Blackwell 技术简报：每卡 FP4 18 / FP8 9 / INT8 9 POPS / FP16 4.5 PFLOPS <b>除 FP64 外均为含稀疏</b></td></tr>
-    <tr><td>显存</td><td class="was">192GB @ 8TB/s（未区分）</td><td class="now">192GB；HGX 可用 180GB</td></tr>
-    <tr><td rowspan="2">B300 / GB300</td><td>FP16</td><td class="was">3,375 TFLOPS</td><td class="now">2,500 TFLOPS</td><td rowspan="2">NVIDIA GB300 NVL72 官方规格：FP16/BF16 360 PFLOPS（机架，除注明外含稀疏）→ 每卡稠密 2.5 PFLOPS；开发者博客明确 "15 PetaFLOPS dense NVFP4"</td></tr>
-    <tr><td>INT8</td><td class="was">10,000 TOPS</td><td class="now">未正式公布</td></tr>
-    <tr><td>MI355X</td><td>FP16</td><td class="was">2,300 TFLOPS</td><td class="now">2,500 TFLOPS</td><td>AMD 官方博客表格脚注 <b>"All Matrix Core dense numbers"</b>：FP16 2.5P / FP8 5P / FP4-FP6 10.1P</td></tr>
-    <tr><td rowspan="2">昇腾 910C</td><td>FP8</td><td class="was">1.6 PFLOPS</td><td class="now">不支持（官方路线图表标注「–」）</td><td rowspan="2">华为全联接大会 2025/2026 官方口径：910C 仅列 FP16 800 TFLOPS、128GB、3.2TB/s、互联 784GB/s</td></tr>
-    <tr><td>FP16 / 显存 / 带宽</td><td class="was">640–800 T / 128GB / 3.2</td><td class="now">800 T / 128GB / 3.2 TB/s（确认）</td></tr>
-    <tr><td>昇腾 950DT</td><td>时间 / 状态</td><td class="was">2026Q4 / 路线图</td><td class="now">提前至 2026.08 云上可用 / 量产</td><td>华为全联接 2026（2026-09-17）及公开报道</td></tr>
-    <tr><td rowspan="2">摩尔线程 S5000</td><td>FP8</td><td class="was">「≤1000 TFLOPS」未分形态</td><td class="now">1.00 P（液冷）/ 0.92 P（风冷），官方 Dense</td><td rowspan="2">摩尔线程官网 S5000 产品规格页</td></tr>
-    <tr><td>互联</td><td class="was">MTLink 784 GB/s</td><td class="now">MTLink 8 卡全互联 784 GB/s（确认）</td></tr>
-    <tr><td>昆仑芯 P800</td><td>超节点时间</td><td class="was">天池 256 卡 2026.04</td><td class="now">天池 256 卡 2026.06 上市；512 卡 2026H2 计划</td><td>百度智能云 / 昆仑芯公开联合发布信息</td></tr>
+  <h2>速判：按场景先筛哪几个字段</h2>
+  <table class="mini">
+    <tr><th>场景</th><th>先看</th><th>再看</th></tr>
+    <tr><td>大模型预训练</td><td>FP8/FP4 稠密、卡间互联</td><td>显存带宽、万卡线性度、HBM 供应</td></tr>
+    <tr><td>推理（decode）</td><td>显存带宽、单卡显存</td><td>FP4/FP8、功耗与机房风冷上限</td></tr>
+    <tr><td>长上下文 prefill</td><td>FP8 稠密算力</td><td>互联拓扑、KV Cache 容量</td></tr>
+    <tr><td>科学计算 / HPC</td><td>FP64 / FP32</td><td>x86 与 CUDA 生态兼容性</td></tr>
+    <tr><td>信创 / 政务</td><td>国产化率、安全可靠测评</td><td>本地化服务与交期</td></tr>
   </table>
-  <p style="font-size:11.5px;color:var(--text-3);margin:10px 0 0">
-    说明：订正仅覆盖<b>能找到官方一手出处</b>的字段；无法取得官方 datasheet 的国产卡仍维持「第三方估算 / 未公开」分级，并在单元格加 <span class="q">?</span>。
+  <p style="font-size:12px;color:var(--text-2);margin:10px 0 0">
+    横向对比注意：<b>国产卡的官方算力多为自定义精度（如 HiF8/HiF4/MXFP8），与 NVFP4/FP8 不可直接等价换算</b>；
+    且单卡算力差距远小于<b>集群互联带宽与软件栈成熟度</b>带来的差距。
   </p>
 </div>
-
-<div class="panel" style="margin-top:14px">
-  <h2>供应链与合规提示摘要（采购前必读）</h2>
-  <ul>
-    <li><b>境外高端卡（B200/B300/GB300/H100/H200/Rubin）：</b>属对华出口管制敏感品类，合规路径以官方清单与最终用户核视为准；<b>不建议走渠道现货</b>，存在质保、固件与合规三重风险。</li>
-    <li><b>H20：</b>2025 年多次反复（4 月禁、7 月解禁、8 月起发放许可证），2026 年初已停止新投产、仅消耗库存；<b>供应链不确定性最高的一档，不具备新建项目的长期供货基础</b>。</li>
-    <li><b>L40/L40S：</b>无 NVLink（PCIe Gen4 64 GB/s），多卡张量并行损失 35–55%，适合单机 8 卡以内的推理/图形/生成类负载，但供应相对宽松、租赁市场多。</li>
-    <li><b>HBM：</b>HBM3e/HBM4 供给高度集中（SK 海力士 / 三星 / 美光），是国产卡 2026–2027 年的首要产能瓶颈；<b>下单前务必锁定 HBM 配额而不是只看 GPU 订单</b>。</li>
-    <li><b>华为昇腾：</b>产能优先保国内。910C/950/960 均为国内配额分配，需通过项目报备获取，<b>供货节奏由项目排程决定</b>；950DT 已提前至 2026 年 8 月在华为云上线。</li>
-    <li><b>国产 CUDA 兼容路线（海光 DCU / 摩尔线程 / 沐曦）：</b>迁移成本最低的替代选项，但需实测目标模型的<b>算子覆盖率与千卡线性加速比</b>（公开实测常见 0.6–0.96 区间）。</li>
-    <li><b>安全库存策略：</b>lead time &gt; 20 周且单源的卡型，建议按 8–12 周用量设安全库存或用<b>短租+长协</b>组合覆盖空窗期；GPU 与配套 HBM/光模块/液冷歧管须同步备货。</li>
-  </ul>
-</div>
-
-<div class="panel" style="margin-top:14px">
-  <h2>主要数据来源（v2 逐条回源）</h2>
-  <p class="src">
-    <b>NVIDIA 官方：</b>nvidia.com/data-center/h100（H100 SXM 规格表）· nvidia.com/data-center/h200（H200 SXM 规格表）·
-    resources.nvidia.com H100 Datasheet · nvidia.com/data-center/l40s（L40S 规格表）· NVIDIA L40S Datasheet PDF ·
-    NVIDIA Blackwell Architecture Technical Brief（HGX B200/B100 系统规格）· nvidia.com/data-center/dgx-b200（FP4 144|72 PFLOPS 密集/稀疏注脚）·
-    nvidia.com/data-center/gb300-nvl72（GB300 NVL72 机架规格）· NVIDIA 开发者博客《Inside NVIDIA Blackwell Ultra》（15 PFLOPS dense NVFP4）·
-    NVIDIA 开发者博客《Blackwell Ultra for the Era of AI Reasoning》（GB300 对比表）
-    <br><b>AMD 官方：</b>amd.com 官方博客《AMD Instinct MI350 Series and Beyond》（表格脚注 <b>"All Matrix Core dense numbers"</b>）· AMD Advancing AI 2025 公开材料
-    <br><b>华为：</b>华为全联接大会 2025（2025-09-18）芯片三年路线图首发 · 华为全联接大会 2026（2026-09-17）昇腾 960 超节点发布 · Atlas 产品页
-    <br><b>国产其他：</b>摩尔线程官网 mthreads.com/product/S5000 产品规格页 · 昆仑芯官网 kunlunxin.com · 沐曦官网及业绩说明会材料 ·
-    百度智能云 × 昆仑芯 × HAMi 联合发布资料 · Tom's Hardware（昇腾路线图更新版、H20 与 H100 稠密对比）·
-    AI Wiki（B200 / H20 / MI355X / Ascend 系列参数整理）· gpusmith 硬件数据库（H100 SXM 稠密/稀疏双列）·
-    techbuzz China Chips（H20 / B200 带出处规格）· arXiv 2504.07042（Hygon K100 实测）· 腾讯/腾讯云开发者社区《国产AI芯片选型》
-  </p>
-  <p class="src" style="margin-top:8px;color:var(--warn)">
-    注：<b>NVIDIA H100 / H200 官方表以「*With sparsity」标注，稠密值＝表值 ÷ 2</b>；L40/L40S 官方表为「dense | sparse 双列」，取左列；
-    Blackwell 官方表「除 FP64 外均为含稀疏」，FP4 官方已直接给出稀疏|稠密双值；AMD MI350 官方博客明确为 dense 列，但 AMD 另有含稀疏版本公开值（FP4-FP6 20.1P），<b>引用时务必注明口径</b>。
-    国产卡（尤其未发布官方 datasheet 的型号）在不同媒体间存在明显冲突口径，本表已用 <span class="q">?</span> 标注并以区间形式呈现；<b>用于招标文件或建设方案前请逐项做原厂书面确认</b>。
-  </p>
-</div>
-
-<footer>
-  AI 算力-硬件供应链专家 · 内部速查用途 ｜ v2 · 生成时间 2026-10-01 ｜ 参数随厂商版本变更，请以最新官方规格为准
-</footer>
 </div>
 
 <script>
@@ -597,6 +525,22 @@ function splitNode(s){
   if(i<0) return {main:t.slice(0,14), sub:"", full:t};
   return {main:t.slice(0,i).trim(), sub:t.slice(i+1).replace(/^\+\s*/,"").trim(), full:t};
 }
+/* 架构列专用（紧凑模式）：主行只留架构名（≤88px），工艺/补充说明折入副行小字。
+   规则：①首个括号内容（如 (208B)、（未公开工艺））→ 副行；②剩余部分按 " / " 或 " + " 拆分，
+   斜杠后的工艺说明也并入副行；③全值保留在 title 悬浮提示。 */
+function splitNode2(s){
+  if(s===null||s===undefined) return null;
+  const t=String(s);
+  const pm=t.match(/[（(]([^）)]*)[）)]/);
+  let body=t, parenSub="";
+  if(pm){ parenSub=pm[1].trim(); body=(t.slice(0,pm.index)+" "+t.slice(pm.index+pm[0].length)).trim(); }
+  let i=body.indexOf(" / "); if(i<0) i=body.indexOf(" + ");
+  let main=body, rest="";
+  if(i>=0){ main=body.slice(0,i).trim(); rest=body.slice(i+3).trim(); }
+  if(!main) main=body.trim();
+  const sub=[rest,parenSub].filter(Boolean).join(" · ");
+  return {main:main.slice(0,16), sub:sub.slice(0,26), full:t};
+}
 /* 时间："2025.03 发布 / 2026 爬坡" → "2025.03 发布"（完整值在展开行） */
 function shortTime(s){
   if(s===null||s===undefined) return "";
@@ -689,7 +633,7 @@ function render(){
       const cnt = rows.filter(r=>r.v===d.v).length;
       const yrs = rows.filter(r=>r.v===d.v).map(r=>r.yn).filter(y=>typeof y==="number");
       const span = yrs.length ? `${Math.min(...yrs)|0}–${Math.max(...yrs)|0}` : "";
-      html += `<tr class="group"><td colspan="14">${d.v} &nbsp;·&nbsp; ${cnt} 款` +
+      html += `<tr class="group"><td colspan="13"><span class="vendor-dot" style="background:${VCOLOR[d.v]||'#888'}"></span>${d.v} &nbsp;·&nbsp; ${cnt} 款` +
               (span?` <span style="font-weight:400;color:var(--text-3)">（按发布年份 ${span} 升序）</span>`:"") + `</td></tr>`;
       lastV = d.v;
     }
@@ -707,10 +651,9 @@ function render(){
     const timeTxt = compact ? shortTime(d.time) : d.time;
 
     html += `<tr class="row" data-i="${i}">
-      <td class="col-sticky"><span class="vendor-dot" style="background:${VCOLOR[d.v]||'#888'}"></span>${d.v}</td>
-      <td class="col-sticky2 model"><span class="tc" title="${escAttr(d.m)}">${d.m}</span><span class="sub" title="${escAttr(d.time)}">${timeTxt}</span></td>
+      <td class="col-sticky model"><span class="vendor-dot" style="background:${VCOLOR[d.v]||'#888'}" title="${d.v}"></span><span class="tc" title="${escAttr(d.m)}">${d.m}</span><span class="sub" title="${escAttr(d.time)}">${timeTxt}</span></td>
       <td title="${escAttr(d.cls)}">${clsTxt}</td>
-      <td style="color:var(--text-2)">${compact?twoCell(splitNode,d.node,"tc"):`<span title="${escAttr(d.node)}">${d.node}</span>`}</td>
+      <td style="color:var(--text-2)">${compact?twoCell(splitNode2,d.node,"tc-node"):`<span title="${escAttr(d.node)}">${d.node}</span>`}</td>
       ${cellNum(d.f4, d.f4n, "f4n", d.f4q)}
       ${cellNum(d.f8, d.f8n, "f8n", d.f8q)}
       ${cellNum(d.f16, d.f16n, "f16n", d.f16q)}
@@ -724,7 +667,7 @@ function render(){
         (!compact && d.note2)?'<span class="sub">'+stripTags(d.note2).slice(0,34)+'…</span>':''}</td>
     </tr>
     <tr class="detail" data-for="${i}" style="${openAll?'':'display:none'}">
-      <td colspan="14"><div class="detail-inner">
+      <td colspan="13"><div class="detail-inner">
         <b>完整参数</b><div>显存 <b>${d.mem}</b> ｜ 带宽 <b>${d.bw} TB/s</b> ｜ 卡间互联 <b>${d.inter}</b> ｜ 功耗 <b>${d.tdp}</b> ｜ 制程/架构 <b>${d.node}</b></div>
         <b>供应 / 合规提示</b><div>${d.note}</div>
         ${d.note2?`<b>技术备注</b><div>${d.note2}</div>`:''}
@@ -733,7 +676,7 @@ function render(){
       </div></td>
     </tr>`;
   });
-  if(!rows.length) html = '<tr><td colspan="14" class="empty">没有匹配的型号，试试清空筛选条件。</td></tr>';
+  if(!rows.length) html = '<tr><td colspan="13" class="empty">没有匹配的型号，试试清空筛选条件。</td></tr>';
   tbody.innerHTML = html;
   tbody.querySelectorAll("tr.row").forEach(tr=>{
     tr.onclick = ()=>{
@@ -744,7 +687,7 @@ function render(){
   });
   syncSticky();
 }
-/* 厂商列实际宽度写入 --c1w，保证「型号」冻结列紧贴其右侧不错位 */
+/* 型号列（现为首列冻结）实测宽度写入 --c1w，供分组行等 sticky 元素对齐 */
 function syncSticky(){
   const th = document.querySelector("thead th.col-sticky");
   if(!th) return;
