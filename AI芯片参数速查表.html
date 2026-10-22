@@ -182,16 +182,7 @@ table.diff td.now{color:var(--ok);font-weight:600}
 
 <header class="top">
   <h1>AI芯片参数速查表 <span class="tagline">GPU · NPU · XPU · DCU — 参数 / 状态 / 供应与合规提示</span></h1>
-  <p class="meta-line">数据截至 <b>2026-10-01</b> ｜ 覆盖 <b id="cnt-all">0</b> 款型号 / <b id="cnt-vendor">0</b> 家厂商 ｜ 点击表头排序，点击型号行展开「供应与合规」备注</p>
-  <div class="disclaim v2">
-    <b>v2 相对 v1 的三处关键变化：</b>
-    ①<b>数值口径统一为「稠密（dense）」</b>——NVIDIA / AMD 官方 datasheet 的默认标注多为<b>含稀疏（with sparsity）</b>，v1 混用了两种口径，v2 已全部按官方表 ÷2 折算并标注；
-    ②<b>默认排序改为「厂商 → 发布年份升序 → 型号数字升序」</b>（如 H100 在 H200 之前），点击任意表头可临时按该列排序；
-    ③<b>进度条高度翻倍</b>（3px → 6px），横向比对更直观。
-    已修正的具体数值见页面底部《v2 数据订正清单》。
-    <b>v2.1 紧凑列宽：</b>显存 / 互联 / 功耗 / 架构四列改为「<b>数字主行 + 缩写副行</b>」，大幅减少横向滚动；
-    <b>完整原值一律保留在悬浮提示（title）与点击展开的详情行内</b>，也可点工具栏「完整列宽」按钮一次性展开所有长文本。
-  </div>
+  <p class="meta-line">数据截至 <b>2026-10-22</b> ｜ 覆盖 <b id="cnt-all">0</b> 款型号 / <b id="cnt-vendor">0</b> 家厂商 ｜ 点击表头排序，点击型号行展开「供应与合规」备注</p>
   <div class="disclaim">
     口径说明：算力数值统一取<b>稠密(dense)</b>峰值；<b>FP4/FP8 单位为 PFLOPS，FP16/BF16 为 TFLOPS，INT8 为 TOPS</b>。
     标记 <span class="q" title="第三方或媒体口径">?</span> 表示<b>第三方/媒体口径、或官方未给该精度的分列值</b>，采购与选型前须向供应商书面确认；
@@ -405,6 +396,15 @@ const DATA = [
 {v:"NVIDIA",m:"Rubin R200 / Vera Rubin NVL144",cls:"GPU",node:"Rubin / TSMC 3nm 双die+I/O die",f4:"25–50",f4n:25,f4q:1,f8:"8.3–12.5",f8n:8.3,f8q:1,i8:"—",i8n:null,f16:"—",f16n:null,f16q:1,mem:"144–288GB HBM4",memn:288,memq:1,bw:"20.5–22",bwn:20.5,bwq:1,inter:"NVLink6 3.6 TB/s",intern:3600,interq:1,tdp:"≈1.8–2.3 kW（估）",tdpn:1800,tdpq:1,status:"路线图",time:"H2 2026 起爬坡",yn:2026.6,region:"境外",conf:"warn",
  note:"<b>厂商发布会口径，不同来源对单卡 HBM 容量（144 或 288GB）与 FP4 峰值（25 或 50 PFLOPS，即含稀疏与否）存在冲突</b>，且暂未获第三方实测验证。采购排期按 2027 年规模化供应做基准更稳妥。",
  note2:"NVLink6 3.6 TB/s/卡；NVL144 机架标称 FP4 推理约 3.6 ExaFLOPS（<b>该值是否含稀疏未见官方统一说明</b>，按 144 卡反推为每卡 25P）。同代另有 Rubin CPX（128GB GDDR7）主打长上下文。"},
+{v:"NVIDIA",m:"RTX PRO 5500 Blackwell（工作站版）",cls:"GPU",node:"Blackwell GB202 / TSMC 4N",f4:null,f8:null,f16:null,i8:null,mem:"84GB GDDR7 ECC",memn:84,bw:"1.398",bwn:1.398,inter:"无 NVLink，PCIe Gen5 x16 (128 GB/s)",intern:128,tdp:"600 W",tdpn:600,status:"量产出货",time:"2026.09 官网列名",yn:2026.7,region:"境外",conf:"warn",
+ note:"<b>机架式工作站定位</b>（非数据中心 SXM 形态）。规格表标注 Preliminary、未发布算力值，CUDA 21,760（=RTX 5090 规模）与 416-bit 位宽来自 PNY 官方参数页。<b>下单前须向渠道索取正式 datasheet。</b>",
+ note2:"NVIDIA 官网规格（Preliminary）：<b>84GB GDDR7 ECC、1,398 GB/s、PCIe Gen5 x16、最高 600 W</b>；3×NVENC(9th)/3×NVDEC(6th)；MIG 1×84GB 或 2×42GB；4×DP 2.1b；CUDA 核心数与位宽为 PNY 口径（官网未列）。AI TOPS/TFLOPS 官方未发布。"},
+{v:"NVIDIA",m:"RTX PRO 6000 Blackwell（工作站版）",cls:"GPU",node:"Blackwell GB202 / TSMC 4N",f4:"2",f4n:2,f8:"0.742",f16:"371",i8:"742",mem:"96GB GDDR7 ECC",memn:96,bw:"1.792",bwn:1.792,inter:"无 NVLink，PCIe Gen5 x16 (128 GB/s)",intern:128,tdp:"600 W",tdpn:600,status:"量产出货",time:"2025.04 发布",yn:2025.3,region:"境外",conf:"ok",
+ note:"单卡工作站/机架推理新标杆：96GB 大显存 + 1.79 TB/s 带宽，DeepSeek 级 dense 模型单卡可载。风冷双槽 600W，数据中心部署需按 PCIe 卡功耗与散热专门设计，不可与 SXM 卡混插设计。<b>对华供应受管制，国内合规替代为 RTX PRO 6000D。</b>",
+ note2:"NVIDIA 官方 datasheet（JUN26 版）：<b>CUDA 24,064；AI TOPS 4,000（FP4 含稀疏，稠密 2,000）；FP32 126 TFLOPS；RT Core 382 TFLOPS</b>；96GB GDDR7 ECC、512-bit、1,792 GB/s；4×NVENC/4×NVDEC；MIG 4×24GB / 2×48GB / 1×96GB。本表 AI 列取稠密＝表值÷2，与 H100/B200 同口径（FP8/FP16 按 FP4 逐级 ÷2 推导）。"},
+{v:"NVIDIA",m:"RTX PRO 6000D Blackwell（中国特供版）",cls:"GPU",node:"Blackwell GB202 / TSMC 4N",f4:"0.593",f4n:0.593,f8:"0.296",f16:"148",i8:"296",mem:"84GB GDDR7 ECC",memn:84,bw:"1.398",bwn:1.398,inter:"无 NVLink，PCIe Gen5 x16 (128 GB/s)",intern:128,tdp:"600 W",tdpn:600,status:"量产出货",time:"2025 发布 / 2026 规模供货",yn:2025.5,region:"境外",conf:"blue",
+ note:"对华合规特供卡：算力较 6000 削减约 55%（FP4 593 vs 4,000 TOPS 含稀疏口径），但<b>保留 84GB 大显存与全精度支持</b>，是当前国内可正规直采的 NVIDIA 新卡中显存最大者。无 NVLink，多卡走 PCIe；适合 70B 级推理与中小规模微调，不适合千卡级训练。",
+ note2:"数值取自 NVIDIA 中国区官方参数表（经超擎数智等官方伙伴发布）：<b>FP32 74 / BF16·FP16 148 / FP8 296 / FP4 593 TFLOPS</b>（官方表未标注稀疏口径，第三方另有 6000D CUDA 19,968 / 2430MHz / FP32 97 的互斥说法）——<b>用于投标或验收须按 SKU 向 NVIDIA 或授权渠道书面校准。</b>84GB GDDR7 ECC、1,398 GB/s、600W、双槽全长、4×NVENC/4×NVDEC、MIG 最多 2 实例。"},
 /* ---------- AMD（国际第二货源基准） ---------- */
 {v:"AMD",m:"MI300X",cls:"GPU",node:"CDNA3 / 5nm+6nm",f4:null,f8:"2.61",i8:"2614",f16:"1307",mem:"192GB HBM3",memn:192,bw:"5.3",bwn:5.3,inter:"Infinity Fabric 896 GB/s",intern:896,tdp:"750 W",tdpn:750,status:"量产出货",time:"2023.12",yn:2023.9,region:"境外",conf:"ok",
  note:"国际第二货源基准；Azure/Oracle/Meta 已规模部署。ROCm 生态是落地门槛，需实测目标模型吞吐。",
