@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算力集群配置模型 v2 · Compute Capacity Planning Model</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --line:#e3e6ea; --line2:#cfd4da;
+  --tx:#1f2328; --tx2:#5b6570; --tx3:#8b939c;
+  --ac:#1f6feb; --ac-soft:#eaf2fe;
+  --ok:#0a7d3b; --ok-soft:#e8f5ed;
+  --wn:#b45309; --wn-soft:#fef4e6;
+  --bd:#b3261e; --bd-soft:#fdecea;
+  --chip:#f0f2f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:13.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:18px 20px 60px}
+h1,h2,h3,h4{margin:0}
+a{color:var(--ac)}
+
+/* ---------- header ---------- */
+header.top{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:12px}
+header.top .t1{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:19px;letter-spacing:.3px}
+header.top .ver{font-size:11.5px;color:var(--tx3)}
+header.top .desc{color:var(--tx2);font-size:12.5px;margin-top:4px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.btn,label.btn{display:inline-block;background:var(--card);border:1px solid var(--line2);color:var(--tx);
+  border-radius:7px;padding:6px 12px;font-size:12.5px;cursor:pointer;font-family:inherit}
+button.btn:hover{border-color:var(--ac);color:var(--ac)}
+button.btn.pri{background:var(--ac);border-color:var(--ac);color:#fff}
+button.btn.pri:hover{filter:brightness(1.08);color:#fff}
+input[type=text],input[type=number],select{background:#fff;border:1px solid var(--line2);color:var(--tx);
+  border-radius:7px;padding:6px 9px;font-size:13px;font-family:inherit;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-soft)}
+select{cursor:pointer}
+
+/* ---------- 配置条 ---------- */
+.cfgbar{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:12px;position:sticky;top:0;z-index:30;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.cfgline{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.fld{min-width:120px}
+.fld label{display:block;font-size:11.5px;color:var(--tx2);margin-bottom:4px}
+.fld.w-sm{min-width:90px}
+.fld.w-md{min-width:150px}
+.fld.w-lg{min-width:230px;flex:1}
+.unit{position:relative}
+.unit .u{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11.5px;color:var(--tx3);pointer-events:none}
+.unit input{padding-right:44px}
+
+/* ---------- 高级假设 ---------- */
+details.adv{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+details.adv>summary{cursor:pointer;padding:10px 16px;font-size:12.5px;color:var(--tx2);list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.adv>summary::-webkit-details-marker{display:none}
+details.adv>summary:after{content:"展开 ▾";color:var(--tx3);font-size:11.5px}
+details.adv[open]>summary:after{content:"收起 ▴"}
+.advbody{padding:4px 16px 14px;border-top:1px solid var(--line)}
+.grp{margin-top:12px}
+.grp h4{font-size:12px;color:var(--ac);letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px}
+@media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid4{grid-template-columns:1fr}}
+.switchrow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--tx2)}
+/* 单参数恢复默认：标签行右侧的 ↺，仅在取值与默认值不同时出现 */
+.pf .lbr{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--tx2);margin-bottom:4px;min-height:17px}
+.pf .lbr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf .rst{flex:none;width:16px;height:16px;line-height:15px;text-align:center;padding:0;border:1px solid var(--line);
+  border-radius:4px;background:transparent;color:var(--tx3);font-size:11px;cursor:pointer;visibility:hidden}
+.pf .rst:hover{color:var(--ac);border-color:var(--ac);background:var(--ac-soft)}
+.pf .rst:focus{visibility:visible;outline:1px solid var(--ac)}
+
+/* ---------- card / section ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.card>h2{padding:11px 16px;font-size:13px;color:var(--tx);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:9px;background:#fbfcfd}
+.card>h2 .n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;
+  background:var(--ac-soft);color:var(--ac);font-size:11px;font-weight:700}
+.card>h2 .sub{font-size:11.5px;color:var(--tx3);font-weight:400;margin-left:auto}
+.card>.body{padding:14px 16px}
+.note{font-size:11.5px;color:var(--tx3);line-height:1.7;margin:8px 0 0}
+.note b{color:var(--wn)}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+/* KPI 小卡：底色按状态变体上淡色（与左边框色呼应），使卡面在白色大卡上清晰可辨 */
+.kpi{border:1px solid var(--line);border-left:3px solid var(--ac);border-radius:8px;padding:10px 12px;background:var(--ac-soft)}
+.kpi.g{border-left-color:var(--ok);background:var(--ok-soft)}
+.kpi.w{border-left-color:var(--wn);background:var(--wn-soft)}
+.kpi.r{border-left-color:var(--bd);background:var(--bd-soft)}
+/* 淡底上原 --tx3 对比度不足（约 2.8:1），标签文字加深一级以保证可读 */
+.kpi .k{font-size:11px;color:var(--tx2)}
+.kpi .v{font-size:21px;font-weight:700;line-height:1.25;font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.kpi .v small{font-size:12px;font-weight:500;color:var(--tx2);margin-left:3px}
+.kpi .x{font-size:11.5px;color:var(--tx2);margin-top:1px}
+
+/* ---------- table ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{text-align:left;font-weight:600;color:var(--tx2);font-size:11.5px;padding:7px 9px;border-bottom:1px solid var(--line2);white-space:nowrap;background:#fafbfc}
+.tbl td{padding:7px 9px;border-bottom:1px solid #eef0f3;vertical-align:top}
+.tbl td.num,.tbl th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .hl{background:var(--ac-soft)}
+.tbl .hl td{font-weight:600}
+.tbl .dash{color:var(--tx3)}
+.tbl .foot{color:var(--tx3);font-size:11px}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:4px;line-height:1.6;white-space:nowrap}
+.t-ok{background:var(--ok-soft);color:var(--ok)}
+.t-wn{background:var(--wn-soft);color:var(--wn)}
+.t-bd{background:var(--bd-soft);color:var(--bd)}
+.t-gray{background:var(--chip);color:var(--tx2)}
+.t-ac{background:var(--ac-soft);color:var(--ac)}
+.empty{text-align:center;color:var(--tx3);padding:20px;font-size:12.5px}
+
+/* ---------- 分项结论 / 风险 ---------- */
+.ck{border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:7px;padding:8px 11px;margin-bottom:7px;background:#fcfdff;font-size:12.5px;display:flex;gap:9px}
+.ck.w{border-left-color:var(--wn);background:#fffdf8}
+.ck.r{border-left-color:var(--bd);background:#fffaf9}
+.ck .ic{font-weight:700;color:var(--ok)}
+.ck.w .ic{color:var(--wn)}.ck.r .ic{color:var(--bd)}
+.ck .tt{font-weight:600;margin-right:4px}
+
+/* ---------- 拓扑 ---------- */
+.topo{display:flex;flex-direction:column;gap:7px}
+.layer{border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:#fcfdff}
+.layer.hl{border-color:#bcd4fb;background:var(--ac-soft)}
+.layer .lt{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.layer .lt b{font-size:12.5px}
+.layer .lt span{font-size:11.5px;color:var(--tx2)}
+.arr{text-align:center;color:var(--tx3);font-size:11px;letter-spacing:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.chip{font-size:11.5px;padding:3px 9px;border-radius:6px;background:var(--chip);border:1px solid var(--line);color:var(--tx2)}
+.chip.on{background:var(--ac-soft);border-color:#bcd4fb;color:#164ba8}
+.chip.on.g{background:var(--ok-soft);border-color:#bfe3cd;color:var(--ok)}
+.chip.on.y{background:var(--wn-soft);border-color:#f2ddb9;color:var(--wn)}
+
+/* ---------- 对比 ---------- */
+.cmp{overflow-x:auto}
+.cmp th:first-child,.cmp td:first-child{text-align:left;color:var(--tx2)}
+
+footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--tx3);display:flex;gap:14px;flex-wrap:wrap}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:#1f2328;color:#fff;
+  padding:9px 16px;border-radius:8px;font-size:12.5px;opacity:0;pointer-events:none;transition:.22s;z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.print-only{display:none}
+.errbox{background:var(--bd-soft);border:1px solid #f0c2bd;color:#7d2019;border-radius:8px;padding:12px 15px;font-size:12.5px;margin-bottom:12px}
+
+/* ============================================================
+   打印 / PDF 导出
+   ============================================================ */
+@media print{
+  @page{size:A4 portrait;margin:14mm 10mm 12mm}
+  html,body{background:#fff;font-size:10.5pt;color:#000}
+  .wrap{max-width:none;width:190mm;margin:0 auto;padding:0}
+  .no-print{display:none !important}
+  .print-only{display:block}
+  #printHead{display:flex;justify-content:space-between;font-size:8.5pt;color:#555;
+    border-bottom:.5pt solid #bbb;padding-bottom:1.5mm;margin-bottom:4mm}
+  #printFoot{display:flex;justify-content:space-between;font-size:8pt;color:#777;
+    border-top:.5pt solid #ddd;padding-top:1.5mm;margin-top:2mm}
+  .card{border:0;border-top:1.2pt solid #999;border-radius:0;margin-bottom:6mm;break-inside:auto}
+  .card>h2{background:none;border:0;padding:3mm 0 1.5mm;color:#000;font-size:11.5pt}
+  .card>h2 .n{background:none;color:#000;padding:0}
+  .card>.body{padding:0}
+  .kpis{grid-template-columns:repeat(4,1fr);gap:2mm}
+  .kpi{border:1px solid #ccc;border-left:2pt solid #555;padding:1.5mm 2mm;background:none}
+  .kpi .v{font-size:13pt}
+  table{break-inside:auto}
+  thead{display:table-header-group}
+  tr{break-inside:avoid;break-after:auto}
+  .ck{break-inside:avoid}
+  .layer{break-inside:avoid}
+  details.adv{display:block;border:0}
+  details.adv>summary{display:none}
+  .advbody{display:block !important;padding:0;border:0}
+  .card{break-inside:auto}
+  #secAssump{break-before:page}
+  footer{border-top:.5pt solid #ccc;color:#666}
+  a{color:#000;text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<script src="site-nav.js"></script>
+
+<!-- ==================== 页眉页脚（打印用，置于首尾，Chrome 分页下 fixed 定位不可靠） ==================== -->
+<div class="print-only" id="printHead"><span id="phL">算力集群配置方案</span><span id="phM"></span><span id="phR"></span></div>
+
+<!-- ==================== 标题 ==================== -->
+<header class="top no-print">
+  <div class="t1">
+    <h1>算力集群配置模型</h1>
+    <span class="ver" id="dbVer"></span>
+  </div>
+  <div class="desc">选卡 → 填量 → 自动推演：机柜 · 机房面积 · 能耗与制冷 · 结构承重 · 网络配置 · 算力与显存规模</div>
+  <div class="btnrow">
+    <span class="fld w-md" style="margin:0"><input type="text" id="planName" placeholder="方案名称（用于导出 PDF）"></span>
+    <button class="btn" onclick="App.saveScenario()">保存为方案</button>
+    <button class="btn" onclick="App.toggleCmp()">方案对比</button>
+    <button class="btn" onclick="App.importCfg()">导入配置</button>
+    <button class="btn" onclick="App.exportCfg()">导出配置</button>
+    <button class="btn" onclick="App.resetParams()">恢复默认参数</button>
+    <button class="btn pri" onclick="App.print()">导出 PDF</button>
+  </div>
+</header>
+
+<div id="loadErr" class="errbox" style="display:none"></div>
+
+<!-- ==================== 配置条 ==================== -->
+<section class="cfgbar no-print">
+  <div class="cfgline">
+    <div class="fld w-sm"><label>业务场景</label>
+      <select id="selScenario"><option value="train">训练</option><option value="infer">推理</option><option value="hybrid">训练+推理混部</option></select></div>
+    <div class="fld w-lg"><label>加速卡 / NPU 型号</label><select id="selCard"></select></div>
+    <div class="fld w-sm"><label>数量</label>
+      <div class="unit"><input type="number" id="inCount" value="512" min="1" step="1"><span class="u">张</span></div></div>
+    <div class="fld w-md"><label>服务器机型</label><select id="selNode"></select></div>
+    <div class="fld w-sm"><label>每机箱卡数</label><select id="selCpn"></select></div>
+    <button class="btn pri" onclick="App.addItem()">加入算力池</button>
+  </div>
+  <div class="note" id="cardHint"></div>
+</section>
+
+<!-- ==================== 高级假设 ==================== -->
+<details class="adv no-print" id="advBox">
+  <summary>高级假设（机柜 / 机房 / 电力与制冷 / 结构 / 网络 / 算力效率）<span style="color:var(--tx3);font-size:11.5px">— 全部参数均可在第 08 节口径表中查看来源</span></summary>
+  <div class="advbody" id="advBody"></div>
+</details>
+
+<!-- ==================== 算力池 ==================== -->
+<section class="card no-print">
+  <h2><span class="n">·</span>算力池组成<span class="sub">同一方案可添加多类机型</span></h2>
+  <div class="body" style="padding:0">
+    <table class="tbl" id="tblPool">
+      <thead><tr><th>加速卡 / NPU</th><th>服务器机型</th><th class="num">需求卡数</th><th class="num">实配卡数</th><th class="num">机箱数</th><th class="num">单机箱功耗</th><th></th></tr></thead>
+      <tbody><tr><td colspan="7" class="empty">尚未添加算力单元</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================== 报告 ==================== -->
+<div id="reportTitle" style="margin:6px 0 12px">
+  <div style="font-size:16px;font-weight:700" id="rtTitle">算力集群配置方案</div>
+  <div style="font-size:12px;color:var(--tx2)" id="rtMeta"></div>
+</div>
+
+<section class="card" id="sec0">
+  <h2><span class="n">00</span>方案摘要<span class="sub">结论指标</span></h2>
+  <div class="body">
+    <div class="kpis" id="sumKpis"></div>
+    <div id="sumNote" class="note"></div>
+  </div>
+</section>
+
+<section class="card" id="sec1">
+  <h2><span class="n">01</span>算力规模<span class="sub">理论峰值 · 有效算力 · 显存与互联</span></h2>
+  <div class="body">
+    <div class="kpis" id="cmpKpis" style="margin-bottom:12px"></div>
+    <table class="tbl" id="tblPerf"></table>
+    <div class="note" id="perfNote"></div>
+    <table class="tbl" id="tblMem" style="margin-top:12px"></table>
+  </div>
+</section>
+
+<section class="card" id="sec2">
+  <h2><span class="n">02</span>机柜与机房面积<span class="sub">三口径校核 · 占地与辅助区</span></h2>
+  <div class="body">
+    <div class="kpis" id="rackKpis" style="margin-bottom:12px"></div>
+    <table class="tbl" id="tblRack"></table>
+    <div class="note" id="rackNote"></div>
+    <table class="tbl" id="tblArea" style="margin-top:12px"></table>
+  </div>
+</section>
+
+<section class="card" id="sec3">
+  <h2><span class="n">03</span>能耗与制冷<span class="sub">IT → 制冷 → 配电 → 市电</span></h2>
+  <div class="body">
+    <div id="pwAlert"></div>
+    <div class="kpis" id="pwKpis" style="margin-bottom:12px"></div>
+    <table class="tbl" id="tblPower"></table>
+    <div class="note" id="pwNote"></div>
+  </div>
+</section>
+
+<section class="card" id="sec4">
+  <h2><span class="n">04</span>结构承重校核<span class="sub">整体分摊值 · 单机柜局部值</span></h2>
+  <div class="body">
+    <table class="tbl" id="tblFloor"></table>
+    <div class="note" id="floorNote"></div>
+  </div>
+</section>
+
+<section class="card" id="sec5">
+  <h2><span class="n">05</span>网络配置<span class="sub">拓扑 · 设备与光互联 BOM</span></h2>
+  <div class="body">
+    <div class="kpis" id="netKpis" style="margin-bottom:12px"></div>
+    <div class="topo" id="netTopo"></div>
+    <table class="tbl" id="tblNet" style="margin-top:12px"></table>
+  </div>
+</section>
+
+<section class="card" id="sec6">
+  <h2><span class="n">06</span>选型建议与风险清单<span class="sub">分项结论</span></h2>
+  <div class="body" id="riskList"></div>
+</section>
+
+<section class="card no-print" id="secCompare" style="display:none">
+  <h2><span class="n">07</span>多方案对比<span class="sub">关键指标横向比较</span></h2>
+  <div class="body">
+    <div class="btnrow" style="margin:0 0 10px"><button class="btn" onclick="App.clearScenarios()">清空已存方案</button></div>
+    <div class="cmp"><table class="tbl" id="tblCmp"></table></div>
+  </div>
+</section>
+
+<section class="card" id="secAssump">
+  <h2><span class="n">08</span>计算口径与假设参数表<span class="sub">默认值 · 本次取值 · 口径 · 来源</span></h2>
+  <div class="body">
+    <table class="tbl" id="tblAssump"></table>
+    <div class="note" id="assumpNote"></div>
+    <table class="tbl" id="tblSrc" style="margin-top:14px"></table>
+  </div>
+</section>
+
+<footer>
+  <span>算力集群配置模型 v2 · 单文件 HTML + chips.js · 无外部依赖 · 数据全部在本地浏览器计算</span>
+  <span id="footVer"></span>
+</footer>
+<div class="print-only" id="printFoot"><span>本模型用于方案前期估算与比选，正式设计须经暖通、供配电与结构专业复核；芯片参数以厂商最新 datasheet 为准</span><span id="pfR"></span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+
+<script src="chips.js" charset="utf-8"></script>
+<script>
+/* ============================================================
+   0. 工具
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const el = id => document.getElementById(id);
+const N  = v => (typeof v === 'number' && isFinite(v)) ? v : null;
+const add = (a,b) => a==null ? b : (b==null ? a : a+b);
+const mul = (a,b) => (a==null||b==null) ? null : a*b;
+const div = (a,b) => (a==null||b==null||b===0) ? null : a/b;
+const cdiv = (a,b) => { const r=div(a,b); return r==null ? null : Math.max(1, Math.ceil(r-1e-9)); };
+const maxN = (...xs) => { const v=xs.filter(x=>N(x)!==null); return v.length?Math.max(...v):null; };
+const minN = (...xs) => { const v=xs.filter(x=>N(x)!==null); return v.length?Math.min(...v):null; };
+const sumA = arr => arr.reduce((s,x)=>add(s,N(x)), null);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dash = '—';
+
+const f0 = v => N(v)==null ? dash : Math.round(v).toLocaleString('zh-CN');
+const f1 = v => N(v)==null ? dash : v.toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1});
+const f2 = v => N(v)==null ? dash : v.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fx = (v,d=0) => N(v)==null ? dash : v.toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pc = v => N(v)==null ? dash : (v*100).toFixed(0)+'%';
+
+/* 算力：输入 TFLOPS（int8 为 TOPS 数值） */
+function perfStr(v, isInt){
+  if(N(v)==null) return dash;
+  const a=Math.abs(v), U=isInt?['TOPS','POPS','EOPS']:['TFLOPS','PFLOPS','EFLOPS'];
+  if(a>=1e6) return (v/1e6).toFixed(2)+' '+U[2];
+  if(a>=1e3) return (v/1e3).toFixed(2)+' '+U[1];
+  return v.toFixed(a>=100?0:1)+' '+U[0];
+}
+function bwStr(v){ if(N(v)==null) return dash; const a=Math.abs(v);
+  if(a>=1e6) return (v/1e6).toFixed(2)+' PB/s';
+  if(a>=1e3) return (v/1e3).toFixed(2)+' TB/s';
+  return v.toFixed(0)+' GB/s'; }
+function memStr(v){ if(N(v)==null) return dash; const a=Math.abs(v);
+  if(a>=1e6) return (v/1e6).toFixed(2)+' PB';
+  if(a>=1e3) return (v/1e3).toFixed(2)+' TB';
+  return v.toFixed(0)+' GB'; }
+function kwStr(v){ return N(v)==null ? dash : f1(v)+' kW'; }
+/* 模型参数规模：输入单位为 B（十亿）参数 */
+function paramStr(v){
+  if(N(v)==null) return dash;
+  return v>=1000 ? (v/1000).toFixed(2)+' 万亿参数（'+f0(v)+' B）' : f1(v)+' B 参数';
+}
+
+const getP = (o,path) => path.split('.').reduce((a,k)=> (a==null?undefined:a[k]), o);
+const setP = (o,path,v) => { const ks=path.split('.'); let t=o; for(let i=0;i<ks.length-1;i++){ if(t[ks[i]]==null) t[ks[i]]={}; t=t[ks[i]]; } t[ks[ks.length-1]]=v; };
+/* 深合并：patch 覆盖 base 的叶子键，但保留 base 中 patch 未提供的值；
+   unknown 收集 patch 中出现、base 中不存在的键路径，用于提示而非静默丢弃 */
+function deepMerge(base, patch, unknown, path){
+  unknown = unknown || []; path = path || '';
+  if(patch==null || typeof patch!=='object' || Array.isArray(patch)) return patch;
+  const out = (base && typeof base==='object' && !Array.isArray(base)) ? Object.assign({}, base) : {};
+  Object.keys(patch).forEach(k=>{
+    const p = path ? path+'.'+k : k;
+    if(!(k in out)) unknown.push(p);
+    out[k] = deepMerge(out[k], patch[k], unknown, p);
+  });
+  return out;
+}
+
+/* ============================================================
+   1. 数据加载
+   ============================================================ */
+const DB = (typeof window.CHIP_DB === 'object' && window.CHIP_DB) ? window.CHIP_DB : null;
+if(!DB){
+  el('loadErr').style.display='block';
+  el('loadErr').innerHTML = '<b>未加载到芯片参数文件 chips.js</b><br>请确认 chips.js 与本 HTML 位于同一目录；若通过 file:// 打开仍失败，可点击「导入配置」载入导出的 JSON，或将本目录用本地静态服务器打开。';
+}
+const cardById = id => DB ? DB.cards.find(c=>c.id===id) : null;
+/* 参数不完整：缺 TDP 或完全未公开算力数据。此类卡型只做标注提示，不编造数值 */
+function cardIncomplete(c){
+  if(!c) return false;
+  const noPerf = !c.perf || Object.values(c.perf).every(v=>N(v)==null);
+  return N(c.tdp)==null || noPerf;
+}
+function cardNoPerf(c){ return !c || !c.perf || Object.values(c.perf).every(v=>N(v)==null); }
+const nodeById = id => DB ? DB.nodes.find(n=>n.id===id) : null;
+const swById   = id => DB ? DB.switches.find(s=>s.id===id) : null;
+
+/* ============================================================
+   2. 状态
+   ============================================================ */
+const S = {
+  pool: [],
+  params: DB ? JSON.parse(JSON.stringify(DB.defaults)) : {},
+  scenarios: []
+};
+const KEY='cmp_model_v2_scenarios';
+try{ S.scenarios = JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ S.scenarios=[]; }
+
+/* 高级假设面板定义 */
+const ADV = [
+  {g:'算力效率', items:[
+    {p:'compute.mfuTrain', t:'num', step:0.05, min:0.05, max:0.9},
+    {p:'compute.mfuInfer', t:'num', step:0.05, min:0.05, max:0.9},
+    {p:'compute.mfuHybrid', t:'num', step:0.05, min:0.05, max:0.9},
+    {p:'compute.vramUsableRatioTrain', t:'num', step:0.05, min:0.4, max:1},
+    {p:'compute.vramKvReserveRatio', t:'num', step:0.05, min:0, max:0.8},
+    {p:'compute.bytesPerParamTrain', t:'num', step:1, min:4, max:32}
+  ]},
+  {g:'机柜', items:[
+    {p:'rack.mode', t:'sel', opts:[['vendor','厂商官方密度优先'],['strict','三口径取严'],['power','功率口径'],['u','U 位口径']]},
+    {p:'rack.maxKw', t:'num', step:1, min:2, max:80, u:'kW/柜'},
+    {p:'rack.availU', t:'num', step:1, min:20, max:47, u:'U'},
+    {p:'rack.spareRackRatio', t:'num', step:0.05, min:0, max:0.5},
+    {p:'rack.netRackPerComputeRack', t:'num', step:1, min:2, max:40, u:'柜/柜'},
+    {p:'rack.edgeRacks', t:'num', step:1, min:0, max:6, u:'柜'},
+    {p:'rack.swPerRack', t:'num', step:1, min:1, max:20, u:'台/柜'},
+    {p:'rack.tareWeightKg', t:'num', step:10, min:0, max:600, u:'kg'},
+    {p:'rack.accessoryWeightKg', t:'num', step:10, min:0, max:300, u:'kg'},
+    {p:'rack.rackFootprintM2', t:'num', step:0.02, min:0.3, max:2, u:'m²'}
+  ]},
+  {g:'机房', items:[
+    {p:'site.areaPerRackM2', t:'num', step:0.1, min:1, max:8, u:'m²/柜'},
+    {p:'site.auxAreaRatio', t:'num', step:0.05, min:0, max:1},
+    {p:'site.racksPerModule', t:'num', step:10, min:10, max:500, u:'柜'}
+  ]},
+  {g:'电力与制冷', items:[
+    {p:'power.pue', t:'num', step:0.01, min:1.02, max:2},
+    {p:'power.coolingCalc', t:'sel', opts:[['pue','按 PUE 反推'],['cop','按显冷量与 COP 正算']]},
+    {p:'power.cop', t:'num', step:0.1, min:1.5, max:12},
+    {p:'power.envelopeLossRatio', t:'num', step:0.01, min:0, max:0.2},
+    {p:'power.coolingMargin', t:'num', step:0.05, min:1, max:1.5},
+    {p:'power.distEff', t:'num', step:0.01, min:0.8, max:1},
+    {p:'power.auxLoadPerRackKw', t:'num', step:0.05, min:0, max:1, u:'kW/柜'},
+    {p:'power.switchPowerW', t:'num', step:50, min:0, max:3000, u:'W'},
+    {p:'power.redundancyGrade', t:'sel', opts:[['N','N（无冗余）'],['N+1','N+1'],['2N','2N']]},
+    {p:'power.capacityMargin', t:'num', step:0.05, min:0, max:0.5},
+    {p:'power.avgLoadFactor', t:'num', step:0.05, min:0.3, max:1}
+  ]},
+  {g:'结构', items:[
+    {p:'floor.designLoadKNm2', t:'num', step:0.5, min:3, max:30, u:'kN/m²'},
+    {p:'floor.useNodeWeight', t:'sel', opts:[['true','按机型标称重量'],['false','按 kW×系数折算']]},
+    {p:'floor.kgPerKw', t:'num', step:0.1, min:1, max:80, u:'kg/kW'}
+  ]},
+  {g:'网络', items:[
+    {p:'net.goal', t:'sel', opts:[['auto','自动判定'],['train','大规模训练'],['infer','在线推理'],['hybrid','训练+推理混部']]},
+    {p:'net.fabric', t:'sel', opts:[['ib','InfiniBand'],['roce','RoCEv2 以太 RDMA'],['both','IB + RoCE 双平面']]},
+    {p:'net.oversub', t:'sel', opts:[['1','1:1 无超分'],['2','2:1'],['4','4:1'],['8','8:1']]},
+    {p:'net.switchId', t:'selsw'},
+    {p:'net.nicRateGbps', t:'num', step:100, min:25, max:800, u:'Gbps'},
+    {p:'net.dacRatio', t:'num', step:0.05, min:0, max:1},
+    {p:'net.fibersPerLink', t:'num', step:2, min:1, max:24, u:'芯/链路'},
+    {p:'net.mgmtPortsPerNode', t:'num', step:1, min:0, max:4, u:'口/机箱'},
+    {p:'net.storagePortsPerNode', t:'num', step:1, min:0, max:8, u:'口/机箱'}
+  ]}
+];
+
+function buildAdv(){
+  if(!DB) return;
+  const pm = DB.paramMeta, box = el('advBody');
+  const defOf = p => { try{ return getP(DB.defaults, p); }catch(e){ return null; } };
+  const curOf = p => { try{ return getP(S.params, p); }catch(e){ return null; } };
+  const labelOf = p => { const m=pm[p]; return (m&&m.label) ? m.label : p; };
+  const shownVal = (inp,v) => {
+    if(inp.tagName==='SELECT') return v==null? '' : String(v);
+    const sc = parseFloat(inp.dataset.scale||'1');
+    return v==null? '' : (sc!==1 ? +(v*sc).toFixed(4) : v);
+  };
+  /* 参数取值与默认不同时才显示单参恢复按钮 */
+  const paintDirty = ()=>{
+    box.querySelectorAll('.pf').forEach(f=>{
+      const inp=f.querySelector('[data-path]'), b=f.querySelector('.rst');
+      if(!inp||!b) return;
+      const p=inp.dataset.path;
+      b.style.visibility = String(curOf(p))!==String(defOf(p)) ? 'visible' : 'hidden';
+    });
+  };
+  box.innerHTML = ADV.map(g=>`
+    <div class="grp"><h4>${esc(g.g)}</h4><div class="grid4">
+    ${g.items.map(it=>{
+      const m = pm[it.p] || {label:it.p, unit:''};
+      const v = getP(S.params, it.p);
+      const unit = it.u || (m.unit && m.unit!=='—' ? m.unit : '');
+      const dv = defOf(it.p);
+      const isPct = (it.t==='num') && (m.unit==='%'||it.p.includes('Ratio')||it.p.includes('mfu')||it.p.includes('Eff')||it.p.includes('Factor'));
+      const dvTxt = isPct && dv!=null ? String(+(dv*100).toFixed(2)) : String(dv==null?'—':dv);
+      let ctrl='';
+      if(it.t==='num'){
+        /* 百分比字段显示值已 ×100，min / max / step 必须同步缩放，
+           否则输入框长期处于 rangeOverflow 非法态且步进按钮失效 */
+        const sc = isPct ? 100 : 1;
+        const step = (it.step||1)*sc;
+        const val = isPct && v!=null ? (v*100).toFixed(0) : v;
+        const mn = it.min==null ? '' : +(it.min*sc).toFixed(4);
+        const mx = it.max==null ? '' : +(it.max*sc).toFixed(4);
+        ctrl = `<div class="unit"><input type="number" data-path="${it.p}" data-scale="${sc}" value="${val==null?'':val}" step="${step}" min="${mn}" max="${mx}">${unit?`<span class="u">${esc(unit)}</span>`:''}</div>`;
+      } else if(it.t==='sel'){
+        ctrl = `<select data-path="${it.p}">${it.opts.map(([val,lab])=>`<option value="${val}" ${String(v)===String(val)?'selected':''}>${esc(lab)}</option>`).join('')}</select>`;
+      } else if(it.t==='selsw'){
+        ctrl = `<select data-path="${it.p}">${DB.switches.map(s=>`<option value="${s.id}" ${v===s.id?'selected':''}>${esc(s.name)}（${s.ports}×${s.portRateGbps}G）</option>`).join('')}</select>`;
+      }
+      return `<div class="pf"><div class="lbr"><span>${esc(m.label)}</span>`+
+             `<button type="button" class="rst" data-rst="${it.p}" title="恢复默认值 ${esc(dvTxt)}${unit?' '+esc(unit):''}">↺</button></div>${ctrl}</div>`;
+    }).join('')}
+    </div></div>`).join('');
+  box.querySelectorAll('[data-path]').forEach(inp=>{
+    const h = ()=>{
+      const p=inp.dataset.path, sc=parseFloat(inp.dataset.scale||'1');
+      let v = inp.value;
+      if(inp.tagName==='SELECT'){ v = (p==='floor.useNodeWeight') ? (v==='true') : (inp.value===''?'':(isNaN(+v)?v:+v)); }
+      else {
+        /* 清空 / 非法输入不再静默保持旧值：回落到 chips.js 的默认值，并回显告知
+           （旧行为 if(v!==null) 才写入，导致输入框显示为空而算法仍用旧值） */
+        if(v==='' || isNaN(+v)){
+          const raw=inp.value, dv = defOf(p), sv = shownVal(inp, dv);
+          if(raw!==String(sv)) inp.value = sv;
+          setP(S.params, p, dv);
+          toast(raw===''
+            ? `「${labelOf(p)}」已清空，恢复默认值 ${sv===''?'—':sv}`
+            : `「${labelOf(p)}」输入无效（${raw}），已恢复默认值 ${sv===''?'—':sv}`);
+          paintDirty(); calc(); return;
+        }
+        v = parseFloat(v)/sc;
+      }
+      if(v!==null) setP(S.params, p, v);
+      paintDirty(); calc();
+    };
+    inp.addEventListener('input',h); inp.addEventListener('change',h);
+  });
+  box.querySelectorAll('.rst').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const p=b.dataset.rst, dv=defOf(p);
+      setP(S.params, p, dv);
+      const inp=box.querySelector(`[data-path="${p}"]`);
+      const sv = inp ? shownVal(inp, dv) : (dv==null?'':dv);
+      if(inp) inp.value = sv;
+      paintDirty(); calc();
+      toast(`「${labelOf(p)}」已恢复默认值 ${sv===''?'—':sv}`);
+    });
+  });
+  paintDirty();
+}
+
+/* ============================================================
+   3. 选择与算力池
+   ============================================================ */
+function fillCardSelect(){
+  const sel=el('selCard'); if(!DB) return;
+  const vs=[...new Set(DB.cards.map(c=>c.vendor))];
+  sel.innerHTML = vs.map(v=>`<optgroup label="${esc(v)}">${
+    DB.cards.filter(c=>c.vendor===v).map(c=>`<option value="${c.id}">${esc(c.name)}${cardIncomplete(c)?'（参数待补）':''}</option>`).join('')
+  }</optgroup>`).join('');
+  sel.value = S.params.cardId || DB.cards[0].id;
+}
+function nodesForCard(cardId){
+  if(!DB) return [];
+  const spec = DB.nodes.filter(n=>n.card===cardId);
+  const gen  = DB.nodes.filter(n=>n.card==='*');
+  return spec.concat(gen);
+}
+function autoNodeFor(cardId){
+  const list = nodesForCard(cardId);
+  if(!list.length) return null;
+  const spec = list.find(n=>n.card===cardId);
+  if(spec) return spec;
+  const card = cardById(cardId);
+  const hot = N(card && card.tdp)!=null && card.tdp>=600;
+  return list.find(n=>n.cardsPerNode===8 && (hot ? n.coolingDefault==='liquid' : n.coolingDefault==='air')) || list[0];
+}
+function refreshNodeSelect(){
+  const cardId=el('selCard').value, sel=el('selNode');
+  const list=nodesForCard(cardId);
+  sel.innerHTML = list.map(n=>`<option value="${n.id}">${esc(n.name)}${n.card==='*'?'（通用）':''}</option>`).join('');
+  const auto=autoNodeFor(cardId);
+  if(auto) sel.value=auto.id;
+  refreshCpn();
+}
+function refreshCpn(){
+  const node=nodeById(el('selNode').value), sel=el('selCpn');
+  const cur=S.params.cpnOverride;
+  const opts=[1,2,4,8,16,32,72];
+  const set=[...new Set(opts.concat(N(node&&node.cardsPerNode)?[node.cardsPerNode]:[]))].sort((a,b)=>a-b);
+  sel.innerHTML=set.map(v=>`<option value="${v}">${v}</option>`).join('');
+  sel.value = cur || (node?node.cardsPerNode:8) || 8;
+}
+function updateCardHint(){
+  const c=cardById(el('selCard').value); if(!c){el('cardHint').textContent='';return;}
+  const bits=[];
+  bits.push(`TDP ${N(c.tdp)==null?'未公开':c.tdp+' W'}`);
+  bits.push(`显存 ${N(c.memGB)==null?'未公开':c.memGB+' GB'+(c.memType?' '+c.memType:'')}`);
+  bits.push(`带宽 ${bwStr(c.memBW)}`);
+  bits.push(`数据置信度：${({official:'官方 datasheet',vendor:'厂商发布口径',thirdparty:'第三方/待核实',unknown:'未标注'})[c.confidence]||'未标注'}`);
+  const n=nodeById(el('selNode').value);
+  if(n) bits.push(n.rackDensity? '该机型有厂商官方机柜密度数据' : '该机型无官方机柜密度数据，机柜数按功率/U 位推算');
+  el('cardHint').innerHTML = bits.join(' · ')
+    + (cardIncomplete(c)? '<br><b style="color:var(--bd)">该型号未公开 TDP 或算力数据：加入算力池后，能耗链路与算力相关结果将按缺失处理（显示「—」）</b>':'')
+    + (c.perfNote? `<br><b>口径提示：</b>${esc(c.perfNote)}`:'');
+}
+
+const App = {
+  addItem(){
+    if(!DB) return;
+    const cardId=el('selCard').value, nodeId=el('selNode').value;
+    /* 数量输入校验：非法值不再静默取 1，超大数量给出提示 */
+    const raw=String(el('inCount').value==null?'':el('inCount').value).trim();
+    const num=parseFloat(raw);
+    let count, warn='';
+    if(raw===''||!isFinite(num)){ count=1; warn='输入无效（须为正整数），已按 1 张处理'; }
+    else if(num<=0){ count=1; warn='数量须为正整数（当前 '+num+'），已按 1 张处理'; }
+    else if(Math.floor(num)!==num){ count=Math.floor(num); warn='数量按整数取整：'+num+' → '+count; }
+    else count=num;
+    if(count>200000) warn += (warn?'；':'')+'数量超过 20 万张，规模远超单集群范畴，计算可能变慢，结果仅供参考';
+    const cpn=Math.max(1, parseInt(el('selCpn').value,10)||8);
+    const node=nodeById(nodeId); if(!node){ toast('请先选择有效的服务器机型'); return; }
+    const ex=S.pool.find(p=>p.nodeId===nodeId && p.cpn===cpn);
+    if(ex) ex.count += count;
+    else S.pool.push({cardId, nodeId, count, cpn});
+    renderPool(); calc();
+    toast('已加入 '+f0(count)+' 张' + (warn?'（'+warn+'）':''));
+  },
+  delItem(i){ S.pool.splice(i,1); renderPool(); calc(); },
+  resetParams(){ if(!DB) return; S.params=JSON.parse(JSON.stringify(DB.defaults)); syncControls(); buildAdv(); calc(); toast('已恢复默认参数'); },
+  saveScenario(){
+    if(!S.pool.length){ toast('算力池为空，无法保存'); return; }
+    const name=(el('planName').value||'').trim() || ('方案'+(S.scenarios.length+1));
+    const m=compute();
+    S.scenarios.push({name, ts:new Date().toLocaleString('zh-CN',{hour12:false}), inputs:JSON.parse(JSON.stringify({pool:S.pool, params:S.params, scenario:S.params.scenario})), metrics:m.metricSnapshot});
+    if(S.scenarios.length>4) S.scenarios.shift();
+    try{ localStorage.setItem(KEY, JSON.stringify(S.scenarios)); }catch(e){}
+    toast('已保存：'+name); renderCmp();
+  },
+  clearScenarios(){ S.scenarios=[]; try{localStorage.removeItem(KEY);}catch(e){} renderCmp(); toast('已清空'); },
+  toggleCmp(){ const s=el('secCompare'); s.style.display = s.style.display==='none'?'':'none'; if(s.style.display==='') renderCmp(); },
+  importCfg(){ el('fileInput').click(); },
+  exportCfg(){
+    const data={app:'算力配置模型v2', version:2, ts:new Date().toISOString(),
+      name:el('planName').value||'', pool:S.pool, params:S.params};
+    download((el('planName').value||'算力配置方案')+'.json', JSON.stringify(data,null,2), 'application/json');
+    toast('已导出配置 JSON');
+  },
+  print(){
+    if(!S.pool.length){ toast('算力池为空'); return; }
+    const name=(el('planName').value||'算力配置方案').trim();
+    el('phL').textContent = name;
+    el('phM').textContent = '跨页定位：按节编号 00–08 查找';
+    el('phR').textContent = '生成时间：'+new Date().toLocaleString('zh-CN',{hour12:false})+' · 数据版本 '+DB.meta.updated;
+    el('pfR').textContent = name;
+    el('rtTitle').textContent = name;
+    el('advBox').open = true;
+    const old=document.title; document.title=name;
+    setTimeout(()=>{ window.print(); document.title=old; }, 60);
+  }
+};
+window.App = App;
+
+function download(filename, text, type){
+  const blob=new Blob([text],{type:type||'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+function toast(m){ const t=el('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1900); }
+
+el('fileInput').addEventListener('change', ev=>{
+  const f=ev.target.files && ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(d.cards && d.nodes){ /* 芯片库 JSON：仅提示 */ toast('这是芯片库文件，请放入 chips.js'); return; }
+      if(!d.pool) throw new Error('缺少 pool 字段');
+      S.pool=d.pool||[];
+      let unk=[];
+      if(d.params) S.params=deepMerge(JSON.parse(JSON.stringify(DB.defaults)), d.params, unk);
+      if(d.name) el('planName').value=d.name;
+      syncControls(); buildAdv(); renderPool(); calc();
+      toast('已导入配置' + (unk.length ? `（未知参数 ${unk.length} 项已保留：${unk.slice(0,3).join('、')}${unk.length>3?'…':''}）` : ''));
+    }catch(e){ toast('导入失败：'+e.message); }
+  };
+  r.readAsText(f,'utf-8');
+});
+
+function syncControls(){
+  el('selScenario').value = S.params.scenario||'train';
+  if(DB) el('selCard').value = S.params.cardId || DB.cards[0].id;
+  refreshNodeSelect();
+  el('inCount').value = S.params.cardCount || 512;
+}
+
+function renderPool(){
+  const tb=el('tblPool').querySelector('tbody');
+  if(!S.pool.length){ tb.innerHTML='<tr><td colspan="7" class="empty">尚未添加算力单元</td></tr>'; return; }
+  tb.innerHTML=S.pool.map((p,i)=>{
+    const c=cardById(p.cardId), n=nodeById(p.nodeId);
+    const cpn=p.cpn||(n?n.cardsPerNode:8);
+    const chassis=Math.ceil(p.count/cpn);
+    /* 与 compute() 保持同一口径：整柜交付不可拆分，始终按整柜补齐；其余按开关决定是否补齐 */
+    const installed=(n&&n.rackMode) ? chassis*cpn
+      : ((S.params.compute&&S.params.compute.countChassisPadding) ? chassis*cpn : Math.max(0, Math.floor(p.count||0)));
+    const pw = n ? (n.rackMode ? n.rackPowerW : (N(c&&c.tdp)!=null? c.tdp*cpn + (n.basePowerW||0) : null)) : null;
+    return `<tr>
+      <td><b>${esc(c?c.name:p.cardId)}</b><div class="foot">${esc(c?c.vendor:'')} · ${esc(c?c.status:'')}</div></td>
+      <td>${esc(n?n.name:p.nodeId)}</td>
+      <td class="num">${f0(p.count)}</td>
+      <td class="num">${f0(installed)}</td>
+      <td class="num">${n&&n.rackMode? '整柜 '+f0(chassis) : f0(chassis)}</td>
+      <td class="num">${N(pw)==null? dash : f1(pw/1000)+' kW'}</td>
+      <td><button class="btn" style="padding:3px 8px" onclick="App.delItem(${i})">删除</button></td></tr>`;
+  }).join('');
+}
+
+/* ============================================================
+   4. 核心算法
+   ============================================================ */
+function compute(){
+  const P=S.params, R={};
+  const scenario=P.scenario||'train';
+  /* --- 展开清单 --- */
+  const items=[], warns=[];
+  S.pool.forEach(p=>{
+    const card=cardById(p.cardId), node=nodeById(p.nodeId);
+    if(!card||!node) return;
+    const cpn = p.cpn || node.cardsPerNode || 8;
+    const demand = Math.max(0, Math.floor(p.count||0));
+    let chassis, installed, nodePowerW, nodeWeightKg, racksDirect=null;
+    if(node.rackMode){
+      racksDirect = cdiv(demand, cpn);                 // 整机柜交付：按柜数计
+      chassis = racksDirect; installed = racksDirect*cpn;
+      nodePowerW = N(node.rackPowerW); nodeWeightKg = N(node.rackWeightKg);
+    }else{
+      chassis = cdiv(demand, cpn);
+      installed = P.compute.countChassisPadding ? chassis*cpn : demand;
+      const cardTdp = N(card.tdp);
+      const raw = cardTdp==null ? null : cardTdp*cpn + (node.basePowerW||0);
+      nodePowerW = raw==null ? null : (node.psuEff? raw/node.psuEff : raw);
+      nodeWeightKg = N(node.weightKg);
+      if(nodeWeightKg==null && nodePowerW!=null) nodeWeightKg = nodePowerW/1000 * (P.floor.kgPerKw||3.6);
+    }
+    if(N(nodePowerW)==null) warns.push(`${card.name}：缺少功耗数据（TDP 未公开），能耗、制冷与承重结果不可用`);
+    if(!card.perf || Object.values(card.perf).every(v=>N(v)==null)) warns.push(`${card.name}：该型号未公开算力数据，算力相关结果按缺失处理`);
+    items.push({p,card,node,cpn,demand,installed,chassis,nodePowerW,nodeWeightKg,racksDirect});
+  });
+
+  const empty = items.length===0;
+  const totalDemand   = sumA(items.map(i=>i.p.count));
+  const totalInstalled= sumA(items.map(i=>i.installed));
+  const totalChassis  = sumA(items.map(i=>i.chassis));
+
+  /* --- 网络（先算，机柜需要网络柜数量） --- */
+  const isTrainScenario = scenario!=='infer';
+  const netGoal = P.net.goal==='auto' ? (scenario==='infer'?'infer':(scenario==='hybrid'?'hybrid':'train')) : P.net.goal;
+  const planes = P.net.fabric==='both'?2:1;
+  const nicRate = P.net.nicRateGbps || 200;
+  const nicPorts = sumA(items.map(i=> (i.node.nicCount||0)*i.chassis)) || 0;
+  const trainPorts = nicPorts*planes;
+  const sw = swById(P.net.switchId) || DB.switches[2];
+  const os = Math.max(1, parseInt(P.net.oversub,10)||1);
+  const downlink = Math.max(1, Math.floor(sw.ports*os/(os+1)));
+  const uplink   = Math.max(1, sw.ports - downlink);
+  const leafCount  = trainPorts>0 ? cdiv(trainPorts, downlink) : 0;
+  const spineCount = leafCount>0 ? Math.max(1, cdiv(leafCount*uplink, sw.ports)) : 0;
+  const mgmtPorts = sumA(items.map(i=> (P.net.mgmtPortsPerNode||0)*i.chassis)) || 0;
+  const storPorts = sumA(items.map(i=> ((i.node.storPorts||0)+(P.net.storagePortsPerNode||0))*i.chassis)) || 0;
+  const mgmtSw = cdiv(mgmtPorts, P.net.mgmtSwitchPorts||48) || 0;
+  const storSw = cdiv(storPorts, P.net.storageSwitchPorts||48) || 0;
+  const edgeSw = items.length? 2 : 0;
+  const totalSwitches = (leafCount+spineCount+mgmtSw+storSw+edgeSw);
+  const allLinks = leafCount*spineCount*planes + leafCount*planes;   // 叶-脊 + 叶-边界上行
+  const dacLinks = Math.round(allLinks*(P.net.dacRatio||0));
+  const fiberLinks = Math.max(0, allLinks-dacLinks);
+  const fibers = fiberLinks*(P.net.fibersPerLink||2);
+  const optics = fiberLinks*2;
+  const netSwitchPowerW = totalSwitches*(P.power.switchPowerW||0);
+  const aggBwGbps = trainPorts*nicRate;
+  const net = {isTrainScenario, netGoal, planes, nicRate, nicPorts, trainPorts, sw, os, downlink, uplink,
+    leafCount, spineCount, mgmtSw, storSw, edgeSw, totalSwitches, allLinks, dacLinks, fiberLinks, fibers, optics,
+    netSwitchPowerW, aggBwGbps, mgmtPorts, storPorts};
+
+  /* --- 机柜：三口径 --- */
+  const mode=P.rack.mode||'vendor';
+  const maxKw=P.rack.maxKw||12, availU=P.rack.availU||40;
+  const cooling = (items.some(i=>i.node.coolingDefault==='liquid') && items.every(i=>i.node.coolingDefault==='liquid')) ? 'liquid' : 'air';
+  const rackRows=[];
+  let sumVendor=0, sumPower=0, sumU=0, vendorKnown=true, anyOfficial=false;
+  items.forEach(i=>{
+    const n=i.node, c=i.card;
+    const npKW = N(i.nodePowerW)==null?null:i.nodePowerW/1000;
+    const uCap = N(n.u)? Math.max(0, Math.floor((availU - (P.rack.torDeployment?P.rack.torUplinkReserveU:0))/n.u)) : null;
+    const pwCap = (npKW && npKW>0) ? Math.floor(maxKw/npKW) : null;
+    const rd = n.rackDensity || null;
+    const rec = rd ? (cooling==='liquid'? rd.liqRec : rd.airRec) : null;
+    const recMax = rd ? (cooling==='liquid'? rd.liqMax : rd.airMax) : null;
+    /* 液冷机型在风冷口径下拿不到 airRec：有密度数据但不适用，属「静默回退」高风险点，需显式标记 */
+    const liqMasked = !n.rackMode && cooling==='air' && rd!=null && N(rec)==null;
+    let feasible=null, impliedKw=null, downgrade=null;
+    if(N(rec)!=null && rec>0){
+      anyOfficial=true;
+      const caps=[rec]; if(N(pwCap)!=null) caps.push(pwCap); if(N(uCap)!=null&&uCap>0) caps.push(uCap);
+      feasible=Math.floor(Math.min(...caps));
+      impliedKw = mul(rec, npKW);
+      if(feasible<1){ feasible=null; downgrade='官方建议密度在当前机柜功率上限 / U 位条件下无法容纳，已回退'; }
+      else if(feasible<rec) downgrade=`官方 ${rec} 台/柜隐含 ${f1(impliedKw)} kW/柜，超出当前单机柜 ${maxKw} kW 上限或 U 位限制，实际按 ${feasible} 台/柜`;
+    }
+    const byVendor = feasible? cdiv(i.chassis, feasible) : (n.rackMode? i.racksDirect : null);
+    /* 功率 / U 位口径统一改为「按每柜可容纳台数」的离散口径：
+       原总量除法隐含可跨柜拼接台数，高密时会给出物理上不可行的偏小值
+       （例：64 台 7.2 kW 机箱按总功率÷12 kW 得 39 柜，意味 25 柜各放 2 台 = 14.5 kW/柜，超限）。
+       单机箱功耗/高度已超单机柜上限时，每柜最多 1 台，取 chassis 为下界。 */
+    const byPower  = n.rackMode ? i.racksDirect
+      : (npKW==null ? null : (N(pwCap)!=null && pwCap>0 ? cdiv(i.chassis, pwCap) : i.chassis));
+    const byU      = (!n.rackMode && N(n.u)!=null && n.u>0)
+      ? (N(uCap)!=null && uCap>0 ? cdiv(i.chassis, uCap) : i.chassis) : null;
+    const fallback = maxN(byPower, byU);
+    let chosen;
+    if(mode==='power') chosen = byPower!=null? byPower : fallback;
+    else if(mode==='u') chosen = byU!=null? byU : fallback;
+    else if(mode==='strict') chosen = maxN(byVendor, byPower, byU);
+    else chosen = byVendor!=null? byVendor : fallback;      // vendor 优先
+    if(N(byVendor)==null) vendorKnown=false;
+    if(N(chosen)==null) chosen = 1;
+    sumVendor=add(sumVendor,byVendor); sumPower=add(sumPower,byPower); sumU=add(sumU,byU);
+    rackRows.push({i, npKW, uCap, pwCap, rec, recMax, feasible, impliedKw, downgrade, byVendor, byPower, byU, chosen, liqMasked,
+      perRack: chosen? Math.ceil(i.chassis/chosen) : null});
+  });
+  let computeRacks = sumA(rackRows.map(r=>r.chosen)) || 0;
+  const spare = P.rack.spareRackRatio||0;
+  if(spare>0) computeRacks = Math.ceil(computeRacks*(1+spare));
+  const netRacksFromRatio = computeRacks>0 ? cdiv(computeRacks, P.rack.netRackPerComputeRack||10) : 0;
+  const netRacksFromSw    = totalSwitches>0 ? cdiv(totalSwitches, P.rack.swPerRack||6) : 0;
+  const netRacks = maxN(netRacksFromRatio||0, netRacksFromSw||0) || 0;
+  const edgeRacks = items.length? (P.rack.edgeRacks||0) : 0;
+  const totalRacks = (computeRacks||0) + (netRacks||0) + edgeRacks;
+
+  /* --- 面积 --- */
+  const equipArea = mul(totalRacks, P.site.areaPerRackM2);
+  const auxArea   = mul(equipArea, P.site.auxAreaRatio);
+  const totalArea = add(equipArea, auxArea);
+  const netRackFootprint = mul(totalRacks, P.rack.rackFootprintM2);
+  const modules = totalRacks>0 ? cdiv(totalRacks, P.site.racksPerModule||120) : 0;
+
+  /* --- 能耗 --- */
+  const itComputeKW = sumA(items.map(i=> mul(i.nodePowerW, i.chassis)!=null? i.nodePowerW*i.chassis/1000 : null));
+  const itNetKW = netSwitchPowerW/1000;
+  /* 任一机型缺少功耗数据时，能耗链路整体判定为不可用：
+     避免仅凭网络设备功耗与辅助负载继续推出看似完整的市电/装机/年耗电结论 */
+  const powerIncomplete = items.length>0 && items.some(i=>N(i.nodePowerW)==null);
+  const itKW = powerIncomplete ? null : add(itComputeKW, itNetKW);
+  const auxKW = powerIncomplete ? null : mul(totalRacks, P.power.auxLoadPerRackKw);
+  const baseLoadKW = powerIncomplete ? null : add(itKW, auxKW);
+  const coolingLoadKW = powerIncomplete ? null : mul(mul(baseLoadKW, 1+(P.power.envelopeLossRatio||0)), P.power.coolingMargin||1);
+  const coolingElecKW = powerIncomplete ? null : (P.power.coolingCalc==='cop' ? div(coolingLoadKW, P.power.cop||4.5)
+                                                    : mul(baseLoadKW, (P.power.pue||1.25)-1));
+  const facilityKW = powerIncomplete ? null : div(add(baseLoadKW, coolingElecKW), P.power.distEff||0.94);
+  const siteDemandKW = powerIncomplete ? null : mul(facilityKW, 1+(P.power.capacityMargin||0));
+  const grade = P.power.redundancyGrade;
+  const gradeValid = (grade==='N'||grade==='N+1'||grade==='2N');
+  const redFactor = gradeValid ? {'N':1,'N+1':1.25,'2N':2}[grade] : 1;
+  const installedCapKW = mul(siteDemandKW, redFactor);
+  const annualKWh = mul(mul(facilityKW, P.power.annualHours||8760), P.power.avgLoadFactor||0.85);
+  const avgRackKW = powerIncomplete ? null : div(itComputeKW, computeRacks);
+  const power = {powerIncomplete, itComputeKW, itNetKW, itKW, auxKW, baseLoadKW, coolingLoadKW, coolingElecKW, facilityKW,
+    siteDemandKW, installedCapKW, annualKWh, avgRackKW, redFactor, grade, gradeValid};
+
+  /* --- 承重 --- */
+  const equipWeightKg = sumA(items.map(i=> mul(i.nodeWeightKg, i.chassis)));
+  const rackTareKg = mul(totalRacks, (P.rack.tareWeightKg||0)+(P.rack.accessoryWeightKg||0));
+  const totalWeightKg = add(equipWeightKg, rackTareKg);
+  const totalLoadKN = mul(totalWeightKg, 9.81/1000);
+  const avgLoadKNm2 = div(totalLoadKN, totalArea);
+  let maxRackWeightKg=null;
+  const loadBasis=[];
+  rackRows.forEach(r=>{
+    const n=r.i.node;
+    const perRack = r.perRack || 1;
+    /* 结构校核应取「允许布放密度上限」，而非 ceil(chassis/chosen) 的均布密度：
+       机柜可能不满配或后续逐步加装设备，均布值会低估最不利单机柜重量。
+       上限取 U 位 / 功率 / 厂商上限三者最小值（最不利约束生效），且不低于方案实际密度，避免反向放松。
+       例外：任一约束为 0（单机柜连 1 台都容不下，多为机柜功率上限设置过低）或数据缺失时，
+       沿用方案实际密度，不向外推上加。 */
+    let dens=perRack, how='方案实际密度';
+    if(n.rackMode){ dens=1; how='整柜交付'; }
+    else{
+      const caps=[r.recMax, r.uCap, r.pwCap].filter(v=>N(v)!=null);
+      const infeasible = caps.some(v=>v<=0);
+      const capMin = caps.length? Math.min(...caps) : null;
+      if(!infeasible && N(capMin)!=null && capMin>0){
+        dens = Math.max(perRack, capMin);
+        how = capMin>=perRack ? '允许密度上限' : '方案实际密度（已超允许上限）';
+      }
+    }
+    r.loadDens=dens; r.loadHow=how;
+    loadBasis.push(`${r.i.card.name} ${dens} 台/柜（${how}）`);
+    /* 整机柜交付的重量已含柜体，不再叠加机柜自重与附件，避免重复计重 */
+    const extra = n.rackMode ? 0 : (P.rack.tareWeightKg||0)+(P.rack.accessoryWeightKg||0);
+    const w = add(mul(r.i.nodeWeightKg, dens), extra);
+    maxRackWeightKg = maxN(maxRackWeightKg, w);
+  });
+  const loadBasisTxt = loadBasis.join('；');
+  const localLoadKNm2 = div(mul(maxRackWeightKg, 9.81/1000), P.rack.rackFootprintM2);
+  const floorOk = N(localLoadKNm2)==null ? null : localLoadKNm2 <= (P.floor.designLoadKNm2||12);
+  const floor = {equipWeightKg, rackTareKg, totalWeightKg, totalLoadKN, avgLoadKNm2, maxRackWeightKg, localLoadKNm2, floorOk, loadBasisTxt};
+
+  /* --- 算力 --- */
+  const PREC=['fp64','fp32','tf32','fp16','bf16','fp8','int8'];
+  const peak={}, missing=[];
+  PREC.forEach(k=>{
+    let s=null, miss=0;
+    items.forEach(i=>{
+      const v=N(i.card.perf? i.card.perf[k]:null);
+      if(v==null){ if(i.installed>0) miss+=i.installed; }
+      else s=add(s, v*i.installed);
+    });
+    peak[k]=s; if(miss>0) missing.push(`${k}:${miss}张`);
+  });
+  const inferScenario = scenario==='infer';
+  const base = inferScenario ? (P.compute.primaryPrecisionInfer||'int8') : (P.compute.primaryPrecisionTrain||'bf16');
+  const chain = inferScenario ? ['int8','fp8','fp16','bf16','tf32'] : ['bf16','fp16','fp8','int8','tf32'];
+  let primaryKey=null, primaryPeak=null;
+  for(const k of [base].concat(chain)){ if(N(peak[k])!=null && peak[k]>0){ primaryKey=k; primaryPeak=peak[k]; break; } }
+  const mfu = inferScenario ? (P.compute.mfuInfer||0.35) : scenario==='hybrid' ? (P.compute.mfuHybrid||0.40) : (P.compute.mfuTrain||0.45);
+  const effective = mul(primaryPeak, mfu);
+  const vramGB = sumA(items.map(i=> mul(N(i.card.memGB), i.installed)));
+  const vramBW = sumA(items.map(i=> mul(N(i.card.memBW), i.installed)));
+  const scaleUpBW = sumA(items.map(i=> mul(N(i.card.scaleUp?i.card.scaleUp.bwGBs:null), i.installed)));
+  const usableVram = mul(vramGB, P.compute.vramUsableRatioTrain||0.85);
+  const trainParamsB = div(usableVram, P.compute.bytesPerParamTrain||16);   // B 参数
+  const inferParamsB = div(mul(vramGB, 1-(P.compute.vramKvReserveRatio||0.3)), P.compute.bytesPerParamInfer||2);
+  const compute_ = {PREC, peak, missing, primaryKey, primaryPeak, mfu, effective, vramGB, vramBW, scaleUpBW,
+    usableVram, trainParamsB, inferParamsB, inferScenario};
+
+  R.items=items; R.empty=empty; R.warns=warns; R.totalDemand=totalDemand; R.totalInstalled=totalInstalled;
+  R.totalChassis=totalChassis; R.net=net; R.rackRows=rackRows; R.computeRacks=computeRacks; R.netRacks=netRacks;
+  R.edgeRacks=edgeRacks; R.totalRacks=totalRacks; R.mode=mode; R.cooling=cooling; R.sumVendor=sumVendor;
+  R.sumPower=sumPower; R.sumU=sumU; R.vendorKnown=vendorKnown; R.anyOfficial=anyOfficial;
+  R.area={equipArea, auxArea, totalArea, netRackFootprint, modules};
+  R.power=power; R.floor=floor; R.compute=compute_; R.scenario=scenario;
+  R.metricSnapshot = {
+    '卡数（实配）': totalInstalled, '机箱数': totalChassis, '机柜数': totalRacks,
+    '机房面积 m²': totalArea, 'IT 功耗 kW': itKW, '市电需求 kW': siteDemandKW,
+    '市电装机 kW': installedCapKW, '主精度峰值 TFLOPS': primaryPeak, '有效算力 TFLOPS': effective,
+    '显存 GB': vramGB, '年耗电量 万kWh': annualKWh==null?null:annualKWh/10000,
+    '__prec': primaryKey
+  };
+  return R;
+}
+
+/* ============================================================
+   5. 渲染
+   ============================================================ */
+let LAST=null;
+function calc(){
+  if(!DB) return;
+  const R=compute(); LAST=R;
+  render(R);
+  if(el('secCompare').style.display==='') renderCmp();
+}
+
+function kpi(k,v,x,cls){ return `<div class="kpi ${cls||''}"><div class="k">${esc(k)}</div><div class="v">${v}</div><div class="x">${esc(x||'')}</div></div>`; }
+
+function render(R){
+  const P=S.params;
+  /* 标题 */
+  const name=(el('planName').value||'').trim();
+  el('rtTitle').textContent = name || '算力集群配置方案';
+  const scenTxt={train:'训练',infer:'推理',hybrid:'训练+推理混部'}[R.scenario]||R.scenario;
+  el('rtMeta').innerHTML = `业务场景：${esc(scenTxt)} · 算力池 ${R.items.length} 类机型 · 需求 ${f0(R.totalDemand)} 张 / 实配 ${f0(R.totalInstalled)} 张 · 数据版本 ${esc(DB.meta.updated)}`;
+
+  /* ---- 00 摘要 ---- */
+  if(R.empty){
+    el('sumKpis').innerHTML='<div class="empty" style="grid-column:1/-1">请在上方配置条中选择加速卡并加入算力池</div>';
+    el('sumNote').innerHTML='';
+  }else{
+    const C=R.compute, A=R.area, PW=R.power;
+    el('sumKpis').innerHTML =
+      kpi('计算节点 / 机箱', f0(R.totalChassis)+'<small>台</small>', `${f0(R.totalInstalled)} 张加速卡`) +
+      kpi('机柜数（含网络柜）', f0(R.totalRacks)+'<small>柜</small>', `计算 ${f0(R.computeRacks)} + 网络 ${f0(R.netRacks)} + 边界 ${f0(R.edgeRacks)}`,'') +
+      kpi('机房总面积', f1(A.totalArea)+'<small>m²</small>', `主设备区 ${f1(A.equipArea)} m²`, 'w') +
+      kpi('IT 设备功耗', f1(PW.itKW)+'<small>kW</small>', `市电需求 ${f1(PW.siteDemandKW)} kW`, 'r') +
+      kpi('主精度算力（'+String(C.primaryKey||'—').toUpperCase()+'）', perfStr(C.primaryPeak, C.primaryKey==='int8').replace(/(\d)\s/,'$1<br>'), '理论峰值','g') +
+      kpi('有效算力（MFU '+pc(C.mfu)+'）', perfStr(C.effective, C.primaryKey==='int8').replace(/(\d)\s/,'$1<br>'), '可用于产能测算','g') +
+      kpi('显存总容量', memStr(C.vramGB), `带宽合计 ${bwStr(C.vramBW)}`,'') +
+      kpi('年耗电量', (N(PW.annualKWh)==null?dash:f1(PW.annualKWh/10000))+'<small>万 kWh</small>', `平均负载率 ${pc(P.power.avgLoadFactor)}`,'w');
+    const ws=R.warns.slice(0,4).map(w=>`<div>· ${esc(w)}</div>`).join('');
+    const pad = N(R.totalInstalled)!=null && N(R.totalDemand)!=null ? R.totalInstalled-R.totalDemand : 0;
+    el('sumNote').innerHTML = (pad>0? `按机箱对齐实配 ${f0(R.totalInstalled)} 张，较需求多配 ${f0(pad)} 张；` : '')
+      + `机柜取值口径：<b>${ {vendor:'厂商官方机柜密度优先',strict:'三口径取严',power:'功率口径',u:'U 位口径'}[R.mode] }</b>；`
+      + `制冷形态按机型默认判定为 <b>${R.cooling==='liquid'?'液冷':'风冷'}</b>。`
+      + (ws? '<div style="margin-top:4px;color:var(--bd)">'+ws+'</div>':'');
+  }
+
+  /* ---- 01 算力 ---- */
+  const C=R.compute;
+  if(R.empty){
+    ['cmpKpis','rackKpis','pwKpis','netKpis'].forEach(id=>el(id).innerHTML='');
+    el('pwAlert').innerHTML='';
+    ['tblPerf','tblMem','tblRack','tblArea','tblPower','tblFloor','tblNet'].forEach(id=>
+      el(id).innerHTML='<tbody><tr><td class="empty">请先添加算力单元</td></tr></tbody>');
+    ['perfNote','rackNote','pwNote','floorNote'].forEach(id=>el(id).innerHTML='');
+    el('netTopo').innerHTML='';
+    el('riskList').innerHTML='<div class="empty">请先添加算力单元</div>';
+    renderAssump(R);
+    el('footVer').textContent='chips.js 数据版本 '+DB.meta.updated;
+    el('dbVer').textContent='chips.js v'+DB.meta.schema+' · 更新 '+DB.meta.updated+' · 卡型 '+DB.cards.length+' 款 · 服务器机型 '+DB.nodes.length+' 款';
+    return;
+  }
+  el('cmpKpis').innerHTML = R.empty? '' :
+    kpi('理论峰值（'+String(C.primaryKey||'—').toUpperCase()+'）', perfStr(C.primaryPeak, C.primaryKey==='int8'), `${f0(R.totalInstalled)} 张卡合计`,'') +
+    kpi('有效算力', perfStr(C.effective, C.primaryKey==='int8'), `MFU ${pc(C.mfu)}（${esc({train:'训练',infer:'推理',hybrid:'混部'}[R.scenario])}场景）`,'g') +
+    kpi('显存总容量', memStr(C.vramGB), `单卡均值 ${f0(div(C.vramGB,R.totalInstalled))} GB`,'w') +
+    kpi('显存总带宽', bwStr(C.vramBW), `单卡均值 ${f0(div(C.vramBW,R.totalInstalled))} GB/s`,'r');
+
+  const NAME={fp64:'FP64 双精度',fp32:'FP32 单精度',tf32:'TF32 张量',fp16:'FP16 半精度',bf16:'BF16 脑浮点',fp8:'FP8',int8:'INT8'};
+  const rows = C.PREC.map(k=>{
+    const isInt = k==='int8';
+    const v=C.peak[k];
+    const isPk = k===C.primaryKey;
+    return `<tr class="${isPk?'hl':''}"><td>${esc(NAME[k])}${isPk?' <span class="tag t-ac">主用口径</span>':''}</td>
+      <td class="num">${perfStr(v,isInt)}</td>
+      <td class="num">${N(v)==null?dash:f0(v)}</td>
+      <td class="num">${isPk? perfStr(C.effective,isInt) : dash}</td>
+      <td>${N(v)==null?'<span class="tag t-gray">该精度未公开</span>':(isPk?'按本列 × MFU 计':'—')}</td></tr>`;
+  }).join('');
+  el('tblPerf').innerHTML = `<thead><tr><th>精度</th><th class="num">集群理论峰值</th><th class="num">数值（TFLOPS / TOPS）</th><th class="num">有效算力</th><th>说明</th></tr></thead><tbody>${rows}</tbody>`;
+  let pn = R.empty? '' : `主用精度取 <b>${String(C.primaryKey||'—').toUpperCase()}</b>`;
+  if(C.primaryKey && C.primaryKey!==base_primary(P)) pn += `（设定的首选精度无数据，已按回退链取值）`;
+  pn += `；理论峰值为各卡型峰值 × 实配卡数的简单加和，未计入集合通信、算子效率与收敛比损失。`;
+  if(C.missing.length) pn += ` 标「该精度未公开」的项表示部分卡型未公开该精度数据，汇总时已跳过而非按 0 计。`;
+  el('perfNote').innerHTML = pn;
+
+  el('tblMem').innerHTML = `<thead><tr><th>项目</th><th class="num">数值</th><th>计算口径</th></tr></thead><tbody>
+    <tr><td>显存总容量</td><td class="num">${memStr(C.vramGB)}（${f0(C.vramGB)} GB）</td><td>Σ 单卡显存 × 实配卡数</td></tr>
+    <tr><td>训练可用显存</td><td class="num">${memStr(C.usableVram)}</td><td>总容量 × 可用占比 ${pc(P.compute.vramUsableRatioTrain)}（扣除框架、通信库与碎片）</td></tr>
+    <tr><td>显存总带宽</td><td class="num">${bwStr(C.vramBW)}</td><td>Σ 单卡带宽 × 实配卡数，为卡内带宽合计，非全互联可达带宽</td></tr>
+    <tr><td>卡间互联（Scale-up）合计</td><td class="num">${bwStr(C.scaleUpBW)}</td><td>Σ 单卡互联带宽 × 卡数；机内聚合口径，跨机需走 Scale-out 网络</td></tr>
+    <tr><td>Scale-out 网络聚合带宽</td><td class="num">${f0(R.net.aggBwGbps)} Gbps ≈ ${f1(div(R.net.aggBwGbps,8000))} TB/s</td><td>Σ 网口数 × 单口速率 × 平面数，单向聚合</td></tr>
+    <tr><td>可驻留模型规模（训练）</td><td class="num">${paramStr(C.trainParamsB)}</td><td>可用显存 ÷ 每参数 ${P.compute.bytesPerParamTrain} B（含权重、梯度与优化器状态）</td></tr>
+    <tr><td>可驻留模型规模（推理）</td><td class="num">${paramStr(C.inferParamsB)}</td><td>总显存 ×(1−KV 预留 ${pc(P.compute.vramKvReserveRatio)}) ÷ 每参数 ${P.compute.bytesPerParamInfer} B</td></tr>
+  </tbody>`;
+
+  /* ---- 02 机柜与面积 ---- */
+  const PW=R.power;
+  el('rackKpis').innerHTML = R.empty? '' :
+    kpi('计算机柜', f0(R.computeRacks)+'<small>柜</small>', `取值口径：${{vendor:'厂商官方密度优先',strict:'三口径取严',power:'功率',u:'U 位'}[R.mode]}`) +
+    kpi('网络柜 + 边界柜', f0((R.netRacks||0)+(R.edgeRacks||0))+'<small>柜</small>', `交换机 ${f0(R.net.totalSwitches)} 台`) +
+    kpi('机柜总数', f0(R.totalRacks)+'<small>柜</small>', `平均功率密度 ${f1(PW.avgRackKW)} kW/柜`,'w') +
+    kpi('机房总面积', f1(R.area.totalArea)+'<small>m²</small>', `${f0(R.area.modules)} 个机房模块`,'r');
+
+  el('tblRack').innerHTML = `<thead><tr><th>机型</th><th class="num">机箱数</th><th class="num">单机箱功率</th>
+    <th class="num">厂商口径</th><th class="num">功率口径</th><th class="num">U 位口径</th><th class="num">采用值</th><th>约束说明</th></tr></thead><tbody>
+    ${R.rackRows.map(r=>{
+      const n=r.i.node;
+      const note = n.rackMode ? '整柜交付，机柜数按整机柜方案直接计入，不参与每柜台数口径'
+        : r.liqMasked ? '<span style="color:var(--wn)">液冷机型：当前按风冷机房口径评估（方案含风冷机型），无风冷密度数据，机柜数按功率 / U 位推算</span>'
+        : r.rec==null ? '无厂商官方机柜密度数据，按功率 / U 位推算'
+        : `官方 ${r.rec} 台/柜（隐含 ${f1(r.impliedKw)} kW/柜）→ 实际 ${r.perRack} 台/柜`;
+      return `<tr><td>${esc(n.name)}<div class="foot">${esc(r.i.card.name)} ×${f0(r.i.installed)} · ${r.i.node.rackMode?'整机柜交付':(n.u?n.u+'U/台':'')}</div></td>
+        <td class="num">${f0(r.i.chassis)}</td>
+        <td class="num">${N(r.npKW)==null?dash:f1(r.npKW)+' kW'}</td>
+        <td class="num">${N(r.byVendor)==null?'<span class="dash">—</span>':f0(r.byVendor)}</td>
+        <td class="num">${N(r.byPower)==null?dash:f0(r.byPower)}</td>
+        <td class="num">${N(r.byU)==null?dash:f0(r.byU)}</td>
+        <td class="num"><b>${f0(r.chosen)}</b></td>
+        <td style="font-size:11.5px">${esc(note)}${r.downgrade?'<br><span style="color:var(--wn)">'+esc(r.downgrade)+'</span>':''}</td></tr>`;
+    }).join('')}
+    <tr class="hl"><td>合计</td><td class="num">${f0(R.totalChassis)}</td><td class="num">${f1(PW.itComputeKW)} kW</td>
+      <td class="num">${N(R.sumVendor)==null?dash:f0(R.sumVendor)}</td>
+      <td class="num">${N(R.sumPower)==null?dash:f0(R.sumPower)}</td>
+      <td class="num">${N(R.sumU)==null?dash:f0(R.sumU)}</td>
+      <td class="num">${f0(R.computeRacks)}</td>
+      <td style="font-size:11.5px">另计网络柜 ${f0(R.netRacks)} + 边界柜 ${f0(R.edgeRacks)} = <b>${f0(R.totalRacks)}</b> 柜</td></tr>
+  </tbody>`;
+
+  const bottle = (()=>{
+    const a=[['厂商官方密度',R.sumVendor],['功率',R.sumPower],['U 位',R.sumU]].filter(x=>N(x[1])!=null);
+    if(!a.length) return '—';
+    a.sort((x,y)=>y[1]-x[1]);
+    return a[0][0];
+  })();
+  el('rackNote').innerHTML = `三口径校核：机柜可能同时受功率、U 位与厂商实测密度约束。当前最紧约束为 <b>${esc(bottle)}</b>。
+    默认取值口径为<b>厂商官方机柜密度优先</b>：厂商数据存在时以官方每柜台数为设计值，并用本机柜功率上限（${P.rack.maxKw} kW）与可用 U 位（${P.rack.availU} U）校核其可达性；不可达时自动下调并在上表标出。无官方数据时回退到功率与 U 位取大值。
+    网络柜按「每 ${P.rack.netRackPerComputeRack} 个计算柜 1 个网络柜」与「每台网络柜 ${P.rack.swPerRack} 台交换机」取大值。`;
+
+  el('tblArea').innerHTML = `<thead><tr><th>项目</th><th class="num">面积</th><th>计算口径</th></tr></thead><tbody>
+    <tr><td>主设备区（机柜占地）</td><td class="num">${f1(R.area.equipArea)} m²</td><td>${f0(R.totalRacks)} 柜 × ${P.site.areaPerRackM2} m²/柜（含冷热通道与维护通道均摊）</td></tr>
+    <tr><td>辅助区</td><td class="num">${f1(R.area.auxArea)} m²</td><td>主设备区 × 辅助区占比 ${pc(P.site.auxAreaRatio)}（电力室、电池间、空调机房、弱电间与走廊）</td></tr>
+    <tr class="hl"><td>机房总面积</td><td class="num">${f1(R.area.totalArea)} m²</td><td>主设备区 + 辅助区</td></tr>
+    <tr><td>机柜净占地（校核）</td><td class="num">${f1(R.area.netRackFootprint)} m²</td><td>${f0(R.totalRacks)} 柜 × ${P.rack.rackFootprintM2} m²/柜；占总面积 ${pc(div(R.area.netRackFootprint,R.area.totalArea))}，其余为通道与辅助用房</td></tr>
+    <tr><td>机房模块拆分</td><td class="num">${f0(R.area.modules)} 个</td><td>按单模块 ${P.site.racksPerModule} 柜拆分，用于控制单故障域规模</td></tr>
+  </tbody>`;
+
+  /* ---- 03 能耗 ---- */
+  el('pwAlert').innerHTML = PW.powerIncomplete
+    ? '<div class="errbox"><b>能耗链路不可用</b><br>所选机型中存在未公开 TDP（或整柜功耗）的加速卡，① 计算设备功耗不完整。为避免仅凭网络设备功耗与辅助负载推出看似完整的结论，③ 及后续各项已全部置「—」。请补齐功耗参数或改用参数完整的机型后复核。</div>'
+    : '';
+  el('pwKpis').innerHTML = R.empty? '' :
+    kpi('IT 设备功耗', f1(PW.itKW)+'<small>kW</small>', `计算设备 ${f1(PW.itComputeKW)} + 网络 ${f1(PW.itNetKW)}`) +
+    kpi('制冷显冷量', f1(PW.coolingLoadKW)+'<small>kW</small>', `含裕量系数 ${P.power.coolingMargin}`,'') +
+    kpi('市电容量需求', f1(PW.siteDemandKW)+'<small>kW</small>', `设施功耗 ${f1(PW.facilityKW)} kW ×(1+${pc(P.power.capacityMargin)})`,'w') +
+    kpi('供电装机容量（'+P.power.redundancyGrade+'）', f1(PW.installedCapKW)+'<small>kW</small>', `变压器与 UPS 配置口径 ×${PW.redFactor}`,'r');
+
+  el('tblPower').innerHTML = `<thead><tr><th>层级</th><th class="num">功率</th><th>计算口径</th></tr></thead><tbody>
+    <tr><td>① 计算设备功耗</td><td class="num">${f1(PW.itComputeKW)} kW</td><td>Σ 单机箱功耗（卡 TDP×每箱卡数 + 机箱基础功耗，含电源效率） × 机箱数</td></tr>
+    <tr><td>② 网络设备功耗</td><td class="num">${f1(PW.itNetKW)} kW</td><td>${f0(R.net.totalSwitches)} 台交换机 × ${P.power.switchPowerW} W</td></tr>
+    <tr><td>③ IT 设备功耗小计</td><td class="num"><b>${f1(PW.itKW)} kW</b></td><td>① + ②</td></tr>
+    <tr><td>④ 辅助负载</td><td class="num">${f1(PW.auxKW)} kW</td><td>${f0(R.totalRacks)} 柜 × ${P.power.auxLoadPerRackKw} kW/柜（弱电、照明与安防）</td></tr>
+    <tr><td>⑤ 制冷显冷量（选型）</td><td class="num">${f1(PW.coolingLoadKW)} kW</td><td>（③+④）×（1+围护附加 ${pc(P.power.envelopeLossRatio)}）× 选型裕量 ${P.power.coolingMargin}</td></tr>
+    <tr><td>⑥ 制冷耗电</td><td class="num">${f1(PW.coolingElecKW)} kW</td><td>${P.power.coolingCalc==='cop'? '⑤ ÷ COP '+P.power.cop : '（③+④）×（PUE '+P.power.pue+' − 1）'}</td></tr>
+    <tr><td>⑦ 设施总功耗</td><td class="num">${f1(PW.facilityKW)} kW</td><td>（③+④+⑥）÷ 配电综合效率 ${pc(P.power.distEff)}</td></tr>
+    <tr class="hl"><td>⑧ 市电容量需求</td><td class="num"><b>${f1(PW.siteDemandKW)} kW</b></td><td>⑦ ×（1+认购裕量 ${pc(P.power.capacityMargin)}）；实际向供电部门申请的容量</td></tr>
+    <tr><td>⑨ 供电装机容量</td><td class="num">${f1(PW.installedCapKW)} kW</td><td>⑧ × 冗余等级系数 ${PW.redFactor}（${P.power.redundancyGrade}）；变压器、UPS 与柴发的配置口径</td></tr>
+    <tr><td>⑩ 年耗电量</td><td class="num">${N(PW.annualKWh)==null?dash:f1(PW.annualKWh/10000)} 万 kWh</td><td>⑦ × 8760 h × 年平均负载率 ${pc(P.power.avgLoadFactor)}</td></tr>
+    <tr><td>平均机柜功率密度</td><td class="num">${f1(PW.avgRackKW)} kW/柜</td><td>① ÷ 计算机柜数 ${f0(R.computeRacks)}；用于判定制冷形式</td></tr>
+  </tbody>`;
+  const cool = PW.avgRackKW==null? '—' : PW.avgRackKW<=8? '风冷（含列间空调）可覆盖' :
+    PW.avgRackKW<=20? '需间接蒸发 / 风墙或冷板式液冷' : '须冷板式液冷或浸没式液冷，并同步复核供配电';
+  el('pwNote').innerHTML = `制冷形式判定：平均机柜功率密度 ${f1(PW.avgRackKW)} kW/柜 → <b>${esc(cool)}</b>。
+    说明：⑧ 市电容量需求与 ⑨ 供电装机容量分列，避免将供电冗余误计入实际取电需求；PUE 口径下的制冷耗电为反推值，若需按冷机性能正算，请在高级假设中切换至 COP 口径。`;
+
+  /* ---- 04 承重 ---- */
+  const F=R.floor;
+  el('tblFloor').innerHTML = `<thead><tr><th>项目</th><th class="num">数值</th><th>计算口径</th></tr></thead><tbody>
+    <tr><td>设备总重量</td><td class="num">${f0(F.equipWeightKg)} kg</td><td>${P.floor.useNodeWeight? 'Σ 机型标称重量 × 机箱数' : '按功耗 × '+P.floor.kgPerKw+' kg/kW 折算（估算，偏低）'}</td></tr>
+    <tr><td>机柜自重与附件</td><td class="num">${f0(F.rackTareKg)} kg</td><td>${f0(R.totalRacks)} 柜 ×（${P.rack.tareWeightKg} + ${P.rack.accessoryWeightKg}）kg</td></tr>
+    <tr><td>总重量 / 总荷载</td><td class="num">${f0(F.totalWeightKg)} kg / ${f1(F.totalLoadKN)} kN</td><td>总重量 × 9.81 ÷ 1000</td></tr>
+    <tr><td>平均楼面荷载（分摊值）</td><td class="num">${f1(F.avgLoadKNm2)} kN/m²</td><td>总荷载 ÷ 机房总面积 ${f1(R.area.totalArea)} m²；仅用于整体估算</td></tr>
+    <tr class="hl"><td>单机柜局部荷载（控制值）</td><td class="num">${f1(F.localLoadKNm2)} kN/m²</td><td>最重单机柜重量 ${f0(F.maxRackWeightKg)} kg ÷ 机柜净占地 ${P.rack.rackFootprintM2} m²；密度取值：${esc(F.loadBasisTxt||'—')}；<b>结构校核以此值为准</b></td></tr>
+    <tr><td>楼面设计承重</td><td class="num">${P.floor.designLoadKNm2} kN/m²</td><td>由建筑结构图纸确定</td></tr>
+  </tbody>`;
+  const ratio = div(F.localLoadKNm2, P.floor.designLoadKNm2);
+  el('floorNote').innerHTML = F.floorOk==null ? '缺少重量或功耗数据，无法校核。' :
+    (F.floorOk
+      ? `局部荷载为设计承重的 ${pc(ratio)}，<b style="color:var(--ok)">满足要求</b>${ratio>0.8?'（余量偏小，高密机柜宜集中布置于梁柱区）':''}。`
+      : `局部荷载为设计承重的 ${pc(ratio)}，<b style="color:var(--bd)">超出楼面设计承重</b>，需结构加固、分散布置或降低单机柜密度。`)
+    + ` 平均荷载为分摊值，仅用于整体估算，不作为结构控制指标。`;
+
+  /* ---- 05 网络 ---- */
+  const NT=R.net;
+  el('netKpis').innerHTML = R.empty? '' :
+    kpi('训练网端口需求', f0(NT.trainPorts)+'<small>口</small>', `${NT.planes} 个平面 × ${NT.nicRate} Gbps`) +
+    kpi('叶交换机', f0(NT.leafCount)+'<small>台</small>', `${NT.sw.ports} 口/台，下联 ${NT.downlink} 口`,'') +
+    kpi('脊交换机', f0(NT.spineCount)+'<small>台</small>', `收敛比 ${NT.os}:1`,'w') +
+    kpi('光纤芯数', f0(NT.fibers)+'<small>芯</small>', `铜缆链路 ${f0(NT.dacLinks)} 条`,'g');
+
+  el('netTopo').innerHTML = `
+    <div class="layer"><div class="lt"><b>① 计算层</b><span>${f0(R.totalChassis)} 台服务器 · ${f0(R.totalInstalled)} 张加速卡 · ${f0(NT.nicPorts)} 个训练网口</span></div>
+      <div class="chips">${R.items.map(i=>`<span class="chip on">${esc(i.node.name)} ×${f0(i.node.rackMode?i.chassis:i.chassis)}</span>`).join('')||'<span class="chip">无计算节点</span>'}</div></div>
+    <div class="arr">▼ ${P.net.fabric==='ib'?'InfiniBand':P.net.fabric==='roce'?'RoCEv2 以太 RDMA':'IB + RoCE 双平面'} · ${NT.nicRate} Gbps × ${f0(NT.trainPorts)} 口</div>
+    <div class="layer hl"><div class="lt"><b>② 叶层 Leaf（接入）</b><span>${f0(NT.leafCount)} 台 × ${NT.sw.ports} 口 · 下联 ${NT.downlink} / 上联 ${NT.uplink}</span></div>
+      <div class="chips"><span class="chip on g">${esc(NT.sw.name)}</span><span class="chip">收敛比 ${NT.os}:1</span></div></div>
+    <div class="arr">▼ 上行 ${f0(mul(NT.leafCount,NT.uplink))} 端口</div>
+    <div class="layer"><div class="lt"><b>③ 脊层 Spine（核心）</b><span>${f0(NT.spineCount)} 台 · 按 leaf×上联 ÷ 单台端口数</span></div>
+      <div class="chips"><span class="chip on">${esc(NT.sw.name)} ×${f0(NT.spineCount)}</span></div></div>
+    <div class="arr">▼ 边界与业务接入</div>
+    <div class="layer"><div class="lt"><b>④ 存储 / 管理 / 边界</b><span>存储 ${f0(NT.storSw)} 台 · 管理 ${f0(NT.mgmtSw)} 台 · 边界 ${NT.edgeSw} 台</span></div>
+      <div class="chips"><span class="chip on y">存储端口 ${f0(NT.storPorts)} 口</span><span class="chip on y">管理端口 ${f0(NT.mgmtPorts)} 口</span></div></div>`;
+
+  el('tblNet').innerHTML = `<thead><tr><th>项目</th><th class="num">数量</th><th>说明</th></tr></thead><tbody>
+    <tr><td>训练网端口需求</td><td class="num">${f0(NT.trainPorts)} 口</td><td>Σ 每机箱网口 × 机箱数 × 平面数（${NT.planes}）</td></tr>
+    <tr><td>叶交换机</td><td class="num">${f0(NT.leafCount)} 台</td><td>端口需求 ÷ 每叶下联 ${NT.downlink} 口（${NT.sw.ports} 口按 ${NT.os}:1 划分）</td></tr>
+    <tr><td>脊交换机</td><td class="num">${f0(NT.spineCount)} 台</td><td>leaf 数 × 上联 ${NT.uplink} ÷ 单台 ${NT.sw.ports} 口，向上取整且不少于 1 台</td></tr>
+    <tr><td>存储交换机</td><td class="num">${f0(NT.storSw)} 台</td><td>存储端口 ${f0(NT.storPorts)} ÷ ${P.net.storageSwitchPorts} 口</td></tr>
+    <tr><td>管理交换机</td><td class="num">${f0(NT.mgmtSw)} 台</td><td>管理端口 ${f0(NT.mgmtPorts)} ÷ ${P.net.mgmtSwitchPorts} 口</td></tr>
+    <tr><td>边界交换机</td><td class="num">${NT.edgeSw} 台</td><td>园区边界与安全接入，按冗余对计</td></tr>
+    <tr><td>链路总数</td><td class="num">${f0(NT.allLinks)} 条</td><td>叶-脊 full mesh × 平面数 + 叶上行至边界</td></tr>
+    <tr><td>铜缆（DAC/ACC）链路</td><td class="num">${f0(NT.dacLinks)} 条</td><td>按铜缆占比 ${pc(P.net.dacRatio)} 估算，短距机柜内互联</td></tr>
+    <tr><td>光纤链路 / 光纤芯数</td><td class="num">${f0(NT.fiberLinks)} 条 / ${f0(NT.fibers)} 芯</td><td>每链路 ${P.net.fibersPerLink} 芯（双纤双向）</td></tr>
+    <tr><td>光模块</td><td class="num">${f0(NT.optics)} 个</td><td>每条光纤链路两端各 1 个，速率 ${NT.sw.portRateGbps} G</td></tr>
+    <tr><td>网络设备总功耗</td><td class="num">${f1(NT.netSwitchPowerW/1000)} kW</td><td>${f0(NT.totalSwitches)} 台 × ${P.power.switchPowerW} W（已计入 IT 功耗）</td></tr>
+    <tr><td>网络聚合带宽</td><td class="num">${f0(NT.aggBwGbps)} Gbps</td><td>端口数 × 单口速率，单向聚合</td></tr>
+  </tbody>`;
+
+  /* ---- 06 风险清单 ---- */
+  el('riskList').innerHTML = buildChecks(R);
+
+  /* ---- 08 口径表 ---- */
+  renderAssump(R);
+  el('footVer').textContent = 'chips.js 数据版本 '+DB.meta.updated+' · 卡型 '+DB.cards.length+' 款 / 机型 '+DB.nodes.length+' 款';
+  el('dbVer').textContent = 'chips.js v'+DB.meta.schema+' · 更新 '+DB.meta.updated+' · 卡型 '+DB.cards.length+' 款 · 服务器机型 '+DB.nodes.length+' 款';
+}
+function base_primary(P){ return (P.scenario==='infer') ? (P.compute.primaryPrecisionInfer||'int8') : (P.compute.primaryPrecisionTrain||'bf16'); }
+
+function buildChecks(R){
+  const P=S.params, out=[];
+  const push=(t,tt,msg)=>out.push(`<div class="ck ${t}"><span class="ic">${t==='r'?'✕':t==='w'?'!':'✓'}</span><span><span class="tt">${esc(tt)}</span>${msg}</span></div>`);
+  if(R.empty){ return '<div class="empty">请先添加算力单元</div>'; }
+
+  const d=R.power.avgRackKW;
+  if(N(d)==null) push('w','能耗数据不完整','部分机型缺少功耗数据，能耗、制冷与承重结论不可用，建议补齐 TDP 后复核。');
+  else if(d>20) push('r','机柜功率密度',`${f1(d)} kW/柜 已进入超高密区间，须采用液冷机柜，并同步复核供配电与结构承重。`);
+  else if(d>8) push('w','机柜功率密度',`${f1(d)} kW/柜 属中高密，建议评估冷板式液冷或强化风冷（封闭通道、列间空调）。`);
+  else push('g','机柜功率密度',`${f1(d)} kW/柜 处于常规风冷可覆盖范围。`);
+
+  const down = R.rackRows.filter(r=>r.downgrade);
+  /* 液冷机型在风冷口径下无法用官方密度、部分机型缺密度数据——均属被掩盖的回退，
+     不得因 anyOfficial=true 就给出「均可实现」的绿灯 */
+  const liqMasked = R.rackRows.filter(r=>r.liqMasked);
+  const noVendor  = R.rackRows.filter(r=>N(r.byVendor)==null);
+  if(down.length) down.forEach(r=>push('w','厂商机柜密度可达性',`${esc(r.i.node.name)}：${esc(r.downgrade)}。若坚持官方密度，需提高单机柜功率上限或改为液冷机柜。`));
+  if(liqMasked.length) push('w','液冷机型机柜密度',`${liqMasked.map(r=>esc(r.i.node.name)).join('、')} 为液冷机型（官方密度按液冷机柜口径给出），当前方案按风冷机房口径评估，机柜数已按功率 / U 位口径推算；建议整体采用液冷机柜方案，或向厂商确认该机型风冷部署密度。`);
+  if(noVendor.length) push('w','机柜密度数据来源',`${noVendor.map(r=>esc(r.i.node.name)).join('、')} 无厂商官方机柜密度数据，机柜数按功率与 U 位口径推算，建议向整机厂商索取机柜级部署图。`);
+  if(!down.length && !liqMasked.length && !noVendor.length && R.anyOfficial) push('g','厂商机柜密度可达性','所选机型的厂商官方每柜台数在当前机柜功率与 U 位条件下均可实现。');
+
+  if(R.totalRacks>100) push('r','机房规模',`总机柜 ${f0(R.totalRacks)} 柜、面积 ${f1(R.area.totalArea)} m²，需按 ${f0(R.area.modules)} 个机房模块拆分，并评估单层与多层方案。`);
+  else if(R.computeRacks>60) push('w','机房规模',`计算机柜 ${f0(R.computeRacks)} 柜，建议按可用区拆分，避免单集群跨越大故障域。`);
+  else push('g','机房规模',`总机柜 ${f0(R.totalRacks)} 柜，规模适中。`);
+
+  if(R.floor.floorOk===false) push('r','结构承重',`单机柜局部荷载 ${f1(R.floor.localLoadKNm2)} kN/m² 超出设计值 ${P.floor.designLoadKNm2} kN/m²，须结构加固、分散布置或降低单机柜密度。`);
+  else if(R.floor.floorOk===true) push('g','结构承重',`单机柜局部荷载 ${f1(R.floor.localLoadKNm2)} kN/m²，满足设计承重 ${P.floor.designLoadKNm2} kN/m²。`);
+
+  if(P.net.oversub>2 && R.net.isTrainScenario) push('r','网络收敛比',`训练场景收敛比 ${R.net.os}:1 偏高，集合通信易成瓶颈，建议调整为 1:1 或 2:1。`);
+  else if(R.net.os>1) push('w','网络收敛比',`收敛比 ${R.net.os}:1，跨叶流量存在超分，需结合业务通信模型评估。`);
+  else push('g','网络收敛比','收敛比 1:1 无超分，满足大规模训练对无阻塞网络的要求。');
+  if(P.net.fabric==='roce' && R.net.isTrainScenario) push('w','RDMA 方案','采用 RoCEv2 需配套无损以太（PFC/ECN）与逐跳拥塞控制，运维复杂度高于 InfiniBand。');
+
+  if(R.power.gradeValid===false) push('w','供电冗余等级',`取值「${esc(String(R.power.grade))}」不是有效等级（N / N+1 / 2N），已按 N（×1）计算供电装机容量；若实际为 N+1 或 2N，装机容量与投资将被低估，请修正后复核。`);
+  if(P.power.pue>1.35) push('w','PUE 目标',`PUE ${P.power.pue} 偏高，能耗指标与绿色数据中心评级可能受限。`);
+  if(P.power.pue<1.15 && R.cooling==='air') push('w','PUE 目标',`风冷条件下 PUE ${P.power.pue} 偏激进，需核实当地气候与冷源条件是否可达。`);
+  if(N(R.power.siteDemandKW)>10000) push('r','市电容量',`市电需求 ${f1(div(R.power.siteDemandKW,1000))} MW，园区变电站、双路市电与柴发均需专项设计并提前与供电部门沟通。`);
+  else if(N(R.power.siteDemandKW)>3000) push('w','市电容量',`市电需求 ${f1(R.power.siteDemandKW)} kW，需确认专线容量与冗余电源路径。`);
+
+  /* 供应链与数据可信度 */
+  const risky=R.items.filter(i=>i.card.risks && i.card.risks.length);
+  risky.forEach(i=>push(i.card.status==='受限/EOL'?'r':'w',`供应与合规 · ${i.card.name}`,
+    `${esc((i.card.risks||[]).join('、'))}。当前状态：${esc(i.card.status)}；建议采购前完成合规与交期确认。`));
+  const noPerf=R.items.filter(i=>cardNoPerf(i.card));
+  if(noPerf.length) push('w','算力参数缺失',`${noPerf.map(i=>esc(i.card.name)).join('、')} 未公开算力数据，理论峰值、有效算力与可驻留模型规模均按「—」处理；正式比选前须向厂商索取完整规格。`);
+  const lowConf=R.items.filter(i=>i.card.confidence==='thirdparty'||i.card.confidence==='unknown');
+  if(lowConf.length) push('w','参数可信度',`${lowConf.map(i=>esc(i.card.name)).join('、')} 的参数为第三方或待核实口径，建议以厂商 datasheet 复核后再用于正式设计。`);
+  push('g','使用边界','本模型用于方案前期估算与比选，结果应作为设计输入交由暖通、供配电与结构专业复核；芯片参数以厂商最新 datasheet 为准。');
+  return out.join('');
+}
+
+function renderAssump(R){
+  const P=S.params, def=DB.defaults, pm=DB.paramMeta;
+  const keys=Object.keys(pm);
+  const rows=keys.map(k=>{
+    const m=pm[k], dv=getP(def,k), cv=getP(P,k);
+    const isPct = m.unit==='%' || /mfu|Ratio|Eff|Factor/.test(k);
+    const fmtv = v => v==null? dash : (isPct? (v*100).toFixed(0)+'%' : (typeof v==='boolean'? (v?'是':'否') : v));
+    const changed = String(fmtv(dv))!==String(fmtv(cv));
+    /* 兜底：paramMeta 条目字段缺失（如手工编辑 chips.js 或旧版本数据）时，
+       标签回退到参数路径、口径回退到占位文案、来源回退「—」，不把 undefined 渲染到页面 */
+    return `<tr><td>${esc(m.label||k)}</td><td class="num">${fmtv(dv)}</td><td class="num">${changed?'<b>'+fmtv(cv)+'</b>':fmtv(cv)}</td>
+      <td>${esc(m.unit&&m.unit!=='—'?m.unit:'')}</td><td style="font-size:11.5px">${esc(m.basis||'口径待补')}</td><td style="font-size:11.5px;color:var(--tx3)">${esc(m.src||'—')}</td></tr>`;
+  }).join('');
+  el('tblAssump').innerHTML = `<thead><tr><th>参数</th><th class="num">默认值</th><th class="num">本次取值</th><th>单位</th><th>计算口径</th><th>来源</th></tr></thead><tbody>${rows}</tbody>`;
+  el('assumpNote').innerHTML = `本表由 chips.js 的 paramMeta 自动生成，确保每个可调参数都有口径与来源说明。加粗项为相对默认值已修改的参数。`;
+  const srcs=DB.meta.sources||[];
+  el('tblSrc').innerHTML = `<thead><tr><th>数据来源</th><th>等级</th></tr></thead><tbody>
+    ${srcs.map(s=>`<tr><td>${esc(s.ref)}</td><td><span class="tag ${s.level==='official'?'t-ok':s.level==='vendor'?'t-ac':'t-wn'}">${esc({official:'官方 datasheet',vendor:'厂商发布口径',thirdparty:'第三方汇总'}[s.level]||s.level)}</span></td></tr>`).join('')}
+    <tr><td colspan="2" style="font-size:11.5px;color:var(--tx3)">${esc(DB.meta.disclaimer)}</td></tr></tbody>`;
+}
+
+function renderCmp(){
+  const pname = (el('planName').value||'当前方案').trim();
+  const cur = LAST && !LAST.empty
+    ? Object.assign({__name:pname+'（当前）', __ts:'当前（未保存）'}, LAST.metricSnapshot) : null;
+  const saved = S.scenarios.map(s=>Object.assign({__name:s.name,__ts:s.ts}, s.metrics));
+  /* 与已保存方案同名且指标完全一致时，不再重复列出当前方案 */
+  const mkeys = cur ? Object.keys(cur).filter(k=>!k.startsWith('__')) : [];
+  const dup = !!cur && saved.some(s=> s.__name===pname && mkeys.every(k=>String(s[k])===String(cur[k])));
+  const list = saved.concat((cur && !dup) ? [cur] : []);
+  if(!list.length){ el('tblCmp').innerHTML='<tr><td class="empty">尚未保存任何方案，点击「保存为方案」后再对比</td></tr>'; return; }
+  const metrics=Object.keys(list[0]).filter(k=>!k.startsWith('__'));
+  const fmtM=(k,v,row)=>{
+    if(v==null) return dash;
+    if(/面积/.test(k)) return f1(v);
+    if(/功耗|市电/.test(k)) return f1(v);
+    if(/算力/.test(k)) return perfStr(v, row && row.__prec==='int8');
+    if(/显存/.test(k)) return memStr(v);
+    if(/电量/.test(k)) return f1(v);
+    return f0(v);
+  };
+  el('tblCmp').innerHTML = `<thead><tr><th>指标</th>${list.map(s=>`<th class="num">${esc(s.__name)}<div class="foot" style="font-weight:400">${esc(s.__ts)}</div></th>`).join('')}</tr></thead><tbody>
+    ${metrics.map(k=>`<tr><td>${esc(k)}</td>${list.map(s=>`<td class="num">${fmtM(k,s[k],s)}</td>`).join('')}</tr>`).join('')}
+  </tbody>`;
+}
+
+/* ============================================================
+   6. 启动
+   ============================================================ */
+(function init(){
+  if(!DB) return;
+  el('dbVer').textContent = 'chips.js v'+DB.meta.schema+' · 更新 '+DB.meta.updated;
+  fillCardSelect();
+  buildAdv();
+  el('selScenario').addEventListener('change',()=>{ S.params.scenario=el('selScenario').value; calc(); });
+  /* 切换卡型时清空每箱卡数覆盖值，避免沿用上一机型的取值（如 72 卡/箱套到 8 卡机型） */
+  el('selCard').addEventListener('change',()=>{ S.params.cardId=el('selCard').value; S.params.cpnOverride=null; refreshNodeSelect(); updateCardHint(); });
+  el('selNode').addEventListener('change',()=>{ refreshCpn(); updateCardHint(); });
+  el('selCpn').addEventListener('change',()=>{ S.params.cpnOverride=parseInt(el('selCpn').value,10); });
+  el('inCount').addEventListener('input',()=>{ S.params.cardCount=parseFloat(el('inCount').value)||0; });
+  el('planName').addEventListener('input',()=>{ if(LAST) el('rtTitle').textContent=el('planName').value||'算力集群配置方案'; });
+  syncControls();
+  updateCardHint();
+  /* 默认示例：512 张 H100 */
+  const c=cardById('H100_SXM')||DB.cards[0];
+  const n=autoNodeFor(c.id);
+  if(n) S.pool=[{cardId:c.id, nodeId:n.id, count:512, cpn:n.cardsPerNode||8}];
+  renderPool(); calc();
+})();
+</script>
+</body>
+</html>
