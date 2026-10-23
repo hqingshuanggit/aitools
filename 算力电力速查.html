@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算力电力速查 · 功率指标与万卡电力需求</title>
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#ffffff;
+  --border:#e3e6ea;
+  --border-strong:#cfd4da;
+  --text:#1f2328;
+  --text-2:#5b6570;
+  --text-3:#8b939c;
+  --accent:#1f6feb;
+  --accent-soft:#eaf2fe;
+  --warn:#b45309;
+  --warn-soft:#fef4e6;
+  --danger:#b3261e;
+  --danger-soft:#fdecea;
+  --ok:#0a7d3b;
+  --ok-soft:#e8f5ed;
+  --chip:#f0f2f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:13.5px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1340px;margin:0 auto;padding:22px 24px 60px}
+
+/* ---------- header ---------- */
+header.top{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:18px 22px;margin-bottom:14px;
+}
+h1{font-size:20px;margin:0 0 6px;letter-spacing:.3px}
+h1 span.tagline{font-size:13px;color:var(--text-3);font-weight:400;margin-left:8px}
+h1 span.ver{
+  display:inline-block;font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);
+  border-radius:5px;padding:1px 7px;margin-right:8px;vertical-align:2px;letter-spacing:.5px;
+}
+.meta-line{color:var(--text-2);font-size:12.5px;margin:0}
+.meta-line b{color:var(--text);font-weight:600}
+.disclaim{
+  margin-top:10px;padding:9px 12px;background:var(--warn-soft);border-left:3px solid #e0a020;
+  border-radius:4px;color:#7a4b06;font-size:12px;line-height:1.65;
+}
+.disclaim b{color:#5c3a05}
+
+/* ---------- generic panel ---------- */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:14px}
+.panel>h2{font-size:15px;margin:0 0 4px}
+.panel>h2 .sub{font-size:12px;color:var(--text-3);font-weight:400;margin-left:8px}
+.panel .lead{color:var(--text-2);font-size:12.5px;margin:0 0 12px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- form controls ---------- */
+label.fl{display:block;font-size:12px;color:var(--text-2);font-weight:600;margin:0 0 4px}
+label.fl small{font-weight:400;color:var(--text-3)}
+input[type=number],select{
+  padding:7px 9px;border:1px solid var(--border-strong);border-radius:7px;background:#fff;
+  font-size:13px;color:var(--text);outline:none;font-family:inherit;width:100%;
+  font-variant-numeric:tabular-nums;
+}
+input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.qchip{
+  display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;
+  background:var(--chip);border:1px solid transparent;color:var(--text-2);
+  font-size:11.5px;cursor:pointer;user-select:none;white-space:nowrap;
+}
+.qchip:hover{border-color:var(--border-strong)}
+.qchip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.btn{
+  padding:6px 12px;border:1px solid var(--border-strong);border-radius:7px;background:#fff;
+  font-size:12.5px;color:var(--text);cursor:pointer;font-family:inherit;
+}
+button.btn:hover{border-color:var(--accent);color:var(--accent)}
+.unit-fix{display:flex;align-items:center;gap:8px}
+.unit-fix .u{font-size:12px;color:var(--text-3);white-space:nowrap}
+
+/* ---------- 01 估算器 ---------- */
+.calc-grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;margin-top:12px}
+@media(max-width:960px){.calc-grid{grid-template-columns:minmax(0,1fr)}}
+.calc-inputs{
+  background:#f8f9fb;border:1px solid var(--border);border-radius:10px;padding:14px 16px;
+}
+.calc-inputs .fg{margin-bottom:12px}
+.calc-inputs .fg:last-child{margin-bottom:0}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:11.5px;color:var(--text-3);margin-top:4px;line-height:1.5}
+
+/* 结果链 */
+.chain{display:grid;grid-template-columns:1fr 26px 1fr 26px 1fr;gap:4px;align-items:stretch}
+@media(max-width:960px){
+  .chain{grid-template-columns:1fr}
+  .chain .arr{transform:rotate(90deg);height:22px}
+}
+.arr{display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:16px;font-weight:700}
+.step-card{
+  border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:#fff;
+  display:flex;flex-direction:column;justify-content:center;min-height:118px;
+}
+.step-card .sc-tag{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-3);margin-bottom:3px}
+.step-card .sc-val{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.25;word-break:break-all}
+.step-card .sc-val small{font-size:13px;font-weight:600;color:inherit;margin-left:2px}
+.step-card .sc-formula{font-size:11.5px;color:var(--text-3);margin-top:5px;font-variant-numeric:tabular-nums}
+.step-card.s1 .sc-val{color:var(--text-2)}
+.step-card.s2 .sc-val{color:var(--accent)}
+.step-card.s3{background:var(--ok-soft);border-color:#bfe3cc}
+.step-card.s3 .sc-val{color:var(--ok)}
+.step-card.s3 .sc-tag{color:var(--ok)}
+
+/* ---------- 02 万卡对比 ---------- */
+.adj-bar{
+  display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;padding:12px 14px;
+  background:#f8f9fb;border:1px solid var(--border);border-radius:10px;margin-bottom:12px;
+}
+.adj-bar .fg{margin:0}
+.adj-bar .fg>label{display:block;font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:4px}
+.adj-bar input[type=number]{width:120px}
+.adj-note{flex:1;min-width:200px;font-size:11.5px;color:var(--text-3);line-height:1.6}
+.table-wrap{overflow-x:auto}
+table.cmp{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;min-width:980px}
+table.cmp th{
+  background:#f8f9fb;color:var(--text-2);font-weight:600;text-align:left;
+  padding:8px 10px;border-bottom:1px solid var(--border-strong);white-space:nowrap;font-size:11.5px;
+}
+table.cmp td{padding:8px 10px;border-bottom:1px solid #eef0f3;vertical-align:middle;white-space:nowrap}
+table.cmp td.num,table.cmp th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.cmp tbody tr:hover td{background:#f8fbff}
+table.cmp .pname{font-weight:600}
+table.cmp .refcell{color:var(--text-3)}
+table.cmp .refcell b{color:var(--text-2)}
+.loadbtn{
+  padding:3px 10px;border:1px solid var(--border-strong);border-radius:6px;background:#fff;
+  font-size:11.5px;color:var(--text-2);cursor:pointer;font-family:inherit;white-space:nowrap;
+}
+.loadbtn:hover{border-color:var(--accent);color:var(--accent)}
+/* TDP 存疑标记（沿用速查表口径标记风格） */
+table.cmp .q{color:var(--warn);font-weight:700;cursor:help}
+
+/* 对比条形图 */
+.bars{margin-top:14px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 92px;gap:10px;align-items:center;margin-bottom:8px}
+.bar-row .bn{font-size:12px;color:var(--text-2);text-align:right;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{background:#eef0f3;border-radius:4px;height:22px;position:relative;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;position:relative;min-width:2px}
+.bar-fill .bv{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  color:#fff;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.bar-row .bx{font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+
+/* ---------- 03 换算器 / PUE 工具 ---------- */
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:14px}
+@media(max-width:1000px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.cv-out{margin-top:12px}
+table.mini{width:100%;font-size:12.5px;border-collapse:collapse}
+table.mini th,table.mini td{border-bottom:1px solid #eef0f3;padding:7px 8px;text-align:left;white-space:nowrap}
+table.mini th{color:var(--text-2);font-weight:600;background:#f8f9fb}
+table.mini td.num{text-align:right;font-variant-numeric:tabular-nums}
+table.mini tr.hl td{background:var(--accent-soft);color:var(--accent);font-weight:700}
+/* 窄屏：双列输入与换算表退化为单列/可横滚，避免撑破视口 */
+@media(max-width:620px){
+  .duo{grid-template-columns:1fr}
+  .cv-out{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .cv-out table.mini{min-width:300px}
+  input[type=number],select{min-width:0;width:100%}
+  .unit-fix{width:100%}
+}
+/* PUE 评级条 */
+.pue-scale{margin-top:12px}
+.ps-track{display:flex;height:14px;border-radius:7px;overflow:hidden;border:1px solid var(--border)}
+.ps-seg{height:100%}
+.ps-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:11px;color:var(--text-3)}
+.ps-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.ps-pointer{position:relative;height:0}
+.ps-pointer .pp{
+  position:absolute;top:-5px;transform:translateX(-50%);font-size:12px;color:var(--text);
+  font-weight:700;white-space:nowrap;transition:left .15s;
+}
+.ps-pointer .pp small{font-weight:400;color:var(--text-3)}
+.pue-result{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.pr-box{flex:1;min-width:120px;border:1px solid var(--border);border-radius:9px;padding:9px 12px;background:#f8f9fb}
+.pr-box .k{font-size:11px;color:var(--text-3);font-weight:600}
+.pr-box .v{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px}
+.pr-box .v small{font-size:12px;font-weight:600}
+.pr-box.grade .v{font-size:15px;line-height:1.6}
+
+/* ---------- 04 能效指标卡 ---------- */
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
+@media(max-width:1000px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.metrics{grid-template-columns:1fr}}
+.metric-card{border:1px solid var(--border);border-radius:10px;padding:13px 15px;background:#fff;display:flex;flex-direction:column}
+.metric-card .mc-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.metric-card .mc-name .abbr{
+  font-size:10.5px;font-weight:700;border-radius:4px;padding:1px 6px;background:var(--accent-soft);color:var(--accent);
+  letter-spacing:.5px;
+}
+.metric-card .mc-name .abbr.w{background:var(--warn-soft);color:var(--warn)}
+.metric-card .mc-name .abbr.c{background:var(--ok-soft);color:var(--ok)}
+.metric-card .mc-full{font-size:11px;color:var(--text-3);margin:2px 0 8px}
+.metric-card .mc-formula{
+  font-size:12px;background:#f8f9fb;border:1px dashed var(--border-strong);border-radius:6px;
+  padding:6px 9px;margin-bottom:8px;font-variant-numeric:tabular-nums;
+}
+.metric-card .mc-desc{font-size:12px;color:var(--text-2);line-height:1.65}
+.metric-card .mc-desc b{color:var(--text)}
+.mc-badge{margin-top:auto;padding-top:8px;font-size:11.5px}
+.mc-badge .b-ok,.mc-badge .b-warn{border-radius:4px;padding:1px 6px;font-weight:600}
+.mc-badge .b-ok{background:var(--ok-soft);color:var(--ok)}
+.mc-badge .b-warn{background:var(--warn-soft);color:var(--warn)}
+
+/* ---------- 05 方法与案例 ---------- */
+.method-chain{
+  border-left:3px solid var(--accent);background:var(--accent-soft);
+  border-radius:4px;padding:11px 15px;margin:10px 0 4px;font-size:13px;line-height:2;color:#1a3a6b;
+}
+.method-chain b{color:#0b2e5e}
+.case-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+@media(max-width:960px){.case-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.case-steps{grid-template-columns:1fr}}
+.case-step{border:1px solid var(--border);border-radius:10px;padding:11px 13px;background:#fff;position:relative}
+.case-step .cs-no{
+  display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:11px;font-weight:700;text-align:center;line-height:20px;margin-bottom:6px;
+}
+.case-step .cs-k{font-size:11.5px;color:var(--text-3);font-weight:600}
+.case-step .cs-v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
+.case-step .cs-v small{font-size:12px;font-weight:600}
+.case-step .cs-d{font-size:11.5px;color:var(--text-2);line-height:1.6}
+.cross-refs{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:800px){.cross-refs{grid-template-columns:1fr}}
+.cross-ref{
+  display:flex;gap:9px;align-items:flex-start;border:1px solid var(--border);border-radius:9px;
+  padding:9px 12px;background:#f8f9fb;font-size:12px;color:var(--text-2);line-height:1.6;
+}
+.cross-ref .xi{flex:none;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);
+  border-radius:4px;padding:1px 6px;margin-top:1px;white-space:nowrap}
+ul.plan-notes{margin:10px 0 0;padding-left:0;list-style:none}
+ul.plan-notes li{
+  padding:8px 0 8px 14px;border-bottom:1px dashed #eceff2;font-size:12.5px;color:var(--text-2);
+  position:relative;line-height:1.7;
+}
+ul.plan-notes li:last-child{border-bottom:none}
+ul.plan-notes li:before{content:"";position:absolute;left:0;top:15px;width:6px;height:6px;border-radius:2px;background:var(--accent)}
+ul.plan-notes b{color:var(--text)}
+.kv{display:flex;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px dashed #eceff2;color:var(--text-2)}
+.kv:last-child{border-bottom:none}
+.kv b{flex:0 0 92px;color:var(--text)}
+
+footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;line-height:1.8}
+
+@media print{
+  .adj-bar,.chip-row,.loadbtn,.no-print{display:none !important}
+  body{background:#fff}
+  .panel,.step-card,.metric-card{border-color:#ccc}
+  .calc-inputs{display:none}
+  .calc-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<script src="site-nav.js"></script>
+
+<header class="top">
+  <h1><span class="ver">速查</span>算力电力速查 <span class="tagline">功率指标 · 能效指标 · 万卡集群电力需求估算</span></h1>
+  <p class="meta-line">口径基准：<b>1 万卡 = 10,000 卡</b>，默认 <b>PUE = 1.25</b> ｜ 页面所有计算在本地浏览器完成，可离线使用</p>
+  <div class="disclaim">
+    口径说明：单卡功耗取<b>综合口径</b>（含 CPU、网卡、散热等分摊），非整卡 TDP；
+    建议报装接入容量 = 理论总电力需求 × 安全冗余（通常 <b>10%~15%</b>）。
+    本页用于<b>方案前期估算与比选</b>，正式报装容量以供电部门批复及厂商书面确认为准。
+  </div>
+</header>
+
+<!-- ============ 01 一万卡方案横向对比 ============ -->
+<section class="panel">
+  <h2>① 一万卡方案横向对比 <span class="sub">PUE = 1.25 基准，参数可调实时重算</span></h2>
+  <p class="lead">调整卡数与 PUE 后，IT 侧负载、理论总需求与报装区间（按冗余 10%~15%）自动重算；「参考报装」列为既定口径基准值，供交叉核对。单卡功耗 TDP 为<b>整卡标称口径</b>（悬浮查看来源），单卡综合功耗为<b>含服务器分摊口径</b>，两者用途不同，勿混用。</p>
+
+  <div class="adj-bar">
+    <div class="fg">
+      <label for="cp-count">卡数</label>
+      <input type="number" id="cp-count" value="10000" min="1" step="1000">
+      <div class="chip-row" style="margin-top:5px">
+        <span class="qchip" data-cc="10000">1 万</span>
+        <span class="qchip" data-cc="20000">2 万</span>
+        <span class="qchip" data-cc="50000">5 万</span>
+        <span class="qchip" data-cc="100000">10 万</span>
+      </div>
+    </div>
+    <div class="fg">
+      <label for="cp-pue">PUE</label>
+      <input type="number" id="cp-pue" value="1.25" min="1" step="0.01">
+      <div class="chip-row" style="margin-top:5px">
+        <span class="qchip" data-cp="1.15">1.15</span>
+        <span class="qchip" data-cp="1.20">1.20</span>
+        <span class="qchip" data-cp="1.25">1.25</span>
+        <span class="qchip" data-cp="1.30">1.30</span>
+        <span class="qchip" data-cp="1.50">1.50</span>
+      </div>
+    </div>
+    <div class="adj-note" id="cp-note">当前基准：10,000 卡 × PUE 1.25。点击行内「载入」可将该方案带入下方估算器细调冗余等参数。</div>
+    <div class="fg no-print">
+      <label>&nbsp;</label>
+      <button class="btn" id="cp-reset">重置基准</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="cmp">
+      <thead>
+        <tr>
+          <th>产品方案</th>
+          <th class="num" title="整卡标称功耗（TDP/TGP），仅为加速卡本身，不含 CPU、网卡、散热等分摊">单卡功耗 TDP</th>
+          <th class="num" title="综合口径：含 CPU、网卡、散热等分摊">单卡综合功耗</th>
+          <th class="num">IT 侧负载（当前）</th>
+          <th class="num">理论总电力需求（当前）</th>
+          <th class="num" title="理论总需求 × (1 + 10%~15%)">建议报装区间（当前）</th>
+          <th class="num" title="既定口径：1 万卡 · PUE = 1.25">参考报装（基准）</th>
+          <th class="no-print">操作</th>
+        </tr>
+      </thead>
+      <tbody id="cp-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="bars" id="cp-bars"></div>
+</section>
+
+<!-- ============ 02 电力需求估算器 ============ -->
+<section class="panel" id="sec-calc">
+  <h2>② 算力中心电力需求估算器 <span class="sub">单卡功耗 × 卡数 × PUE × 安全冗余</span></h2>
+  <p class="lead">选择产品方案自动带出单卡综合功耗（可手动微调，或在上方对比表点「载入」直接带入），沿「IT 侧负载 → 理论总需求 → 建议报装容量」链条实时计算。</p>
+  <div class="calc-grid">
+    <div class="calc-inputs">
+      <div class="fg">
+        <label class="fl" for="sel-plan">产品方案预设</label>
+        <select id="sel-plan">
+          <option value="h200">H200（约 1.37 kW/卡）</option>
+          <option value="gb300">GB300（约 2.12 kW/卡）</option>
+          <option value="ascend">昇腾950 DT / 950 PR（约 1.81 kW/卡）</option>
+          <option value="rtx">RTX PRO 5500（约 0.8 kW/卡，估算）</option>
+          <option value="custom">自定义</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl" for="in-power">单卡综合功耗 <small>（综合口径，非 TDP）</small></label>
+        <div class="unit-fix"><input type="number" id="in-power" value="1.37" min="0.05" step="0.01"><span class="u">kW / 卡</span></div>
+      </div>
+      <div class="fg">
+        <label class="fl" for="in-count">卡数</label>
+        <div class="unit-fix"><input type="number" id="in-count" value="10000" min="1" step="1000"><span class="u">张</span></div>
+        <div class="chip-row">
+          <span class="qchip" data-c="1000">1 千卡</span>
+          <span class="qchip on" data-c="10000">1 万卡</span>
+          <span class="qchip" data-c="20000">2 万卡</span>
+          <span class="qchip" data-c="50000">5 万卡</span>
+          <span class="qchip" data-c="100000">10 万卡</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl" for="in-pue">PUE <small>（总功率 ÷ IT 设备功率）</small></label>
+        <input type="number" id="in-pue" value="1.25" min="1" step="0.01">
+        <div class="chip-row">
+          <span class="qchip" data-p="1.15">1.15</span>
+          <span class="qchip on" data-p="1.25">1.25</span>
+          <span class="qchip" data-p="1.30">1.30</span>
+          <span class="qchip" data-p="1.50">1.50</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">安全冗余 <small>（通常 10%~15%）</small></label>
+        <div class="duo">
+          <div class="unit-fix"><input type="number" id="in-red-lo" value="10" min="0" step="1"><span class="u">% 下限</span></div>
+          <div class="unit-fix"><input type="number" id="in-red-hi" value="15" min="0" step="1"><span class="u">% 上限</span></div>
+        </div>
+        <div class="hint">报装区间按「理论总需求 × (1 + 冗余)」计算；若只填一个值则输出单点。</div>
+      </div>
+    </div>
+
+    <div class="chain">
+      <div class="step-card s1">
+        <div class="sc-tag">STEP 1 · IT 侧总负载</div>
+        <div class="sc-val" id="out-it">—</div>
+        <div class="sc-formula" id="f-it">—</div>
+      </div>
+      <div class="arr">➜</div>
+      <div class="step-card s2">
+        <div class="sc-tag">STEP 2 · 理论总电力需求</div>
+        <div class="sc-val" id="out-total">—</div>
+        <div class="sc-formula" id="f-total">—</div>
+      </div>
+      <div class="arr">➜</div>
+      <div class="step-card s3">
+        <div class="sc-tag">STEP 3 · 建议报装接入容量</div>
+        <div class="sc-val" id="out-install">—</div>
+        <div class="sc-formula" id="f-install">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 功率换算 + PUE 工具 ============ -->
+<div class="grid2">
+  <div class="panel" style="margin-top:14px">
+    <h2>③ 功率单位换算器 <span class="sub">W / kW / MW / GW / TW</span></h2>
+    <div class="fg" style="margin-top:10px">
+      <label class="fl" for="cv-val">输入数值与单位</label>
+      <div class="duo">
+        <input type="number" id="cv-val" value="17.1" min="0" step="any">
+        <select id="cv-unit">
+          <option value="1">W（瓦特）</option>
+          <option value="1000">kW（千瓦）</option>
+          <option value="1000000" selected>MW（兆瓦）</option>
+          <option value="1000000000">GW（吉瓦）</option>
+          <option value="1000000000000">TW（太瓦）</option>
+        </select>
+      </div>
+    </div>
+    <div class="cv-out">
+      <table class="mini" id="cv-tbl">
+        <thead><tr><th>单位</th><th class="num">换算值</th><th>换算关系</th></tr></thead>
+        <tbody id="cv-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <h2>④ PUE / DCIE 互算 <span class="sub">填两项，第三项自动算出</span></h2>
+    <p class="lead" style="margin-top:8px">总功率 = IT 设备功率 × PUE；DCIE = 1 ÷ PUE。编辑任一字段，其余按公式联动。</p>
+    <div class="duo" style="margin-bottom:10px">
+      <div class="fg">
+        <label class="fl" for="pue-it">IT 设备功率</label>
+        <div class="unit-fix"><input type="number" id="pue-it" value="13.7" min="0" step="any"><span class="u">MW</span></div>
+      </div>
+      <div class="fg">
+        <label class="fl" for="pue-total">总功率</label>
+        <div class="unit-fix"><input type="number" id="pue-total" value="17.1" min="0" step="any"><span class="u">MW</span></div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl" for="pue-val">PUE</label>
+      <input type="number" id="pue-val" value="1.25" min="1" step="0.01">
+    </div>
+    <div class="pue-result">
+      <div class="pr-box"><div class="k">PUE</div><div class="v" id="pr-pue">—</div></div>
+      <div class="pr-box"><div class="k">DCIE（PUE 倒数）</div><div class="v" id="pr-dcie">—</div></div>
+      <div class="pr-box grade"><div class="k">能效评级</div><div class="v" id="pr-grade">—</div></div>
+    </div>
+    <div class="pue-scale">
+      <div class="ps-pointer"><span class="pp" id="ps-ptr">▼</span></div>
+      <div class="ps-track" id="ps-track">
+        <div class="ps-seg" style="flex:10;background:#0a7d3b" title="≤1.10 领先"></div>
+        <div class="ps-seg" style="flex:15;background:#3aa660" title="1.10~1.25 优秀"></div>
+        <div class="ps-seg" style="flex:5;background:#7cb342" title="1.25~1.30 达标"></div>
+        <div class="ps-seg" style="flex:20;background:#e0a020" title="1.30~1.50 一般"></div>
+        <div class="ps-seg" style="flex:50;background:#c9503f" title="&gt;1.50 偏高"></div>
+      </div>
+      <div class="ps-legend">
+        <span><i style="background:#0a7d3b"></i>≤1.10 领先</span>
+        <span><i style="background:#3aa660"></i>1.10~1.25 优秀</span>
+        <span><i style="background:#7cb342"></i>1.25~1.30 达标</span>
+        <span><i style="background:#e0a020"></i>1.30~1.50 一般</span>
+        <span><i style="background:#c9503f"></i>&gt;1.50 偏高</span>
+      </div>
+      <div class="hint" style="margin-top:6px">政策锚点：国家《数据中心绿色低碳发展专项行动计划》要求新建及改扩建大型和超大型数据中心 PUE 降至 1.25 以内（国家枢纽节点），其余地区 1.3 以内。评级仅为速查参考。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 04 能效与可持续性指标 ============ -->
+<section class="panel">
+  <h2>⑤ 能效与可持续性指标速查 <span class="sub">PUE / DCIE / WUE / CUE</span></h2>
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="mc-name">PUE <span class="abbr">能效</span></div>
+      <div class="mc-full">Power Usage Effectiveness · 电源使用效率</div>
+      <div class="mc-formula">PUE = 总功率 ÷ IT 设备功率<br>（或总耗电量 ÷ IT 耗电量）</div>
+      <div class="mc-desc"><b>越接近 1 越好</b>，超出 1 的部分即辅助系统（制冷、供配电、照明等）能耗占比。推导：<b>总功率 = IT 设备功率 × PUE</b>。</div>
+      <div class="mc-badge"><span class="b-ok">优 ≤1.25</span>　<span class="b-warn">关注 &gt;1.50</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-name">DCIE <span class="abbr">能效</span></div>
+      <div class="mc-full">Data Center Infrastructure Efficiency · 基础设施效率</div>
+      <div class="mc-formula">DCIE = IT 设备功率 ÷ 总功率<br>= 1 ÷ PUE</div>
+      <div class="mc-desc"><b>越高越好</b>，是 PUE 的倒数表达，通常以百分比呈现：PUE 1.25 ⇔ DCIE 80%。</div>
+      <div class="mc-badge"><span class="b-ok">优 ≥80%</span>　<span class="b-warn">关注 &lt;67%</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-name">WUE <span class="abbr w">水效</span></div>
+      <div class="mc-full">Water Usage Effectiveness · 水使用效率</div>
+      <div class="mc-formula">WUE = 年耗水量 ÷ IT 设备年耗电量<br>单位：L / kWh</div>
+      <div class="mc-desc"><b>越低越好</b>，衡量每单位 IT 能耗的耗水量。风冷蒸发耗水通常高于液冷/闭式方案，缺水地区是关键选址约束。</div>
+      <div class="mc-badge"><span class="b-ok">越低越好</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-name">CUE <span class="abbr c">碳效</span></div>
+      <div class="mc-full">Carbon Usage Effectiveness · 碳使用效率</div>
+      <div class="mc-formula">CUE = 总碳排放量 ÷ IT 设备耗电量<br>单位：kgCO₂ / kWh</div>
+      <div class="mc-desc"><b>越低越好</b>，衡量电力清洁程度，主要取决于电网碳强度与绿电占比，液冷与余热回收可进一步摊薄。</div>
+      <div class="mc-badge"><span class="b-ok">越低越好</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 估算方法与案例 ============ -->
+<section class="panel">
+  <h2>⑥ 估算方法链条与 H200 案例 <span class="sub">口径可追溯 · 交叉可复算</span></h2>
+
+  <div class="method-chain">
+    <b>单卡综合功耗 × 卡数 = IT 侧总负载</b><br>
+    <b>IT 侧总负载 × PUE = 理论总电力需求</b><br>
+    <b>理论总电力需求 × 安全冗余（通常 10%~15%）= 建议报装接入容量</b>
+  </div>
+
+  <h3 style="font-size:13.5px;margin:16px 0 2px">H200 估算示例：理论总需求约 17.1 MW（1 万卡 · PUE 1.25）</h3>
+  <div class="case-steps">
+    <div class="case-step">
+      <span class="cs-no">1</span>
+      <div class="cs-k">单卡综合功耗</div>
+      <div class="cs-v">1.37<small> kW/卡</small></div>
+      <div class="cs-d">H200 SXM 单卡 TDP 700W；计入 CPU、网卡、散热等分摊后，行业综合口径约 1.37 kW/卡</div>
+    </div>
+    <div class="case-step">
+      <span class="cs-no">2</span>
+      <div class="cs-k">IT 侧负载</div>
+      <div class="cs-v">13.7<small> MW</small></div>
+      <div class="cs-d">1.37 kW × 10,000 卡 = 13,700 kW</div>
+    </div>
+    <div class="case-step">
+      <span class="cs-no">3</span>
+      <div class="cs-k">理论总电力需求</div>
+      <div class="cs-v">17.1<small> MW</small></div>
+      <div class="cs-d">13.7 MW × 1.25 = 17.125 ≈ 17.1 MW</div>
+    </div>
+    <div class="case-step">
+      <span class="cs-no">4</span>
+      <div class="cs-k">建议报装接入容量</div>
+      <div class="cs-v">18~20<small> MW</small></div>
+      <div class="cs-d">17.1 × (1.10~1.15) ≈ 18.8~19.7 MW，实际报装建议按 18~20 MW 规划</div>
+    </div>
+  </div>
+
+  <div class="cross-refs">
+    <div class="cross-ref"><span class="xi">交叉参考</span><span>8 卡 HGX H200 服务器整机负载峰值可超 10 kW，折合约 <b>1.28 kW/卡</b>，与 1.37 kW/卡的综合口径处于同一量级（后者含集群级分摊）。</span></div>
+    <div class="cross-ref"><span class="xi">量级参考</span><span>另有「H200 万卡集群功耗约 <b>13 MW</b>」的量级参考，对应 IT 侧负载口径（未乘 PUE），与本页 STEP 2 的 13.7 MW 相互印证。</span></div>
+  </div>
+
+  <h3 style="font-size:13.5px;margin:18px 0 2px">各方案口径备注</h3>
+  <ul class="plan-notes">
+    <li><b>H200</b>：SXM 单卡 TDP 700W，综合口径约 1.37 kW/卡；1 万卡 IT 侧 13.7 MW → 理论总需求 17.1 MW → 报装参考 18~20 MW。</li>
+    <li><b>GB300</b>：Blackwell Ultra 代际机柜级方案，单卡综合功耗口径约 2.12 kW/卡；1 万卡 IT 侧 21.2 MW → 理论总需求 26.5 MW → 报装参考 27~30 MW。</li>
+    <li><b>昇腾950 DT / 950 PR</b>：国产昇腾 950 系列，单卡综合功耗口径约 1.81 kW/卡；1 万卡 IT 侧 18.1 MW → 理论总需求 22.6 MW → 报装参考 25~26 MW。</li>
+    <li><b>RTX PRO 5500</b>：单卡综合功耗约 0.8 kW/卡（估算口径）；1 万卡 IT 侧 8.0 MW → 理论总需求 10.0 MW → 报装参考 10~12 MW。</li>
+  </ul>
+
+  <h3 style="font-size:13.5px;margin:18px 0 2px">功率单位换算关系（供给能力）</h3>
+  <div class="cv-out" style="max-width:560px">
+    <table class="mini">
+      <thead><tr><th>单位</th><th>换算关系</th></tr></thead>
+      <tbody>
+        <tr><td><b>W</b>（瓦特）</td><td>基础单位</td></tr>
+        <tr><td><b>kW</b>（千瓦）</td><td>1 kW = 1,000 W</td></tr>
+        <tr><td><b>MW</b>（兆瓦）</td><td>1 MW = 1,000 kW = 10⁶ W</td></tr>
+        <tr><td><b>GW</b>（吉瓦）</td><td>1 GW = 1,000 MW = 1,000,000 kW = 10⁹ W</td></tr>
+        <tr><td><b>TW</b>（太瓦）</td><td>1 TW = 1,000 GW = 10¹² W</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  算力工具箱 · 算力电力速查 v1.1 ｜ 单卡功耗为行业综合口径估算，报装容量以供电部门批复与厂商书面确认为准 ｜ 页面零外部依赖，可离线双击使用
+</footer>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= 数据 ================= */
+var PLANS = [
+  { id:"h200",   name:"H200",               tdp:"~700 W",     tdpSrc:"SXM 官方 TDP",            power:1.37, ref:[18,20], color:"#1f6feb" },
+  { id:"gb300",  name:"GB300",              tdp:"~1,400 W",   tdpSrc:"Blackwell Ultra 官方 TGP", power:2.12, ref:[27,30], color:"#7c3aed" },
+  { id:"ascend", name:"昇腾950 DT / 950 PR", tdp:"400~500 W",  tdpSrc:"官方未披露，第三方口径分歧（约 350~500 W），选型前须厂商确认", tdpQ:true, power:1.81, ref:[25,26], color:"#0ea5e9" },
+  { id:"rtx",    name:"RTX PRO 5500",       tdp:"~600 W",     tdpSrc:"官方 Max Power",           power:0.8,  ref:[10,12], color:"#f59e0b" }
+];
+var KW = 1000;                 /* W per kW */
+var BASE_COUNT = 10000, BASE_PUE = 1.25;
+
+function $(id){ return document.getElementById(id); }
+function num(el){
+  var v = parseFloat(el.value);
+  return isFinite(v) ? v : NaN;
+}
+/* 数值修剪：去尾零、千分位（≥100 取整，≥10 留 1 位，其余 2 位） */
+function trimNum(n){
+  if(!isFinite(n) || isNaN(n)) return "—";
+  var a = Math.abs(n);
+  var s;
+  if(a >= 100)      s = n.toLocaleString("zh-CN", { maximumFractionDigits:0 });
+  else if(a >= 10)  s = n.toLocaleString("zh-CN", { maximumFractionDigits:1 });
+  else               s = n.toLocaleString("zh-CN", { maximumFractionDigits:2 });
+  return s;
+}
+/* 按幅值选单位 */
+function pickUnit(w){
+  var a = Math.abs(w);
+  if(a >= 1e9) return { m:1e9,  s:"GW" };
+  if(a >= 1e6) return { m:1e6,  s:"MW" };
+  if(a >= 1e3) return { m:1e3,  s:"kW" };
+  return { m:1, s:"W" };
+}
+/* 区间显示：两端统一单位（按较大值选单位） */
+function rangeW(a, b){
+  if(!isFinite(a) || !isFinite(b)) return "—";
+  var u = pickUnit(Math.max(Math.abs(a), Math.abs(b)));
+  return trimNum(a / u.m) + " ~ " + trimNum(b / u.m) + "<small>" + u.s + "</small>";
+}
+/* 瓦特值 → 智能单位字符串 */
+function fmtW(w){
+  if(!isFinite(w) || isNaN(w)) return "—";
+  var a = Math.abs(w);
+  if(a >= 1e9)  return trimNum(w/1e9)  + " GW";
+  if(a >= 1e6)  return trimNum(w/1e6)  + " MW";
+  if(a >= 1e3)  return trimNum(w/1e3)  + " kW";
+  return trimNum(w) + " W";
+}
+function numHTML(w){
+  if(!isFinite(w) || isNaN(w)) return "—";
+  var a = Math.abs(w), v, u;
+  if(a >= 1e9){ v = w/1e9;  u = "GW"; }
+  else if(a >= 1e6){ v = w/1e6; u = "MW"; }
+  else if(a >= 1e3){ v = w/1e3; u = "kW"; }
+  else { v = w; u = "W"; }
+  return trimNum(v) + "<small>" + u + "</small>";
+}
+
+/* ================= ① 估算器 ================= */
+function calcMain(){
+  var power = num($("in-power")) * KW;         /* W */
+  var count = num($("in-count"));
+  var pue   = num($("in-pue"));
+  var lo    = num($("in-red-lo")) / 100;
+  var hi    = num($("in-red-hi")) / 100;
+
+  var it = power * count;                       /* W */
+  if(isFinite(it) && it > 0){
+    $("out-it").innerHTML = numHTML(it);
+    $("f-it").textContent = trimNum(power/KW) + " kW × " + trimNum(count) + " 卡";
+  } else {
+    $("out-it").innerHTML = "—"; $("f-it").textContent = "请输入单卡功耗与卡数";
+  }
+
+  var total = (isFinite(pue) && pue >= 1) ? it * pue : NaN;
+  if(isFinite(total) && total > 0){
+    $("out-total").innerHTML = numHTML(total);
+    $("f-total").textContent = fmtW(it) + " × PUE " + trimNum(pue);
+  } else {
+    $("out-total").innerHTML = "—"; $("f-total").textContent = "PUE 须 ≥ 1";
+  }
+
+  if(isFinite(total) && total > 0){
+    if(isFinite(lo) && lo >= 0 && isFinite(hi) && hi >= 0){
+      var a = total * (1 + Math.min(lo, hi));
+      var b = total * (1 + Math.max(lo, hi));
+      $("out-install").innerHTML = (a === b)
+        ? numHTML(a)
+        : rangeW(a, b);
+      $("f-install").textContent = fmtW(total) + " × (1 + " +
+        trimNum(Math.min(lo,hi)*100) + (a===b ? "%" : ("%~" + trimNum(Math.max(lo,hi)*100) + "%")) + ")";
+    } else {
+      $("out-install").innerHTML = "—"; $("f-install").textContent = "请输入安全冗余";
+    }
+  } else {
+    $("out-install").innerHTML = "—"; $("f-install").textContent = "—";
+  }
+}
+
+/* 方案预设 → 带出功耗 */
+$("sel-plan").addEventListener("change", function(){
+  var id = this.value;
+  if(id === "custom") return;
+  for(var i = 0; i < PLANS.length; i++){
+    if(PLANS[i].id === id){ $("in-power").value = PLANS[i].power; break; }
+  }
+  calcMain();
+});
+["in-power","in-count","in-pue","in-red-lo","in-red-hi"].forEach(function(id){
+  $(id).addEventListener("input", calcMain);
+});
+/* 卡数 / PUE 快捷 chip */
+Array.prototype.forEach.call(document.querySelectorAll('[data-c]'), function(ch){
+  ch.addEventListener("click", function(){
+    Array.prototype.forEach.call(ch.parentNode.children, function(x){ x.classList.remove("on"); });
+    ch.classList.add("on");
+    $("in-count").value = ch.getAttribute("data-c");
+    calcMain();
+  });
+});
+Array.prototype.forEach.call(document.querySelectorAll('[data-p]'), function(ch){
+  ch.addEventListener("click", function(){
+    Array.prototype.forEach.call(ch.parentNode.children, function(x){ x.classList.remove("on"); });
+    ch.classList.add("on");
+    $("in-pue").value = ch.getAttribute("data-p");
+    calcMain();
+  });
+});
+/* 从对比表载入方案（含 PUE / 卡数） */
+function loadToCalc(planId){
+  var p = null;
+  for(var i = 0; i < PLANS.length; i++) if(PLANS[i].id === planId) p = PLANS[i];
+  if(!p) return;
+  $("sel-plan").value = p.id;
+  $("in-power").value = p.power;
+  $("in-count").value = $("cp-count").value;
+  $("in-pue").value = $("cp-pue").value;
+  /* 同步 chip 选中态 */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-c]'), function(x){
+    x.classList.toggle("on", x.getAttribute("data-c") === String($("in-count").value));
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-p]'), function(x){
+    x.classList.toggle("on", x.getAttribute("data-p") === String($("in-pue").value));
+  });
+  calcMain();
+  var sec = document.getElementById("sec-calc");
+  if(sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+  else window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ================= ② 万卡对比 ================= */
+function cmpCalc(){
+  var count = num($("cp-count"));
+  var pue   = num($("cp-pue"));
+  var okCount = isFinite(count) && count > 0;
+  var okPue   = isFinite(pue) && pue >= 1;
+  var isBase  = okCount && okPue && Math.abs(count - BASE_COUNT) < 1 && Math.abs(pue - BASE_PUE) < 1e-9;
+
+  /* 表格 */
+  var rows = "";
+  PLANS.forEach(function(p){
+    var it    = p.power * KW * count;
+    var total = it * pue;
+    var instA = total * 1.10, instB = total * 1.15;
+    rows += "<tr>" +
+      '<td class="pname">' + p.name + "</td>" +
+      '<td class="num"' + (p.tdpSrc ? ' title="' + p.tdpSrc + '"' : "") + ">" +
+        (p.tdpQ ? '<span class="q">' : "") + p.tdp + (p.tdpQ ? "</span>" : "") + "</td>" +
+      '<td class="num">~' + trimNum(p.power) + " kW</td>" +
+      '<td class="num">' + (okCount ? fmtW(it) : "—") + "</td>" +
+      '<td class="num"><b>' + (okCount && okPue ? fmtW(total) : "—") + "</b></td>" +
+      '<td class="num">' + (okCount && okPue ? rangeW(instA, instB) : "—") + "</td>" +
+      '<td class="num refcell"><b>' + p.ref[0] + "~" + p.ref[1] + " MW</b></td>" +
+      '<td class="no-print"><button class="loadbtn" data-load="' + p.id + '">载入 ↗</button></td>' +
+      "</tr>";
+  });
+  $("cp-tbody").innerHTML = rows;
+  Array.prototype.forEach.call($("cp-tbody").querySelectorAll("[data-load]"), function(b){
+    b.addEventListener("click", function(){ loadToCalc(this.getAttribute("data-load")); });
+  });
+
+  /* 条形图（理论总需求，当前口径） */
+  var maxV = 0;
+  PLANS.forEach(function(p){
+    var v = p.power * KW * count * pue;
+    if(isFinite(v) && v > maxV) maxV = v;
+  });
+  var scale = maxV * 1.15;
+  var bars = "";
+  PLANS.forEach(function(p){
+    var v = p.power * KW * count * pue;
+    var wPct = (isFinite(v) && scale > 0) ? Math.max(v / scale * 100, 2) : 0;
+    bars += '<div class="bar-row">' +
+      '<span class="bn">' + p.name + "</span>" +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + wPct.toFixed(1) + "%;background:" + p.color + '">' +
+      '<span class="bv">' + (isFinite(v) ? fmtW(v) : "—") + "</span></div></div>" +
+      '<span class="bx">报装 ' + (isFinite(v) ? rangeW(v * 1.10, v * 1.15) : "—") + "</span>" +
+      "</div>";
+  });
+  $("cp-bars").innerHTML =
+    '<div style="font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:8px">理论总电力需求对比（当前口径' +
+    (okCount && okPue ? "：" + trimNum(count) + " 卡 × PUE " + trimNum(pue) : "") + "）</div>" + bars;
+
+  $("cp-note").innerHTML = isBase
+    ? "当前基准：<b>10,000 卡 × PUE 1.25</b>（与汇总表口径一致）。点击行内「载入」可将该方案带入下方估算器细调冗余等参数。"
+    : "当前口径：<b>" + (okCount ? trimNum(count) + " 卡" : "卡数无效") + " × PUE " + (okPue ? trimNum(pue) : "无效") +
+      "</b>，表中数值已按公式实时重算；「参考报装」列仍为 1 万卡 · PUE 1.25 基准值，仅作交叉核对。";
+}
+$("cp-count").addEventListener("input", cmpCalc);
+$("cp-pue").addEventListener("input", cmpCalc);
+Array.prototype.forEach.call(document.querySelectorAll('[data-cc]'), function(ch){
+  ch.addEventListener("click", function(){
+    Array.prototype.forEach.call(ch.parentNode.children, function(x){ x.classList.remove("on"); });
+    ch.classList.add("on");
+    $("cp-count").value = ch.getAttribute("data-cc");
+    cmpCalc();
+  });
+});
+Array.prototype.forEach.call(document.querySelectorAll('[data-cp]'), function(ch){
+  ch.addEventListener("click", function(){
+    Array.prototype.forEach.call(ch.parentNode.children, function(x){ x.classList.remove("on"); });
+    ch.classList.add("on");
+    $("cp-pue").value = ch.getAttribute("data-cp");
+    cmpCalc();
+  });
+});
+$("cp-reset").addEventListener("click", function(){
+  $("cp-count").value = BASE_COUNT;
+  $("cp-pue").value = BASE_PUE;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-cc]'), function(x){
+    x.classList.toggle("on", x.getAttribute("data-cc") === String(BASE_COUNT));
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-cp]'), function(x){
+    x.classList.toggle("on", x.getAttribute("data-cp") === String(BASE_PUE));
+  });
+  cmpCalc();
+});
+
+/* ================= ③ 单位换算器 ================= */
+var CV_ROWS = [
+  { u:"W（瓦特）",   f:"基础单位" },
+  { u:"kW（千瓦）",  f:"1 kW = 1,000 W" },
+  { u:"MW（兆瓦）",  f:"1 MW = 1,000 kW = 10⁶ W" },
+  { u:"GW（吉瓦）",  f:"1 GW = 1,000 MW = 10⁹ W" },
+  { u:"TW（太瓦）",  f:"1 TW = 1,000 GW = 10¹² W" }
+];
+var CV_MULT = [1, 1e3, 1e6, 1e9, 1e12];
+function cvCalc(){
+  var v = num($("cv-val"));
+  var m = parseFloat($("cv-unit").value);
+  var srcW = v * m;   /* 换算为 W */
+  var srcIdx = $("cv-unit").selectedIndex;
+  var rows = "";
+  for(var i = 0; i < CV_ROWS.length; i++){
+    var out = (isFinite(srcW) && isFinite(CV_MULT[i])) ? srcW / CV_MULT[i] : NaN;
+    var isSrc = (i === srcIdx);
+    rows += (isSrc ? '<tr class="hl">' : "<tr>") +
+      "<td>" + CV_ROWS[i].u + (isSrc ? " ←" : "") + "</td>" +
+      '<td class="num">' + (isFinite(out) ? trimNum(out) : "—") + "</td>" +
+      "<td>" + CV_ROWS[i].f + "</td></tr>";
+  }
+  $("cv-tbody").innerHTML = rows;
+}
+$("cv-val").addEventListener("input", cvCalc);
+$("cv-unit").addEventListener("change", cvCalc);
+
+/* ================= ④ PUE / DCIE 互算 ================= */
+function pueGrade(v){
+  if(!isFinite(v) || v < 1) return "—";
+  if(v <= 1.10) return "领先";
+  if(v <= 1.25) return "优秀";
+  if(v <= 1.30) return "达标";
+  if(v <= 1.50) return "一般";
+  return "偏高";
+}
+function pueRender(){
+  var it = num($("pue-it")) * 1e6;       /* W */
+  var tot = num($("pue-total")) * 1e6;
+  var pue = num($("pue-val"));
+  var valid = isFinite(pue) && pue >= 1;
+  $("pr-pue").innerHTML = valid ? trimNum(pue) : "—";
+  $("pr-dcie").innerHTML = valid ? trimNum(100 / pue) + "<small>%</small>" : "—";
+  $("pr-grade").textContent = pueGrade(pue);
+  /* 指针定位：1.0~2.0 映射 0~100% */
+  var ptr = $("ps-ptr");
+  if(valid){
+    var pct = Math.min(Math.max((pue - 1) / 1 * 100, 0), 100);
+    ptr.style.left = pct.toFixed(1) + "%";
+    ptr.innerHTML = "▼ <small>PUE " + trimNum(pue) + "</small>";
+  } else {
+    ptr.style.left = "0%";
+    ptr.innerHTML = "▼";
+  }
+}
+var lastEdited = "pue-val";
+function pueSync(from){
+  lastEdited = from;
+  var it  = num($("pue-it"));
+  var tot = num($("pue-total"));
+  var pue = num($("pue-val"));
+  if(from === "pue-it"){
+    /* IT 变化：优先按 PUE 推总功率；无 PUE 则按总功率反推 PUE */
+    if(isFinite(it) && it > 0 && isFinite(pue) && pue >= 1) $("pue-total").value = +(it * pue).toFixed(3);
+    else if(isFinite(it) && it > 0 && isFinite(tot) && tot > 0) $("pue-val").value = +(tot / it).toFixed(3);
+  } else if(from === "pue-val"){
+    if(isFinite(pue) && pue >= 1 && isFinite(it) && it > 0) $("pue-total").value = +(it * pue).toFixed(3);
+  } else { /* pue-total 变化 */
+    if(isFinite(tot) && tot > 0 && isFinite(it) && it > 0) $("pue-val").value = +(tot / it).toFixed(3);
+  }
+  pueRender();
+}
+["pue-it","pue-total","pue-val"].forEach(function(id){
+  $(id).addEventListener("input", function(){ pueSync(id); });
+});
+
+/* ================= init ================= */
+calcMain();
+cmpCalc();
+cvCalc();
+pueRender();
+})();
+</script>
+</body>
+</html>
