@@ -15,7 +15,8 @@
 
   var PAGES = [
     { href: "AI芯片参数速查表.html", label: "AI 芯片参数速查表" },
-    { href: "算力集群配置模型.html", label: "算力集群配置模型" }
+    { href: "算力集群配置模型.html", label: "算力集群配置模型" },
+    { href: "算力电力速查.html", label: "算力电力速查" }
     /* —— 预留入口示例（上线时补 href、去掉 on:false）——
     , { href: "", label: "成本测算模型", on: false }
     , { href: "", label: "机房检查清单", on: false }
