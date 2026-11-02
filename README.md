@@ -13,6 +13,8 @@
 | `算力电力速查.html` | 电力功率指标与万卡电力需求速查：1 万卡方案横向对比（含单卡 TDP 与综合功耗双口径）、电力估算器（单卡功耗 × 卡数 × PUE × 冗余）、功率单位换算、PUE/DCIE 互算与能效指标 |
 | `LLM推理技术速查.html` | LLM 推理工程速查：主流推理引擎对比与选型速判（vLLM / SGLang / TensorRT-LLM / DeepInfer / llama.cpp / Strata / LMDeploy 与 MindIE 等）、TP/PP/DP/EP 四大并行原理与组合策略、PD 分离架构与 KV 迁移通道、KV 显存与批调度三机制（PagedAttention / RadixAttention / 连续批处理，含 FlashAttention 辨析与 KV 压缩三路线）+ KV 显存速算计算器、投机解码（变体谱系与适用边界）、量化技术对比（GGUF/FP8/AWQ/GPTQ/NVFP4/bitsandbytes）与 Llama-3.1-8B 各量化版本实测 |
 | `AI模型速查表.html` | AI 模型速查表：语言（25）/ 图片（12）/ 视频（12）三类共 49 个主流模型，区分国内外×开源闭源×MoE，含权重体积（官方发布格式实测）、量化版本、官网定价（¥/$ 原始币种）与发布日期；筛选 + 搜索 + 行展开详情 |
+| `AI算力厂商速查表.html` | AI 算力厂商速查表：按商业模式七类（**A IDC智算中心 / B 租赁跨界 / C 独立算力云 / D Token工厂 / E 模型厂 / F 云大厂 MaaS / G 国产AI芯片，字母序即展示序**）收录 **36 家**算力公司与 AI 供应商（A 5 / B 5 / C 5 / D 4 / E 5 / F 5 / G 7），主表 8 列 + 点击行定位详情卡（默认折叠，点击卡头展开，卡底有回目录链接）；26 个上市主体市值已按 **2026-11-02 收盘**补入（美股 10-30）；含市值vs估值、算力四态口径、芯片结构等数据红线；明确不收运营商云 |
+| `英伟达平台形态速查.html` | NVIDIA 平台与形态速查表：**26 个概念 / 6 大类**——芯片封装形态（SXM / PCIe / OAM·UBB / RXM / Superchip）→ 基板模组（HGX）→ 整机与系统（DGX 家族 / OVX / RTX PRO Server / EGX 历史）→ 机架与集群（MGX / Oberon·Kyber·ETL / NVL 命名 / POD）→ 边缘与车载（Jetson / IGX / DRIVE）→ 命名规则与历史品牌（GB·GH·VR / Tesla / Quadro / GeForce）；含概念层级总览图、高频混淆速辨（DGX vs HGX 等 7 组）、产品名逐段拆解示例；点击概念行展开定位详解与口径来源（数据截至 2026-11-02） |
 
 > `chips.js` 必须与 HTML 同目录。双击 HTML 打开即自动加载；若浏览器阻止本地脚本，可点「导入配置」载入 JSON，或将目录用本地静态服务器打开。
 

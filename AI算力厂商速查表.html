@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI算力厂商速查表 · 算力公司 / Token工厂 / AI供应商 — 公司维度与商业版图</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --border:#e3e6ea; --border-strong:#cfd4da;
+  --text:#1f2328; --text-2:#5b6570; --text-3:#8b939c;
+  --accent:#1f6feb; --accent-soft:#eaf2fe;
+  --warn:#b45309; --warn-soft:#fef4e6;
+  --danger:#b3261e; --danger-soft:#fdecea;
+  --ok:#0a7d3b; --ok-soft:#e8f5ed;
+  --chip:#f0f2f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1380px;margin:0 auto;padding:22px 24px 60px}
+header.top{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:14px}
+h1{font-size:20px;margin:0 0 6px;letter-spacing:.3px}
+h1 span.tagline{font-size:13px;color:var(--text-3);font-weight:400;margin-left:8px}
+.meta-line{color:var(--text-2);font-size:12.5px;margin:0}
+.meta-line b{color:var(--text);font-weight:600}
+.disclaim{margin-top:10px;padding:9px 12px;background:var(--warn-soft);border-left:3px solid #e0a020;border-radius:4px;color:#7a4b06;font-size:12px;line-height:1.65}
+.disclaim.v2{background:var(--accent-soft);border-left-color:var(--accent);color:#1a3a6b}
+
+/* ---------- 页内目录 ---------- */
+#toc{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  margin:0 -24px 14px;padding:9px 24px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+}
+#toc .toc-t{font-size:12px;font-weight:700;color:var(--text-3);margin-right:2px;white-space:nowrap}
+#toc a{
+  font-size:12px;color:var(--text-2);text-decoration:none;white-space:nowrap;
+  padding:3px 11px;border-radius:20px;border:1px solid transparent;cursor:pointer;
+  transition:color .15s,background .15s,border-color .15s;
+}
+#toc a:hover{color:var(--accent);border-color:#a8c7f5;background:#eaf2fe}
+#toc a.cur{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+@media(max-width:640px){
+  .wrap{padding:18px 14px 50px}
+  #toc{margin:0 -14px 12px;padding:8px 14px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  #toc::-webkit-scrollbar{display:none}
+}
+
+/* ---------- toolbar ---------- */
+.toolbar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(16,24,40,.04)}
+.tb-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tb-row + .tb-row{margin-top:9px}
+.search-box{position:relative;flex:0 0 250px}
+.search-box input{width:100%;padding:7px 10px 7px 28px;border:1px solid var(--border-strong);border-radius:7px;font-size:13px;background:#fff;color:var(--text);outline:none;font-family:inherit}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search-box svg{position:absolute;left:8px;top:8px;opacity:.45}
+.seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{padding:6px 13px;border:none;background:#fff;color:var(--text-2);font-size:12.5px;cursor:pointer;font-family:inherit;border-right:1px solid var(--border)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:var(--chip);border:1px solid transparent;color:var(--text-2);font-size:12px;cursor:pointer;user-select:none;white-space:nowrap}
+.chip:hover{border-color:var(--border-strong)}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.btn{padding:6px 10px;border:1px solid var(--border-strong);border-radius:7px;background:#fff;font-size:12.5px;color:var(--text);cursor:pointer;font-family:inherit}
+button.btn:hover{border-color:var(--accent);color:var(--accent)}
+.spacer{flex:1}
+.stat{font-size:12.5px;color:var(--text-2)}
+.stat b{color:var(--text)}
+
+/* ---------- sections & table ---------- */
+.section-head{display:flex;align-items:baseline;gap:10px;margin:20px 0 8px;flex-wrap:wrap}
+.section-head h2{font-size:15.5px;margin:0;color:var(--text)}
+.section-head .sub{font-size:12px;color:var(--text-3)}
+.section-head .cnt{font-size:11.5px;color:var(--accent);background:var(--accent-soft);border-radius:10px;padding:1px 9px}
+.table-shell{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:none}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;min-width:1180px}
+thead th{position:sticky;top:0;z-index:10;background:#f8f9fb;color:var(--text-2);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--border-strong);white-space:nowrap;font-size:11.5px}
+th.col-sticky,td.col-sticky{position:sticky;left:0;z-index:6;background:#fff;white-space:nowrap}
+thead th.col-sticky{z-index:11;background:#f8f9fb}
+tbody tr.main{cursor:pointer}
+tbody tr.main:hover td{background:#f2f7fe}
+tbody tr.main:hover td.col-sticky{background:#eef5fe}
+td{padding:6px 8px;border-bottom:1px solid #eef0f3;vertical-align:middle}
+td.model{font-weight:600;color:var(--text);min-width:120px;max-width:180px}
+td.model .sub{display:block;color:var(--text-3);font-size:10.5px;font-weight:400;margin-top:1px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.org-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.price b{font-weight:600;color:var(--text)}
+td.price .sub{display:block;color:var(--text-3);font-size:10.5px;margin-top:1px}
+.na{color:#c2c8cf}
+.q{color:var(--warn);font-weight:700;cursor:help}
+.tc{display:block;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-sm{display:block;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{padding:36px;text-align:center;color:var(--text-3)}
+
+/* ---------- 分类徽章（A–G 各一色） ---------- */
+.catb{display:inline-block;padding:1px 6px;border-radius:5px;font-size:10.5px;line-height:1.55;white-space:nowrap;font-weight:600}
+.badge{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10.5px;line-height:1.5;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-gray{background:#eef0f3;color:var(--text-2)}
+.b-blue{background:var(--accent-soft);color:var(--accent)}
+.b-danger{background:var(--danger-soft);color:var(--danger)}
+
+/* ---------- 公司详情卡片（默认折叠） ---------- */
+#cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+@media(max-width:1000px){#cards{grid-template-columns:1fr}}
+.co-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:0;scroll-margin-top:64px;transition:box-shadow .2s,border-color .2s;
+  overflow:hidden;
+}
+.co-card:hover{box-shadow:0 2px 10px rgba(16,24,40,.06)}
+.co-card.flash{animation:flashcard 1.8s ease-out;border-color:#e0a020}
+@keyframes flashcard{
+  0%{box-shadow:0 0 0 3px #f5e3ad}
+  40%{box-shadow:0 0 0 2px #f5e3ad}
+  100%{box-shadow:0 0 0 0 transparent}
+}
+.co-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 16px;cursor:pointer;user-select:none;background:#fff;
+}
+.co-head:hover{background:#f6f9ff}
+.co-head .co-head-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.co-head h3{font-size:14.5px;margin:0;color:var(--text);display:inline-block}
+.co-head .co-full{font-size:11px;color:var(--text-3);display:block;margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.co-head .co-right{text-align:right;flex:none;display:flex;align-items:center;gap:8px}
+.co-head .co-right .code{font-size:11.5px;color:var(--text-2);font-weight:600;font-variant-numeric:tabular-nums}
+.co-head .co-right .listst{margin-top:2px;display:block}
+.co-fold-arrow{
+  display:inline-block;flex:none;width:20px;height:20px;line-height:20px;text-align:center;
+  border:1px solid var(--border);border-radius:50%;color:var(--text-3);font-size:11px;
+  transition:transform .2s,background .2s;
+}
+.co-card.open .co-fold-arrow{transform:rotate(180deg);background:var(--accent-soft);color:var(--accent);border-color:#a8c7f5}
+.co-card.open .co-head{border-bottom:1px solid var(--border);background:#f8fbff}
+.co-body-wrap{padding:0 16px 14px;display:none}
+.co-card.open .co-body-wrap{display:block}
+.co-card.flash .co-head{background:#fff7e0}
+.co-block{margin-top:11px}
+.co-block:first-child{margin-top:12px}
+.co-block h4{
+  font-size:11.5px;color:var(--text-3);font-weight:700;margin:0 0 5px;
+  letter-spacing:.4px;
+}
+.co-block ul{margin:0;padding-left:16px;font-size:12px;color:var(--text-2);line-height:1.7}
+.co-block ul li{margin-bottom:2px}
+.kv{display:flex;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px dashed #eceff2;color:var(--text-2);line-height:1.6}
+.kv:last-child{border-bottom:none}
+.kv b{flex:0 0 92px;color:var(--text);font-weight:600}
+.kv .q{color:var(--warn);font-weight:700;cursor:help}
+.co-src{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:10.5px;color:var(--text-3);line-height:1.6}
+.co-top-link{font-size:11px;color:var(--text-3);text-decoration:none;white-space:nowrap;padding:2px 8px;border:1px solid var(--border);border-radius:20px;background:#fff;cursor:pointer;flex:none}
+.co-top-link:hover{color:var(--accent);border-color:#a8c7f5;background:var(--accent-soft)}
+.locate-pill{display:inline-block;font-size:10.5px;color:var(--accent);background:var(--accent-soft);border-radius:10px;padding:0 8px;margin-left:6px;vertical-align:2px}
+
+/* ---------- panels ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:14px;margin-bottom:0}
+.panel h2{font-size:14.5px;margin:0 0 10px}
+.panel ul{margin:0;padding-left:18px;color:var(--text-2);font-size:12.5px;line-height:1.75}
+.panel li{margin-bottom:3px}
+table.mini{width:100%;font-size:12px;border-collapse:collapse;min-width:0}
+table.mini th,table.mini td{border-bottom:1px solid #eef0f3;padding:6px 8px;text-align:left;vertical-align:top}
+table.mini th{color:var(--text-2);font-weight:600;background:#f8f9fb;white-space:nowrap}
+table.mini td .sub{display:block;color:var(--text-3);font-size:10.5px;margin-top:1px;white-space:normal}
+.todo-chip{display:inline-block;font-size:11.5px;background:var(--chip);border:1px solid var(--border);border-radius:6px;padding:2px 8px;margin:2px 4px 2px 0;color:var(--text-2);white-space:nowrap}
+.todo-chip.done{border-color:#9ec2f7;background:var(--accent-soft);color:#1a4d8f;font-weight:600}
+footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;line-height:1.8}
+@media print{
+  #toc,.co-top-link{display:none!important}
+  body{background:#fff}
+  .table-shell{border:none}
+  .co-card{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<script src="site-nav.js"></script>
+
+<header class="top">
+  <h1>AI算力厂商速查表 <span class="tagline">算力公司 · Token工厂 · AI供应商 — 商业模式分类 / 资本状态 / 算力供给 / 动态</span></h1>
+    <p class="meta-line">数据截至 <b>2026-11-02</b> ｜ 收录 <b id="cnt-all">0</b> 家公司（七类 36 家全量：A 智算中心 5 · B 租赁跨界 5 · C 算力云 5 · D Token工厂 4 · E 模型厂 5 · F 云大厂 5 · G 国产AI芯片 7）｜ 分类字母 A–G 即展示顺序 ｜ 点击主表公司行 → 定位并展开下方详情卡</p>
+  <div class="disclaim">
+    <b>口径说明</b>：
+    ① 「商业模式分类」是第一维度：GPU 芯片商、IDC 机房东与 Token 工厂是完全不同的生意，估值逻辑不可直接互比；
+    ② 已上市看<b>市值</b>（二级市场时点快照，标注截止日），未上市看<b>最近一轮投后估值</b>＋轮次＋时间——口径不同，本表分列呈现，<b>禁止跨口径排序</b>；
+    ③ 「算力规模」红线：区分 <b>自持 / 代管 / 转租 / 意向协议</b>，规模折算须注明精度（建议 FP16 稠密，对齐《AI芯片参数速查表》chips.js 口径），未披露填「未披露」而非 0；
+    ④ Token 工厂本质是「调用量 × 单价 − 算力成本」的效率生意（硅基流动 2025 算力资源成本占收入成本 <b>86.9%</b>，招股书口径），看估值先看成本结构；
+    ⑤ 标 <span class="q" title="第三方口径，待核实">?</span> = 第三方/媒体口径，决策前以招股书 / 定期报告 / 官网复核。
+  </div>
+  <div class="disclaim v2">
+    <b>本页定位</b>：系列其他表看「物」（卡 / 电 / 模型 / 推理），本表看「<b>公司主体</b>：谁在卖算力、卖多少、值多少钱」。
+    链路：公司算力规模 →《算力集群配置模型》推演承载 → 卡型参数《AI芯片参数速查表》→ 推理成本《LLM推理技术速查》→ Token 定价《AI模型速查表》。
+  </div>
+</header>
+
+<nav id="toc" aria-label="页内目录">
+  <span class="toc-t">目录</span>
+  <a href="#sec-main" data-sec="sec-main">① 公司总表</a>
+  <a href="#sec-cards" data-sec="sec-cards">② 公司详情</a>
+  <a href="#sec-cat" data-sec="sec-cat">③ 分类定义与口径</a>
+</nav>
+
+<div class="toolbar">
+  <div class="tb-row">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="搜索公司 / 业务 / 关键词…" autocomplete="off">
+    </div>
+    <div class="seg" id="seg-cat">
+      <button data-v="all" class="on">全部</button>
+      <button data-v="A" title="智算中心 / IDC">IDC算力</button>
+      <button data-v="B" title="算力租赁 / 跨界">租赁跨界</button>
+      <button data-v="C" title="独立算力云 / GPU云">算力云</button>
+      <button data-v="D" title="Token工厂 / 异构算力调度">Token工厂</button>
+      <button data-v="E" title="大模型公司（自研+供token）">模型厂</button>
+      <button data-v="F" title="云大厂 MaaS">云大厂</button>
+      <button data-v="G" title="国产AI芯片">AI芯片</button>
+    </div>
+    <div class="spacer"></div>
+    <span class="stat">命中 <b id="cnt-hit">0</b> 家</span>
+    <button class="btn" id="btn-reset">重置</button>
+  </div>
+  <div class="tb-row">
+    <span style="font-size:12px;color:var(--text-3)">上市状态：</span>
+    <span class="chip" data-g="list" data-v="listed">已上市</span>
+    <span class="chip" data-g="list" data-v="filed">递表 / Pre-IPO</span>
+    <span class="chip" data-g="list" data-v="private">未上市</span>
+    <span style="font-size:12px;color:var(--text-3);margin-left:6px">芯片结构：</span>
+    <span class="chip" data-g="chipm" data-v="n">含英伟达系</span>
+    <span class="chip" data-g="chipm" data-v="cn">含国产卡</span>
+    <span class="chip" data-g="chipm" data-v="both">双轨</span>
+    <span style="flex:1"></span>
+    <span style="font-size:12px;color:var(--text-3)">点击表行 → 定位并展开详情卡（默认折叠）</span>
+  </div>
+</div>
+
+<!-- ============ ① 公司总表 ============ -->
+<div class="section-head" id="sec-main">
+  <h2>① 公司总表（按商业模式分类）</h2>
+  <span class="sub">分类徽章 = 七类商业模式（定义见 ③）· 徽章字母 A–G 即展示顺序 · 估值/市值为时点快照 · 算力规模标注口径</span>
+  <span class="cnt" id="c-main"></span>
+</div>
+<div class="table-shell">
+<table>
+  <thead><tr>
+    <th class="col-sticky">公司 <span style="font-weight:400;color:#aab2bb">┅ 点击定位详情</span></th>
+    <th>分类</th>
+    <th>代码 / 市场</th>
+    <th>上市状态</th>
+    <th>估值 / 市值</th>
+    <th>算力规模（口径）</th>
+    <th>主营业务</th>
+    <th>近期动态</th>
+  </tr></thead>
+  <tbody id="tbody-main"></tbody>
+</table>
+</div>
+
+<!-- ============ ② 公司详情 ============ -->
+<div class="section-head" id="sec-cards">
+  <h2>② 公司详情卡（点击卡头展开 / 收起）</h2>
+  <span class="sub">默认折叠 · 点击主表行自动展开并定位 · 每张卡底部有「回目录」链接</span>
+  <span class="cnt" id="c-cards"></span>
+</div>
+<div id="cards"></div>
+
+<!-- ============ ③ 分类定义与口径 ============ -->
+<div class="section-head" id="sec-cat">
+  <h2>③ 分类定义与口径</h2>
+  <span class="sub">七类生意，七种估值逻辑 · A IDC → B 租赁跨界 → C 算力云 → D Token工厂 → E 模型厂 → F 云大厂 → G AI芯片（字母序即展示序）</span>
+</div>
+<div class="grid2">
+  <div class="panel">
+    <h2>分类定义：七类生意，七种估值逻辑</h2>
+    <table class="mini">
+      <tr><th>类别</th><th>业务本质</th><th>估值锚 / 关键指标</th></tr>
+      <tr><td><span class="catb" style="background:#e8f5ed;color:#0a7d3b">A IDC / 智算中心</span></td>
+          <td>液冷机房 + 电力，收「瓦特 + 机柜」租金<div class="sub">已收 5 家：润泽科技 · 光环新网 · 奥飞数据 · 万国数据 · 世纪互联</div></td>
+          <td>上架率 / 机柜功率密度 / PUE；类 REITs 现金流逻辑</td></tr>
+      <tr><td><span class="catb" style="background:#fef4e6;color:#b45309">B 租赁 / 跨界</span></td>
+          <td>买卡出租 / 整机柜转售（跨界进入）<div class="sub">已收 5 家：弘信电子（燧原全栈）· 协创数据（重资产兑现）· 润建股份（Token 出海）· 云赛智联（国资卡位）· 中贝通信（通信跨界）</div></td>
+          <td>单卡回收周期 / 租金覆盖；业务纯度是估值最大变量</td></tr>
+      <tr><td><span class="catb" style="background:#f3e8ff;color:#7c3aed">C 独立算力云</span></td>
+          <td>GPU 云 / 超算云 / 算力调度平台<div class="sub">已收 5 家：商汤大装置 · 优刻得 · 青云科技 · 首都在线 · 并行科技</div></td>
+          <td>算力利用率 / 上架率；云 P/S 与 IDC 资产混合逻辑</td></tr>
+      <tr><td><span class="catb" style="background:#e0f2f7;color:#0e7490">D Token工厂</span></td>
+          <td>第三方 token 生产 + 异构算力调度，卖推理效率<div class="sub">已收 4 家：硅基流动 · 无问芯穹 · 趋境科技 · 基流科技 ｜ 可选：清程极智</div></td>
+          <td>调用量 × 单价 − 算力成本；高 P/S，看成本占收入比</td></tr>
+      <tr><td><span class="catb" style="background:#eef2f7;color:#475569">E 大模型公司</span></td>
+          <td>自研模型 + MaaS 供 token，算力自用兼外供<div class="sub">已收 5 家：智谱 · MiniMax · 月之暗面 · DeepSeek（不融资）· 阶跃星辰 ｜ 可选：百川智能</div></td>
+          <td>AGI 稀缺性溢价 / 模型代际；看解禁与再融资节奏</td></tr>
+      <tr><td><span class="catb" style="background:#eaf2fe;color:#1f6feb">F 云大厂 MaaS</span></td>
+          <td>公有云 + 自研/接入大模型，token 最大供给方<div class="sub">已收 5 家：火山引擎 · 阿里云 · 腾讯云 · 百度智能云（含昆仑芯）· 华为云</div></td>
+          <td>云业务 P/S + 模型溢价；AI 收入占比、资本开支</td></tr>
+      <tr><td><span class="catb" style="background:#fdecea;color:#b3261e">G 国产AI芯片</span></td>
+          <td>卖「算力供给能力」本身（训练/推理芯片）<div class="sub">已收 7 家：华为昇腾 · 寒武纪 · 海光 · 摩尔线程 · 沐曦 · 壁仞 · 燧原 ｜ 可选：天数智芯 · 昆仑芯</div></td>
+          <td>高 P/S + 生态稀缺；营收增速 × 亏损收窄是主轴</td></tr>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>数据口径红线（填充期统一执行）</h2>
+    <div class="kv"><b>市值 vs 估值</b><span>已上市＝二级市值（标日期快照，拆分/配售复权另注）；未上市＝最近一轮投后估值＋轮次＋披露时间；两者<b>不得同列排序</b>，未上市主体估值字段为「—」时不参与比较</span></div>
+    <div class="kv"><b>算力规模</b><span>自持 / 代管 / 转租 / 意向协议四态分记；推荐折算 FP16 稠密 PFLOPS（对齐 chips.js dense 口径，警惕稀疏/FP8 混标）；在建与已交付分列；未披露填「未披露」，不填 0</span></div>
+    <div class="kv"><b>芯片结构</b><span>英伟达系（H800/H20/B30…）与国产系（昇腾/寒武纪/海光/沐曦…）占比；禁令影响标注政策时点。<b>B200/GB200 属 Blackwell 且对华受限，不作国产替代时间窗口锚点</b></span></div>
+    <div class="kv"><b>Token 口径</b><span>调用量注明日均 vs 峰值、是否输入+输出合并；缓存打折 / batch 折扣口径单列（对齐《AI模型速查表》）</span></div>
+    <div class="kv"><b>财务字段</b><span>营收/净利标注报告期（FY2025 / 26H1 / 26Q3）；亏损公司附亏损收窄幅度；经调整 vs 归母口径分列</span></div>
+    <div class="kv"><b>动态字段</b><span>融资/上市/技术事件必须带日期；来源优先级：招股书/公告 → 定期报告 → 权威媒体 → 聚合口径（标 ?）</span></div>
+  </div>
+</div>
+
+<!-- ============ 附：字段级待核与已核实事实 ============ -->
+<div class="panel" id="sec-todo">
+  <h2>附：字段级待核与已核实事实</h2>
+  <ul>
+    <li><b>市值快照 ✓（2026-11-02 收盘）</b>：26 个上市主体已全部按 11-02 收盘补入（美股为 10-30 收盘，人民币/港元/美元分口径标注）；未上市主体估值按最近一轮口径分列。<b>A股/港股/美股三个币种不做换算排序</b>，比较时注意口径。</li>
+    <li><b>字段级待核</b>：
+      <span class="todo-chip">商汤 4.8万P 精度口径</span><span class="todo-chip">并行科技在管PFLOPS</span><span class="todo-chip">基流科技大客户集中度</span><span class="todo-chip">无问芯穹轮次/投后</span><span class="todo-chip">昇腾 910 代次出货量?</span><span class="todo-chip">海光-曙光整合进度</span><span class="todo-chip">摩尔线程/沐曦 港股二次上市</span><span class="todo-chip">月之暗面正式递表</span><span class="todo-chip">燧原股票代码核对</span><span class="todo-chip">世纪互联上市地位?</span><span class="todo-chip">昆仑芯独立成条?</span><span class="todo-chip">天数智芯 IPO 进度</span></li>
+    <li><b>A/B 类财务细节</b>：光环新网 / 奥飞数据 / 万国数据 / 世纪互联 / 中贝通信的季度数字按定期报告原件复核补入（当前为框架条目，正文已标注）。</li>
+    <li><b>第二波可选扩充</b>（用户原清单外，按需）：整机链（浪潮信息 · 中科曙光 · 高新发展/华鲲振宇 · 烽火通信/长江计算 · 拓维信息 · 神州数码 · 软通动力）——若收录建议单列「H 整机与集成」类，保持七类口径纯净。另有可选：清程极智（D）、百川智能（E）、鸿博股份（B 类风险样本）。</li>
+    <li><b>已核实关键事实（2026-11-02）</b>：GPU 四小龙全部上市（摩尔线程 2025-12-05 / 沐曦 2025-12-17 科创板，壁仞 2026-01-02 港股，燧原 2026-09-11 科创板发行市值 611.87 亿）；商汤 26H1 首次 IFRS 盈利 6.17 亿、总算力 4.8 万P、日均 Token 服务量超 2.4 万亿（+22 倍）；海光 26Q1-Q3 营收 149.55 亿（+57.6%）/ 归母净利 28.47 亿（+45.1%）；硅基流动 26-06-30 递表（算力成本占收入成本 86.9%）；基流科技 26-04-29 递表；智谱 26-01-08 上市后市值曾破万亿港元；MiniMax 26H1 收入 1.2 亿美元（+283%）；月之暗面拟 500 亿美元 Pre-IPO（媒体口径）；阶跃星辰 25 亿美元 Pre-IPO 完成。</li>
+    <li><b>明确不收</b>：运营商云（天翼/移动/联通，用户指定排除）。</li>
+  </ul>
+</div>
+
+<footer>
+  AI算力厂商速查表 · 全量版 v1.1（36 家：A 5 · B 5 · C 5 · D 4 · E 5 · F 5 · G 7）｜ 与《AI芯片参数速查表》《AI模型速查表》《LLM推理技术速查》《算力电力速查》《算力集群配置模型》配套使用<br>
+  口径与红线见 ③ 节 ｜ 市值 / 估值 / 上市状态为强时效信息，使用前复核 ｜ 分类字母 A–G 即展示顺序 ｜ 明确不收：运营商云 ｜ 本表不构成投资建议
+</footer>
+</div>
+
+<script>
+"use strict";
+/* ============================ 分类定义（A–G） ============================ */
+var CATS = {
+  A:{k:"A",n:"IDC / 智算中心",color:"#0a7d3b",soft:"#e8f5ed"},
+  B:{k:"B",n:"租赁 / 跨界",color:"#b45309",soft:"#fef4e6"},
+  C:{k:"C",n:"独立算力云",color:"#7c3aed",soft:"#f3e8ff"},
+  D:{k:"D",n:"Token工厂",color:"#0e7490",soft:"#e0f2f7"},
+  E:{k:"E",n:"大模型公司",color:"#475569",soft:"#eef2f7"},
+  F:{k:"F",n:"云大厂 MaaS",color:"#1f6feb",soft:"#eaf2fe"},
+  G:{k:"G",n:"国产AI芯片",color:"#b3261e",soft:"#fdecea"}
+};
+
+/* ============================ 公司数据（36 家全量） ============================
+   字段:
+   id=锚点  n=公司名  full=主体全称  cat=分类(A-G)  dot=主色点  chips=n英伟达/cn国产/both双轨/""不适用
+   code=代码/市场  listKey=listed|filed|private  listTxt=状态说明
+   val/valSub=估值·市值  pw/pwSub=算力规模  biz=主营业务  hi=近期动态(主表)
+   body.groups=[组标题, [[标签,值]...]]  news=[]  risk=[]  src=来源与截止日 */
+var COMPANIES = [
+/* ------------------------------------------------ F · 火山引擎 */
+{id:"volcengine",n:"火山引擎",full:"北京火山引擎科技有限公司（字节跳动旗下）",cat:"F",dot:"#325AB4",chips:"both",
+ code:"未上市 · 字节跳动旗下",listKey:"private",listTxt:"未独立上市 · 母公司字节跳动未上市",
+ val:"—",valSub:"无独立公开估值口径",
+ pw:"未披露",pwSub:"以豆包系日调用量侧写<span class='q'>?</span>",
+ biz:"云基础设施 + 豆包大模型系 MaaS（火山方舟）+ AI 应用生态",
+ hi:"豆包调用量国内第一梯队；Seed 1.6 Flash 定义国内低成本 token 口径",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","F 云大厂 MaaS：字节系云 + 模型 API，token 供给能力国内头部"],
+     ["核心供给","豆包 Seed 系列（闭源为主，小尺寸 Seed-OSS 开源）"],
+     ["Token 业务","火山方舟 MaaS 平台：模型调用 / 精调 / agent 编排，国内调用定价的锚定者之一"],
+     ["客户结构","字节系产品、互联网与消费企业、AI 创业公司；政企相对较少"]
+   ]],
+   ["资本动态",[
+     ["独立性","无独立融资 / 上市主体，随字节整体估值叙事波动"],
+     ["关注点","豆包系降价节奏 = 国内 token 价格战风向标；方舟对外单价变化"]
+   ]],
+   ["算力与供给",[
+     ["规模口径","未公开披露自有智算规模；媒体以「豆包日调用量」侧写<span class=\"q\">?</span>"],
+     ["芯片结构","英伟达系为主 + 国产 / 自研芯片双轨（公开采购与自研传闻并存，待核实）"],
+     ["待核","若有卡数口径 → 用《算力集群配置模型》推演机房与电力承载"]
+   ]]
+ ]},
+ news:[
+   "豆包 Seed 2.1（2026-06）主打可靠通用 agent；成本标杆 Seed 1.6 Flash：输入 ¥0.075 / 输出 ¥0.75（每百万 token）",
+   "模型侧定价与口径已收录于《AI模型速查表》字节条目，本页不重复维护"
+ ],
+ risk:["未上市主体：估值字段恒为「—」，比较只能走调用量口径","母公司战略调整直接影响 token 供给与定价"],
+ src:"来源：火山引擎官网 / 权威媒体报道（定价条款核实至 2026-10，载于《AI模型速查表》）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ D · 硅基流动 */
+{id:"siliconflow",n:"硅基流动",full:"北京硅基流动科技股份有限公司",cat:"D",dot:"#0e7490",chips:"both",
+ code:"递表（港交所）",listKey:"filed",listTxt:"2026-06-30 递表 · 已完成股改",
+ val:"B+ 轮投后约 77.4 亿元",valSub:"招股书口径 · 上市前 7 轮（天使→B+）· 递表后估值待定",
+ pw:"未披露（自建 + 多云混部）",pwSub:"算力资源成本占收入成本 86.9%（2025）",
+ biz:"无服务器 Token 服务 / 专属实例 / 本地部署三档推理供给",
+ hi:"2026-06-24 股改 · 06-30 递表港交所；2025 收入 +653.2%",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","D Token工厂：第三方 token 生产 + 异构算力调度，「开箱调用」"],
+     ["产品形态","Serverless（按量）/ 专属实例 / 本地部署；深度承接 DeepSeek / Qwen / GLM / Kimi 等开源模型调用"],
+     ["Token 口径","2025 收入 5,533.0 万元（+653.2%）；日调用量口径待披露"],
+     ["成本结构","2025 算力资源成本 5,962.7 万元，占收入成本 86.9%——单位经济性是核心观察点"],
+     ["竞争位","与无问芯穹 / 趋境科技 / 基流科技同处「中间层」；对上游云厂商是客户兼竞对"]
+   ]],
+   ["资本事件",[
+     ["IPO","2026-06-30 递交港交所上市申请——Token 工厂第一股候选"],
+     ["融资史","天使→B+ 共 7 轮，最新一轮投后约 77.4 亿元（招股书）"],
+     ["财务","2025：收入 5,533.0 万（+653.2%）；年度亏损 3.45 亿元"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露自有集群规模；多云 + 混部推理口径"],
+     ["芯片结构","英伟达系 + 国产卡双轨（异构调度本身就是其产品能力）"],
+     ["联动","86.9% 成本占比 → 对《LLM推理技术速查》的 KV 优化 / 量化 / 投机解码最敏感，效率即毛利"]
+   ]]
+ ]},
+ news:[
+   "2026-06-24 完成股改（更名「股份有限公司」）；06-30 递表港交所",
+   "2025 年收入 5,533.0 万元（+653.2%）、亏损 3.45 亿元（招股书口径）",
+   "聆讯 / 挂牌窗口以港交所披露易为准（时效字段，填充期每季复核）"
+ ],
+ risk:["86.9% 算力成本占比下毛利极薄：规模不经济即失血","一级→二级估值跳变风险（GPU 四小龙首日 200%-600% 涨幅，但 Token 工厂盈利模式完全不同，不可类推）"],
+ src:"来源：港交所招股书 / 证券时报 / 网易财经（2026 报道）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ C · 优刻得 */
+{id:"ucloud",n:"优刻得",full:"优刻得科技股份有限公司（UCloud）",cat:"C",dot:"#7c3aed",chips:"both",
+ code:"688158.SH · 科创板",listKey:"listed",listTxt:"已上市 2020-01 · 同股不同权首例",
+ val:"120.85 亿元",valSub:"2026-11-02 收盘 26.19 元 · 年初至今 −6.8%",
+ pw:"未披露",pwSub:"乌兰察布 / 青浦自建基地 · 智算上电进度待核",
+ biz:"中立云 IaaS/PaaS：公有云 / 私有云 / 混合云 / 专有云 + 智算服务",
+ hi:"中立定位（不与客户争业务）；智算业务增速待复盘补入",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","C 独立算力云：中立第三方云（不与客户争业务），全国 + 出海节点"],
+     ["AI 落地","大模型训练 / 推理算力供给、行业云（政务、金融、制造、教育）"],
+     ["客户结构","政府与国有企业、AI 创业公司、传统行业数字化——与 F 类错位竞争"]
+   ]],
+   ["资本动态",[
+     ["上市","2020-01 科创板（「云计算第一股」；首家同股不同权 A/B 结构）"],
+     ["财务","营收增速与盈利长期承压——具体数字待复盘后按报告期填入，避免臆断"],
+     ["观察","大模型放量后智算业务增速与毛利结构变化"]
+   ]],
+   ["算力与供给",[
+     ["布局","乌兰察布 / 青浦自建数据中心；电力成本与 PUE 是区位优势"],
+     ["芯片结构","英伟达系为主 + 国产适配（口径待核）"],
+     ["口径","自建机房功率 / 机柜 → 用《算力电力速查》换算电力需求；智算集群 → 《算力集群配置模型》推演"]
+   ]]
+ ]},
+ news:[
+   "上市状态：已上市 2020-01（科创板 688158）",
+   "待补：2026 智算订单 / 资本开支 / 毛利结构的季度复盘"
+ ],
+ risk:["体量与云大厂差一个量级，价格战中边际最薄","重资产基地的折旧压力"],
+ src:"来源：招股书与定期报告（巨潮资讯）/ 并行科技 2026 年度向特定对象发行股票募集说明书竞争格局章节（2026-09，对优刻得定位描述）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ A · 润泽科技 */
+{id:"runze",n:"润泽科技",full:"润泽智算科技集团股份有限公司",cat:"A",dot:"#0a7d3b",chips:"",
+ code:"300442.SZ · 创业板",listKey:"listed",listTxt:"已上市 2022-09（重组上市）",
+ val:"865.65 亿元",valSub:"2026-11-02 收盘 52.75 元 · 年初至今 +1.19%",
+ pw:"以承载功率计（机柜 × kW）",pwSub:"廊坊主基地 + 平湖 / 佛山等 · 机柜功率口径待核",
+ biz:"高密度智算中心（AIDC）开发运营：批发型机柜 + 液冷",
+ hi:"FY2025 净利润 50.5 亿（+182.07%）· 毛利率 46.0%",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","A IDC / 智算中心：收「瓦特 + 机柜」租金，向云厂 / 大模型厂 / 央企批发"],
+     ["区位","廊坊（承接北京外溢，电力与土地成本优势）是基本盘"],
+     ["升维","通用 IDC → AIDC（高功率密度 + 液冷），利润率跃升主因"]
+   ]],
+   ["资本与财务",[
+     ["财务","FY2025 净利润 50.5 亿元（+182.07%），毛利率 46.04%——AIDC 景气度直接受益者"],
+     ["观察","上架率（收入确认时滞）、在建工程转固节奏、大客户锁定协议"],
+     ["提醒","强周期字段，填充期逐季更新"]
+   ]],
+   ["算力与承载",[
+     ["算力甄别","出租的是「厂房」（机柜 / 电力 / 液冷），不直接运营 GPU 集群——A 类算力字段以承载功率计，不填 PFLOPS"],
+     ["口径","「机柜数 × 单柜功率（kW）」侧写；联动《算力电力速查》换算"],
+     ["芯片结构","客户侧决定芯片，A 类无自有卡，表中标「—」"]
+   ]]
+ ]},
+ news:[
+   "FY2025：净利润 50.5 亿元（+182.07%）、毛利率 46.04%——A 类景气度行业参考值",
+   "待补：2026 各基地交付进度 / 在建工程 / 大客户签约（运营商与云厂）"
+ ],
+ risk:["客户集中度（头部云厂 / 运营商）","电价与 PUE 政策敏感（枢纽节点审批与绿电指标）"],
+ src:"来源：2025 年度业绩口径（A 股披露）/ 南方财富整理（2026-10-14 引用）。数据截至 2026-11-02，填充期补公告原件。"
+ },
+/* ------------------------------------------------ B · 弘信电子 */
+{id:"hongxin",n:"弘信电子",full:"弘信电子科技股份有限公司",cat:"B",dot:"#b45309",chips:"cn",
+ code:"300657.SZ · 创业板",listKey:"listed",listTxt:"已上市 2017",
+ val:"137.66 亿元",valSub:"2026-11-02 收盘 28.08 元 · 26Q1-Q3 归母净利 2.17 亿（+139.24%）",
+ pw:"燧原集群采购 / 出租",pwSub:"订单 vs 实收口径待核",
+ biz:"FPC（柔性电路板）基本盘 + 智算业务（燧原科技深度合作）",
+ hi:"FY2025 净利润 1.47 亿（+159.13%）· 算力业务爬坡",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","B 租赁 / 跨界：FPC 厂跨界算力，绑定燧原，集群对外出租 / 整机销售"],
+     ["业务纯度","FPC 与算力双主业——估值视「算力含量」而定，B 类典型弹性与风险"],
+     ["绑定关系","与燧原科技战略合作（整机 + 集群），是燧原生态放量的代理变量"]
+   ]],
+   ["资本与财务",[
+     ["财务","FY2025 净利润 1.47 亿元（+159.13%）——弹性主要来自算力业务确认节奏"],
+     ["观察","算力收入占比（业务纯度）、固定资产与租赁资产折旧、单卡回收周期"]
+   ]],
+   ["算力与供给",[
+     ["芯片结构","国产卡（燧原）——国产替代逻辑与交付周期双驱动"],
+     ["口径","采购 / 中标信息逐笔核对公告，区分「订单 / 框架协议」vs「实收」"]
+   ]]
+ ]},
+ news:[
+   "FY2025 净利润 1.47 亿元（+159.13%），创业板算力 B 类代表",
+   "待补：燧原放量进度 / 2026 算力收入占比 / 与燧原持股及承诺细节"
+ ],
+ risk:["跨界业务纯度不足：估值折价与主题溢价并存","与燧原深度绑定的单一生态风险"],
+ src:"来源：FY2025 业绩口径（南方财富 2026-10-14 节引公告）。数据截至 2026-11-02，填充期补公告原件。"
+ },
+/* ------------------------------------------------ B · 协创数据 */
+{id:"xiechuang",n:"协创数据",full:"协创数据技术股份有限公司",cat:"B",dot:"#c2410c",chips:"n",
+ code:"300857.SZ · 创业板",listKey:"listed",listTxt:"已上市 2020",
+ val:"736.05 亿元",valSub:"2026-11-02 收盘 150.41 元 · PE(TTM) 20.9 · 年初至今 +25.1%",
+ pw:"多地自建+代运营 GPU 集群",pwSub:"北京/上海/乌兰察布/廊坊/广州/深圳/宁波 · 规模未披露",
+ biz:"数据存储设备 + 服务器再制造 + 智能算力产品及服务（FCloud 算力云）",
+ hi:"26Q1-Q3 营收 196.1 亿（+135.4%）· 归母净利 30.6 亿（+338.8%）· 374.9 亿长单",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","B 租赁/跨界（重资产算力云）：既卖服务器/集群解决方案，也自持+代运营 GPU 集群，FCloud 平台调度"],
+     ["业务构成","四块：智能算力产品及服务 / 数据存储设备 / 服务器及周边再制造 / AIoT 智能终端——存储仍是最大收入来源"],
+     ["客户覆盖","头部互联网模型训练推理、自动驾驶、生物医药；部分客户签 5 年长约"],
+     ["模式要点","「以销定购」：先锁客户需求与利润空间再采购建设，降低空置风险；验收单/计费单/回款流水可验证（公司口径）"]
+   ]],
+   ["资本与财务",[
+     ["业绩","26Q1-Q3：营收 196.10 亿（+135.39%）、归母净利 30.62 亿（+338.77%）；26H1 智算收入 32.16 亿（+163%），超 2025 全年；经营现金流 26H1 转正至 18.25 亿"],
+     ["FY2025","营收 122.36 亿（+65.13%）、归母净利 11.64 亿（+68.32%）；智算收入 27.61 亿（+1727%），占比 2%→22.6%，毛利率 25.53%"],
+     ["大单","374.90 亿元算力服务长单（5 年期）——重资产投入与五年服务需求连接"],
+     ["杠杆","26H1 末总资产 531 亿（较年初 +123%）；固定资产 220 亿（年初 92.8 亿）；借款合计约 173.6 亿，资产负债率 86.79%；财务费用 5.86 亿（+714%）——融资依赖与利润同步上升"]
+   ]],
+   ["算力与供给",[
+     ["布局","北京、上海（张江机器人物理AI训练集群）、乌兰察布、廊坊、广州、深圳、宁波等多地部署运营"],
+     ["芯片结构","英伟达系为主（Isaac Sim/Lab 深度集成）；规模口径未披露"],
+     ["口径","「已交付计费」vs「纸面大单」是 B 类核心甄别口径：协创自称收入经审计核验，属前者（公司口径，持续跟踪）"]
+   ]]
+ ]},
+ news:[
+   "2026-10-29 投资者关系记录：前三季度营收 196.10 亿（+135.39%）、归母净利 30.62 亿（+338.77%）；总资产 531.05 亿（较年初 +123.15%）",
+   "2026-10-11 上证报专访：区分「纸面大单」与「已交付计费」，公司称以销定购、验收计费回款可验证",
+   "2026 年限制性股票激励：2026-2028 收入增长目标 +130%/+340%/+700%，净利 +225%/+340%/+700%",
+   "行业背景：中信建投口径 2026 年国内算力租赁市场规模有望突破 2,600 亿元；信通院 26Q1 市场 680 亿（+62%）"
+ ],
+ risk:["86.79% 资产负债率 + 173.6 亿借款：收入确认后置于设备采购与利息支付，「利润与现金流错位」是最大财务特征","374.9 亿长单的客户集中度与匿名披露问题（监管对 B 类问询密集）","收入含设备经销（净额法）与租赁混合，算力服务毛利成色需分拆"],
+ src:"来源：26Q3 投资者关系活动记录表（中国证券网 2026-10-29）/ 证券时报 / 正观新闻 374.9 亿长单分析（2026-10）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ B · 润建股份 */
+{id:"runjian",n:"润建股份",full:"润建股份有限公司",cat:"B",dot:"#0e7490",chips:"both",
+ code:"002929.SZ · 深主板",listKey:"listed",listTxt:"已上市 2019",
+ val:"156.18 亿元",valSub:"2026-11-02 收盘 54.54 元（涨停 +10.0%）· 年初至今 +37.3%",
+ pw:"五象云谷 40 MW（南宁）",pwSub:"二期 160 MW 规划中 · 「24h 满载 token 产值」口径为机构推演值",
+ biz:"通信网络运维起家 + Token 工厂（五象云谷）+ 能源网络 + 数字网络",
+ hi:"26Q1-Q3 算力业务 +320% · Q3 毛利率 7%→29% · 2 亿美元 Token 出海大单（10-18）",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","B 租赁/跨界 → Token 工厂转型样本：通信运维（移动/电信核心机楼数据中心运维）为基本盘，自建自营五象云谷智算中心做 token 生意"],
+     ["Token 战略","「Token 为核、绿算协同、智维百业」——面向东盟出海（南宁是中国到东盟数据传输最快最近的城市，区位护城河）"],
+     ["业务构成","通信网络（AI化）/ 算力网络（26Q1-Q3 占营收超 20%）/ 能源网络 / 数字网络——算力已成第二曲线且毛利率提升最快"]
+   ]],
+   ["资本与财务",[
+     ["业绩","26Q1-Q3：营收 57.08 亿；剔除股份支付后净利 1.50 亿；算力网络业务同比 +120% 以上"],
+     ["26Q3","26Q3 算力收入约 6.2 亿（同比 +360%，单季超 2025 全年七成）；算力毛利率从 26H1 的 7% 提升至 Q3 的约 29%（Token 分成放量）；综合毛利率 13.6%→17.5%"],
+     ["市值口径","雪球 10-29 收盘总市值 157.61 亿（动态 PE 260 口径，盈利基数被算力折旧压制）"],
+     ["Token 大单","2026-10-18 签订 2 亿美元 Token 出海大单（毛利率约 50%，机构口径），26Q4 起放量"]
+   ]],
+   ["算力与供给",[
+     ["规模","五象云谷一期约 40 MW 已建设完毕；二期 160 MW 规划中（公司口径）"],
+     ["推演口径","机构推演：40 MW 满载 24h token 产值约 1,000 亿元——属推演值非实测，须与「实际签约+上架率」分开看"],
+     ["芯片结构","英伟达系 + 国产卡双轨口径"],
+     ["联动","40 MW → 《算力电力速查》可换算年耗电量；《算力集群配置模型》按液冷机柜密度推演卡数"]
+   ]]
+ ]},
+ news:[
+   "2026-10-18：签订 2 亿美元 Token 出海大单（中国-东盟方向）",
+   "2026-10-30 三季报：营收 57.08 亿；算力网络 +120%+，占营收超 20%，毛利率快速提升",
+   "2026-10-20 「门神」网络安全大模型登顶 CyberSec-Eval 权威测评榜；牵头组建广西词元经济概念验证中心（10-11）",
+   "2026-09 银行间市场注册 PEFORM/短融（中市协注〔2026〕），算力扩张的债务融资通道已开"
+ ],
+ risk:["运维基本盘增收不增利（净利率薄），利润弹性押注 Token 业务兑现节奏","40 MW 满载产值 1,000 亿为机构推演口径，与实际签约订单（2 亿美元量级）差距大——注意口径分层","算力固定资产「超常规折旧」压制当期利润（雪球口径），报表利润与现金利润需分列"],
+ src:"来源：2026 年第三季度报告（巨潮 2026-10-30）/ 公司官网 / 东方财富财富号与雪球（推演口径已标注）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ B · 云赛智联 */
+{id:"yunsai",n:"云赛智联",full:"云赛智联股份有限公司（上海仪电旗下）",cat:"B",dot:"#9333ea",chips:"cn",
+ code:"600602.SH · 沪主板",listKey:"listed",listTxt:"已上市（借壳仪电系）",
+ val:"203.65 亿元",valSub:"2026-11-02 收盘 14.89 元 · 年初至今 −20.2%",
+ pw:"徐汇+宝山超 7,000 机柜",pwSub:"松江大数据计算中心二期已投运 · 5A 级智算中心认证",
+ biz:"上海国资算力平台：IDC/智算中心运营 + 云服务 MSP + 行业 AI 解决方案 + 科学仪器",
+ hi:"26H1 营收 28.8 亿（−7.98%）· 归母净利 1.02 亿（+7.21%）· 持阶跃星辰 10% 股权",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","B 租赁/跨界（国资算力平台）：上海仪电集团核心信息服务平台，国资资源与区域卡位是优势"],
+     ["地位","上海科技网 = 上海市国资委系统唯一智算中心服务商/数据中心运营商/云服务商——区域牌照与政企入口稀缺性"],
+     ["AI 布局","松江大数据计算中心（二期）2026 上半年整体交付投运，超大规模自主可控智能算力基础设施；参与设立仪电智算产业生态基金（募资 10.02 亿，公司出资 0.85 亿占 8.483%）"],
+     ["卡位","上海市大数据中心资源平台总集成商/运维商、数据运营平台总运营商；与仪电集团等合资算力设施公司（持股 11%）；持阶跃星辰 10% 股权（与云赛各 11%/10% 口径见来源）"]
+   ]],
+   ["评估口径",[
+     ["财务","26H1 营收 28.82 亿（−7.98%）、归母净利 1.02 亿（+7.21%）；26Q1-Q3 营收 43.08 亿、归母净利 1.67 亿——利润偏薄（净利率约 3.5%），算力业务尚处起步期"],
+     ["成色辨析","重庆日报半年报横评口径：算力是「起步期」新业务、未单独成规模；76 倍动态 PE 反映的是国资数据要素+智算布局预期，而非当期业绩"],
+     ["信披观察","研发费用同比 −16% 引发「利润是否省出来」疑问；剥离非主业（云瀚科技 75% 股权转让飞乐音响）聚焦智算转型"]
+   ]],
+   ["算力与供给",[
+     ["布局","徐汇数据中心 + 宝山云计算中心累计超 7,000 机柜；松江二期已投运"],
+     ["芯片结构","国产 GPU 主导（自主可控智算云平台，面向国产 GPU 构建训练/智能体生态——MSP 平台 V1.0 已发布）"],
+     ["口径","智算业务收入未单独披露——B 类「业务纯度」甄别口径下属「国资卡位型」，与协创（重资产兑现型）、润建（Token 出海型）构成 B 类三样本"]
+   ]]
+ ]},
+ news:[
+   "2026-08 松江大数据计算中心（二期）完成整体建设交付并投入运营；获智算中心算力性能 5A 等级认证",
+   "2026-08 出资 0.85 亿参与仪电智算产业生态基金（总募 10.02 亿，占 8.483%），布局 AI 及智算产业链",
+   "2026-09 云瀚科技 75% 股权转让完成（4,350 万），剥离非核心聚焦智算主业；首批仪电智算云 MSP 合作伙伴",
+   "持阶跃星辰股权（上海智算公司层面）——E 类模型厂的区域资本纽带"
+ ],
+ risk:["利润体量与估值落差：净利率约 3.5% vs 动态 PE 约 125 倍（横评口径）","算力收入未单独披露，「智算含量」缺乏公开量化口径","研发投入下滑，转型期费用纪律与增长投入的平衡"],
+ src:"来源：26H1 定期报告（爱集微/中国经营报 2026-09 解读）/ 重庆日报算力租赁半年横评（2026-08-31）/ 南方财富上海 AI 算力盘点（2026-08）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ G · 寒武纪 */
+{id:"cambricon",n:"寒武纪",full:"中科寒武纪科技股份有限公司",cat:"G",dot:"#b3261e",chips:"cn",
+ code:"688256.SH · 科创板",listKey:"listed",listTxt:"已上市 2020-07",
+ val:"5,414.43 亿元",valSub:"2026-11-02 收盘 861.00 元（−2.16%）· PE(TTM) 129.9 · 年初至今 −5.3%",
+ pw:"—（芯片商不持有算力）",pwSub:"思元系列训练 / 推理卡 · 卖供给能力而非自有集群",
+ biz:"云端 AI 芯片（思元系列）+ 边缘 / 终端 + 软件平台（Neuware）",
+ hi:"26H1 营收 59.96 亿（+108.13%）· 归母净利 23.11 亿（+122.61%）",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","G 国产 AI 芯片：云端训练 + 推理芯片，「国产替代首选」标签聚合力最强"],
+     ["产品","思元系列云端训练 / 推理卡；推理卡在头部互联网客户起量"],
+     ["生态位","英伟达受限 + 国产窗口期最大受益者之一；与华为昇腾构成国产双主线"]
+   ]],
+   ["资本与财务",[
+     ["业绩拐点","26H1 营收 59.96 亿元（+108.13%）、归母净利 23.11 亿元（+122.61%）——国产 AI 芯片商业化盈利拐点实证"],
+     ["行业合计","沐曦 + 寒武纪 26H1 合计归母净利 29.23 亿元（媒体口径）"],
+     ["估值","高 P/S：市值随业绩增速与稀缺性溢价波动，快照待统一取数日补入"]
+   ]],
+   ["算力与供给",[
+     ["角色","芯片商不持有算力——本表算力规模字段为「—」；其供给能力决定 B / C / D 类公司的国产化率上限"],
+     ["联动","单卡参数 → 《AI芯片参数速查表》思元条目；集群规模 → 《算力集群配置模型》按思元机型推演"]
+   ]]
+ ]},
+ news:[
+   "26H1 定期报告：营收 59.96 亿（+108.13%）、归母净利 23.11 亿（+122.61%）——营收利润双翻倍",
+   "2026-09-11 燧原挂牌后，国产 GPU / ASIC 公开上市公司完成资本集结（四小龙全部上市）",
+   "待补：下一代芯片路线图 / 互联网大客户份额变化 / 26H2 订单指引"
+ ],
+ risk:["客户集中度（头部互联网 / 运营商占比高）","先进制程代工的供应链政策敏感","高 P/S 估值对增速容错低"],
+ src:"来源：26H1 定期报告口径（中国金融新闻网 2026-09-01 引披露）/ A 股公告。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ E · 智谱 */
+{id:"zhipu",n:"智谱",full:"北京智谱华章科技股份有限公司",cat:"E",dot:"#00B4A0",chips:"cn",
+ code:"02513.HK · 港股 18C",listKey:"listed",listTxt:"已上市 2026-01-08",
+ val:"2,342.37 亿港元",valSub:"2026-11-02 收盘 480.40 港元（−0.66%）· 年初至今 +313% · 距 6-22 高点 −84%",
+ pw:"自建 + 多云",pwSub:"GLM-5 代以华为昇腾为主训练（公开口径）· 规模未量化",
+ biz:"GLM 系模型（开源 + 闭源）+ MaaS（bigmodel.cn / api.z.ai）+ 行业解决方案",
+ hi:"06-22 市值一度 1.27 万亿港元 · 07 上市后配售约 314 亿港元",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","E 大模型公司：自研模型 + token 外供（MaaS），「中国 OpenAI 对标」市场标签"],
+     ["开源战略","GLM-5.2 / 5.3 MIT 开源 → 私有化部署带动行业渗透，MaaS 收口核心调用"],
+     ["Token 业务","api.z.ai 定价口径（5.3 约 ¥9.34 / ¥29.35<span class=\"q\">?</span>）与《AI模型速查表》智谱条目直接联动"]
+   ]],
+   ["资本事件",[
+     ["上市","2026-01-08 港股 18C 上市：发行价 116.20 港元，首发 3,742 万 H 股，11 家基石认购 70%"],
+     ["市值","上市市值 528 亿港元 → 06-22 盘中最高 2,980 港元（市值 1.27 万亿港元，+1900%）；07 完成上市后配售约 314 亿港元"],
+     ["观察","解禁节奏 / 再融资稀释 / 稀缺性溢价（机构口径：全球模型上市标的稀缺 + 未解禁 + 低流通盘）"]
+   ]],
+   ["算力与训练",[
+     ["训练","GLM-5 代以华为昇腾为主训练（信创适配与实际约束双因素，公开口径）"],
+     ["启示","模型厂自建 / 自租算力规模 = token 供给上限；量化口径未披露，以「发布节奏 × 推理档位」侧写"],
+     ["联动","GLM-5.2 FP8 权重 755.6GB 单台 8×H200 可载入——部署口径已收录《AI模型速查表》"]
+   ]]
+ ]},
+ news:[
+   "2026-06-22 盘中市值一度 1.27 万亿港元 → 港股「AGI 叙事」龙头；随后回落（媒体口径：11-02 收盘 479.2 港元<span class=\"q\">?</span>，前复权）",
+   "2026-07 完成上市后配售约 314 亿港元；后续解禁与稀释节奏是估值关键",
+   "GLM-5.3（2026-08-14）与 5.2 同底座，主打编码与智能体（细节见《AI模型速查表》）",
+   "待补：MaaS 调用量口径 / 昇腾训练规模核实 / 当前市值快照"
+ ],
+ risk:["万亿级市值与收入体量差距大：叙事依赖风险最高","解禁与再融资节奏活跃，股本稀释快","开源 MIT 与商业化 MaaS 的收入转化需持续验证"],
+ src:"来源：港股行情（前复权）/ 人民财讯 2026-06-23 / 环球老虎财经 / 环球老虎财经·梁文锋专题之外的上市结构报道。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ A · 光环新网 */
+{id:"guanghuan",n:"光环新网",full:"北京光环新网科技股份有限公司",cat:"A",dot:"#059669",chips:"",
+ code:"300383.SZ · 创业板",listKey:"listed",listTxt:"已上市 2014",
+ val:"172.93 亿元",valSub:"2026-11-02 收盘 9.62 元 · 年初至今 −23.0%",
+ pw:"IDC 机柜计（算力未单列）",pwSub:"一线城市机房资源 · 机柜/功率口径待核",
+ biz:"IDC（一线城市机房批发+零售）+ 云计算（AWS 北京区域运营）+ 算力服务",
+ hi:"一线城市 IDC 稀缺资源标的；智算业务爬坡（待复盘）",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","A IDC / 智算中心：北京及周边核心区位机房，机房批发 + 零售 + 增值云服务"],
+     ["区位","一线城市（北京为主）电力与牌照资源稀缺性是长期壁垒"],
+     ["客户结构","互联网、金融、政企——机柜租金 + 部分转售算力服务"]
+   ]],
+   ["资本与财务",[
+     ["财务","具体报告期数字待统一复盘补入（不臆断）"],
+     ["观察","智算机柜改造进度、上架率、单机柜功率提升（通用→高密液冷）"]
+   ]],
+   ["算力与承载",[
+     ["算力甄别","出租「厂房」为主：机柜 + 电力 + 运维；算力字段以机柜与功率口径计"],
+     ["口径","「机柜数 × 单柜功率 kW」侧写承载，联动《算力电力速查》换算"]
+   ]]
+ ]},
+ news:[
+   "待补：2026 各机房智算改造 / 上架率 / 大客户签约细节（以公告为准）"
+ ],
+ risk:["一线城市电力指标收紧制约扩容","通用 IDC 转 AIDC 的资本开支与折旧压力"],
+ src:"来源：公司公告与定期报告框架（本条为框架期条目，数字字段待补原件）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ A · 奥飞数据 */
+{id:"aofei",n:"奥飞数据",full:"广州奥飞数据科技股份有限公司",cat:"A",dot:"#16a34a",chips:"",
+ code:"300738.SZ · 创业板",listKey:"listed",listTxt:"已上市 2020",
+ val:"158.62 亿元",valSub:"2026-11-02 收盘 16.10 元 · 年初至今 −12.9%",
+ pw:"IDC 机柜计（算力未单列）",pwSub:"华南核心节点 + 全国扩张 · 机柜口径待核",
+ biz:"IDC（华南为主的批发+零售机房）+ 算力服务与智算集成",
+ hi:"算力服务收入占比提升中（三季度报口径待复盘）",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","A IDC / 智算中心：华南 IDC 头部，批发型机房 + 算力服务双轮"],
+     ["区位","广州/深圳核心节点 + 全国重点区域扩张"],
+     ["客户结构","互联网大厂（含头部云厂）、运营商、政企"]
+   ]],
+   ["资本与财务",[
+     ["财务","具体报告期数字待统一复盘补入（不臆断）"],
+     ["观察","算力服务收入占比变化（从机房租金转向算力运营的分水岭）"]
+   ]],
+   ["算力与承载",[
+     ["算力甄别","机房承载为主，算力服务为辅；算力字段以机柜与功率口径计"],
+     ["口径","机柜 × kW 侧写；高功率机柜占比是 AIDC 转型关键指标"]
+   ]]
+ ]},
+ news:[
+   "待补：2026 华南智算项目交付 / 算力收入占比（以公告为准）"
+ ],
+ risk:["华南区域竞争加剧（润泽/万国等跨区扩张）","大客户集中与电价波动"],
+ src:"来源：公司公告与定期报告框架（本条为框架期条目，数字字段待补原件）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ A · 万国数据 */
+{id:"gds",n:"万国数据",full:"万国数据服务有限公司（GDS Holdings）",cat:"A",dot:"#0d9488",chips:"",
+ code:"GDS.US / 9698.HK · 美股+港股",listKey:"listed",listTxt:"美股上市 2016 · 港股双重主要上市 2020",
+ val:"43.92 亿美元",valSub:"美股 2026-10-30 收盘 21.92 美元 · 年初至今 −36.7%",
+ pw:"区域+超大规模机房（MW 口径）",pwSub:"高密度机柜需求承接方 · 机柜兆瓦口径待核",
+ biz:"第三方 IDC 龙头：批发型超大规模数据中心（Big Data Center 战略承接 AI）",
+ hi:"智算高密机柜承接 AI 需求；具体季度交付待复盘",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","A IDC / 智算中心：第三方批发型 IDC 龙头，超大客户（云厂/大模型厂）整定制机楼"],
+     ["战略","Big Data Center 平台按需交付超大规模智算园区，海外有独立平台（DayOne）分拆叙事"],
+     ["客户结构","头部云厂商、互联网大厂、金融机构——批发长约为主"]
+   ]],
+   ["资本与财务",[
+     ["财务","具体报告期数字待统一复盘补入（不臆断）"],
+     ["观察","上架率与预收租金、在建兆瓦转化节奏、国际业务分拆进展"]
+   ]],
+   ["算力与承载",[
+     ["算力甄别","出租「厂房」：兆瓦级口径为主，AI 高密机柜（液冷）占比快速提升"],
+     ["口径","在运营 MW / 在建 MW / 预签约 MW 三口径分列（填充期补）"]
+   ]]
+ ]},
+ news:[
+   "待补：2026 内地/国际业务拆分口径、AI 高密机柜交付与签约公告"
+ ],
+ risk:["高杠杆建设（数据中心 REITs/债务依赖）","大客户议价强（批发模式毛利弹性弱）"],
+ src:"来源：公司公告与财报框架（本条为框架期条目，数字字段待补原件）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ A · 世纪互联 */
+{id:"vnet",n:"世纪互联",full:"世纪互联集团控股有限公司（VNET Group）",cat:"A",dot:"#0891b2",chips:"",
+ code:"VNET.US · 现已三重上市（退市进程中?）",listKey:"listed",listTxt:"美股上市 · 港股/私有化状态待核<span class='q'>?</span>",
+ val:"9.18 亿美元",valSub:"美股 2026-10-30 收盘 3.22 美元 · 距 52 周高点 −77%",
+ pw:"批发型 IDC（MW 口径）",pwSub:"云互联与批发数据中心 · 机柜口径待核",
+ biz:"批发型 IDC + 云互联（Carrier-Neutral 批发机房 + 零售托管延伸）",
+ hi:"智算需求承接进展待复盘；上市状态变动需核对",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","A IDC / 智算中心：Carrier-neutral 批发型机房 + 云互联业务"],
+     ["客户结构","云厂、互联网企业——批发整租为主"]
+   ]],
+   ["资本与财务",[
+     ["财务","具体数字待统一复盘补入（不臆断）"],
+     ["观察","上市状态口径（美股/私有化要约）优先复核——时效字段"]
+   ]],
+   ["算力与承载",[
+     ["算力甄别","出租「厂房」为主，兆瓦口径计"],
+     ["口径","在运营/在建 MW 分列；液冷改造进度"]
+   ]]
+ ]},
+ news:[
+   "待核：上市地位与私有化/要约进展（以公司公告为准，时效最敏感）",
+   "2026 智算机柜签约与交付公告（以公告为准）"
+ ],
+ risk:["上市状态存在不确定性口径?","客户集中度与长约的重定价风险"],
+ src:"来源：公司公告框架与本轮基础信息（上市状态为待核时点口径?）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ B · 中贝通信 */
+{id:"zhongbei",n:"中贝通信",full:"中贝通信集团股份有限公司",cat:"B",dot:"#a16207",chips:"both",
+ code:"603220.SH · 沪主板",listKey:"listed",listTxt:"已上市 2018",
+ val:"74.39 亿元",valSub:"2026-11-02 收盘 13.87 元 · PE(TTM) 524（利润基数极小）",
+ pw:"智算集群采购/自营",pwSub:"5G 新基建+智算+新能源三大板块 · 规模待核",
+ biz:"通信网络技术服台账 + 智算服务 + 5G 新基建（跨界绑定不算轻）",
+ hi:"智算业务放量中，合同/实收口径待逐笔核公告",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","B 租赁/跨界：通信工程服务商跨界智算——先做 5G 网络基建，再延伸智算中心建设与算力租赁"],
+     ["业务构成","5G 新基建 + 智算 + 智慧城市三大板块，算力为增长极"],
+     ["生态位","并行科技 2026 定增募集说明书中列为主要竞争者之一（智算服务商口径）"]
+   ]],
+   ["资本与财务",[
+     ["财务","FY2025 具体数字待复盘补入（不臆断）"],
+     ["观察","智算合同「订单 vs 实收」逐笔核对（公告），单卡回收周期"]
+   ]],
+   ["算力与供给",[
+     ["芯片结构","英伟达系 + 国产卡双轨口径（采购信息以公告逐笔核）"],
+     ["口径","中标/交付/计费三态分记——B 类红线全面适用"]
+   ]]
+ ]},
+ news:[
+   "并行科技 2026-09 定增募集说明书将其列为智算云市场主要竞争者之一",
+   "待补：智算订单公告逐笔清单与收入确认进度"
+ ],
+ risk:["跨界业务纯度为最大估值变量","智算重资产折旧与通信主业利润周期错配"],
+ src:"来源：并行科技 2026 年度向特定对象发行股票募集说明书（2026-09，竞争格局章节）/ 公司公告框架。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ C · 商汤 */
+{id:"sensetime",n:"商汤",full:"商汤集团股份有限公司",cat:"C",dot:"#1e40af",chips:"both",
+ code:"0020.HK · 港股",listKey:"listed",listTxt:"已上市 2021-12",
+ val:"466.93 亿港元",valSub:"2026-11-02 收盘 1.10 港元 · 距 52 周高点 −60%（长期通道下沿）",
+ pw:"总算力 4.8 万P（2026-08 披露）",pwSub:"大装置升级为 Token 工厂 · 2026-07 日均 Token 服务量超 2.4 万亿（+22 倍）",
+ biz:"大装置算力（Token 工厂）+ 日日新模型 + 智能体（一套模型+一座 Token 工厂+一套智能体管控）",
+ hi:"26H1 首次 IFRS 盈利 6.17 亿 · 生成式 AI 占比 80%",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","C 独立算力云 → Token 工厂：大装置 SenseCore 从算力出租升级为 token 生产（自用+外供模型厂商）"],
+     ["收入结构","26H1 收入 29.11 亿（+23.4%）：生成式 AI 23.27 亿（+28.2%，占 79.9%）/ 视觉 AI 4.97 亿（+13.9%）/ 创新业务 0.87 亿"],
+     ["Token 口径","2026-07 大装置日均 Token 服务量超 2.4 万亿，同比 +22 倍——国内披露口径最强的 token 工厂之一"],
+     ["三件套","「一套模型、一座 Token 工厂、一套智能体管控系统」——从卖模型与算力转向规模化交付智能体能力"]
+   ]],
+   ["资本与财务",[
+     ["盈利拐点","26H1 首次按 IFRS 盈利 6.17 亿（受益于 AI 生态投资公允价值上升）；Non-IFRS 调整后亏损 3.86 亿，同比收窄 67.3%——主业盈利仍在路上"],
+     ["质量","毛利率 41.4%（+2.9pct）；研发开支 17.56 亿（−17.1%）——费用纪律与增长并行"],
+     ["现金流","26H1 末现金及等价物 98.77 亿 + 定期存款 31.24 亿；期内完成两次股份配售募资用于算力扩建"],
+     ["经常性收入","首次披露经常性收入 11.4 亿，占 39.3%——收入质量指标"]
+   ]],
+   ["算力与供给",[
+     ["规模","总算力 4.8 万P（26H1 披露口径，P 精度口径需在填充期与 PFLOPS 换算对齐）"],
+     ["算电协同","单位用电成本 −8%（20%），节约电费超 1,200 万；临港 AIDC 获信通院算效+算电双 5A 认证（业界首个）"],
+     ["芯片结构","国产算力适配 + 出海：参与建设香港最大国产智算中心、沙特落地出海国产算力集群"]
+   ]]
+ ]},
+ news:[
+   "2026-08-26 发布中期业绩：收入 29.11 亿（+23.4%）、首次 IFRS 盈利 6.17 亿、Non-IFRS 亏损收窄 67.3%",
+   "2026-07 大装置日均 Token 服务量超 2.4 万亿（+22 倍）；总算力 4.8 万P",
+   "2026-09-16 临港 AIDC 获信通院「算效+算电」双 5A 认证（业界首个）；沙特/香港国产算力出海"
+ ],
+ risk:["IFRS 盈利依赖公允价值变动，主业 Non-IFRS 仍亏损 3.86 亿","算力重资产扩张与配售节奏（股本稀释）","4.8 万P 的 P 精度口径未标明，与 FP16 稠密口径换算需核实"],
+ src:"来源：商汤 2026 中期业绩公告（港交所）/ 商汤官网新闻中心 / 证券时报 / 经济参考报。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ C · 青云科技 */
+{id:"qingcloud",n:"青云科技",full:"北京青云科技股份有限公司",cat:"C",dot:"#6d28d9",chips:"both",
+ code:"688316.SH · 科创板",listKey:"listed",listTxt:"已上市 2021-03",
+ val:"19.35 亿元",valSub:"2026-11-02 收盘 40.38 元 · 年初至今 −32.9%",
+ pw:"未披露",pwSub:"AI 算力调度平台口径 · 集群为合作承载",
+ biz:"混合云 + AI 算力调度平台（向智算调度软件与行业云转型）",
+ hi:"FY2025 收入 2.28 亿（−16.16%）· 亏损收窄 30.4%",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","C 独立算力云（软件调度型）：轻资产路线——混合云与 AI 算力调度平台，而非自持大规模集群"],
+     ["转型","从通用云收缩聚焦「算力调度 + 行业云」，收入下滑是主动结构调整"],
+     ["生态位","算力调度软件层玩家——是各地智算中心的「运营软件供给方」视角"]
+   ]],
+   ["资本与财务",[
+     ["业绩","FY2025：营收 2.28 亿（−16.16%，主动收缩）；归母净利 −6,666 万，同比收窄 30.38%"],
+     ["观察","体量小是最大现实——估值主要由调度平台卡位与订单驱动"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露自有规模；以调度平台统接合作智算中心资源"],
+     ["芯片结构","英伟达系 + 国产卡双轨适配（算力调度软件必须异构）"]
+   ]]
+ ]},
+ news:[
+   "FY2025 年报口径：营收 2.28 亿（−16.16%）、归母净利 −6,666 万（亏损收窄 30.38%）",
+   "待补：2026 智算调度平台中标 / 跨区域算力网运营项目"
+ ],
+ risk:["收入体量小（2.28 亿）与估值弹性错配","轻资产调度模式毛利高但收入确认依赖项目制"],
+ src:"来源：南方财富 2026-10-14 节引年报业绩 / 公司公告。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ C · 首都在线 */
+{id:"shoudu",n:"首都在线",full:"北京首都在线科技股份有限公司",cat:"C",dot:"#7c3aed",chips:"both",
+ code:"300846.SZ · 创业板",listKey:"listed",listTxt:"已上市 2020",
+ val:"81.81 亿元",valSub:"2026-11-02 收盘 16.18 元 · 年初至今 −29.1%",
+ pw:"GPU 云集群（全球节点）",pwSub:"26Q3 预付算力资源款 +58% · 算力设备押金口径大幅增加",
+ biz:"智算云 + 计算云 + IDC：全球云网一体化 GPU 云服务商",
+ hi:"26Q3 合同负债激增 111% · 预付算力资源款 +58%（需求侧验证）",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","C 独立算力云（GPU 云型）：GPU 云租赁 + 全球云网，面向大模型、出海企业"],
+     ["客户","AI 创业公司、互联网平台、出海企业——GPU 弹性租赁主场景"],
+     ["生态位","并行科技定增说明书中列为 GPU 云租赁主要竞争者"]
+   ]],
+   ["资本与财务",[
+     ["领先指标","26Q3 合同负债激增 111%、预付算力资源款 +58%、其他应收款（算力设备押金）+129%——三口径同向验证算力需求与资源采购加码"],
+     ["观察","预付款合计押金转化订单收入/机柜交付的节奏"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露具体 PFLOPS；全球 GPU 节点扩张，26Q3 资产负债表显著扩张"],
+     ["芯片结构","英伟达系为主 + 国产适配双轨（待核）"]
+   ]]
+ ]},
+ news:[
+   "2026 年三季报，合同负债 111% 激增、预付算力资源款 +58%、押金类应收 +129%（A股披露）",
+   "待补：智算订单公告、GPU 节点上架率、出海需求结构"
+ ],
+ risk:["GPU 重资产 + 价格战对毛利挤压","预付款激增但收入转化存在时滞风险"],
+ src:"来源：三个皮匠报告节引 A 股披露（2026-10）/ 并行科技定增募集说明书竞争格局章节。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ C · 并行科技 */
+{id:"paratera",n:"并行科技",full:"北京并行科技股份有限公司",cat:"C",dot:"#4338ca",chips:"both",
+ code:"920493.BJ · 北交所",listKey:"listed",listTxt:"已上市 2023（北交所）",
+ val:"50.42 亿元",valSub:"2026-11-02 收盘 83.22 元 · 年初至今 −37.2%",
+ pw:"超算云服务（算力池口径未披露）",pwSub:"合作算力为主 + 自建部分集群",
+ biz:"超算云 / 智算云 / 算力网络运营（HPC 为主的算力服务）",
+ hi:"FY2025 营收 11.1 亿（+69.56%）· 26 年定增推进",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","C 独立算力云（超算云型）：打通 HPC + AI 算力调度，面向科研/工业仿真/高校"],
+     ["规模","FY2025 营收 11.1 亿（+69.56%），毛利率 24.23%——北交所算力服务龙头"],
+     ["竞争","在定增说明书中列出的主要竞争者：阿里云、Rescale、优刻得、首都在线、中贝通信——「跨业态竞争」是行业常态佐证"]
+   ]],
+   ["资本与财务",[
+     ["定增","2026 年度向特定对象发行股票募集说明书（申报稿 2026-09-29）——为智算扩充调度资金"],
+     ["财务","FY2025：营收 11.1 亿（+69.56%），毛利率 24.23%"]
+   ]],
+   ["算力与供给",[
+     ["规模","算力池由公共算力+合作节点+自建组成，PFLOPS 口径未单独披露"],
+     ["芯片结构","异构算力调度常态（国产+英伟达双轨）"]
+   ]]
+ ]},
+ news:[
+   "FY2025 营收 11.1 亿（+69.56%）、毛利率 24.23%（业绩口径）",
+   "2026-09-29 披露年度定增募集说明书（申报稿），募资用于算力服务扩充",
+   "2026-10-14 龙头资金流入，成交额 7,600 万（中性动态）"
+ ],
+ risk:["客户结构偏科研/政企，毛利率天花板不高","体量小（11 亿）但增速高——高波动"],
+ src:"来源：并行科技 2026 年度定增募集说明书（巨潮 2026-09-29）/ 南方财富。代码由 839493 平移为 920493（北交所新规）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ D · 无问芯穹 */
+{id:"infinigence",n:"无问芯穹",full:"无锡/上海 无问芯穹人工智能科技有限公司",cat:"D",dot:"#0284c7",chips:"both",
+ code:"未上市",listKey:"private",listTxt:"未上市 · 累计融资超 22 亿元",
+ val:"累计融资超 22 亿（最新轮次为 B+?）",valSub:"2026-05 宣布超 7 亿元融资 · 投后估值未披露",
+ pw:"未披露",pwSub:"多元异构算力+软硬协同+MaaS 平台",
+ biz:"异构算力调度 + MaaS 平台 + 软硬协同优化（连接多元芯片与模型的中间层）",
+ hi:"2026-05 宣布超 7 亿元融资 · 累计披露超 22 亿",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","D Token 工厂（异构调度型）：连接多元异构算力（英伟达+国产多芯片）与上层模型服务——「算力拼多多」式的中间层"],
+     ["产品","MaaS 平台（多模型 API）+ 算力适配优化（张量编译等软硬协同）+ 推理加速"],
+     ["生态位","技术路线偏「底层优化」：跨芯片推理加速与异构调度，与硅基流动（模型聚合为主）形成差异化分工"]
+   ]],
+   ["资本事件",[
+     ["融资","2026-05 宣布超 7 亿元融资，累计公开披露规模超 22 亿元"],
+     ["用途","多元异构算力适配、模型服务和 AI 基础设施建设（官宣口径）"],
+     ["观察","无上市公司主体，估值口径未披露（一级市场口径）"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露自有集群规模；调度合作算力为主"],
+     ["芯片结构","双轨是业务本质——异构算力调度覆盖国产多芯片（昇腾/寒武纪/海光/沐曦等）+ 英伟达系"],
+     ["联动","推理加速能力与《LLM推理技术速查》量化/KV 优化路线直接相关"]
+   ]]
+ ]},
+ news:[
+   "2026-05 宣布完成超 7 亿元融资（累计披露超 22 亿元）",
+   "待补：异构算力适配覆盖的芯片清单 / MaaS 调用量口径"
+ ],
+ risk:["头部云厂商与大模型厂向中间层挤压（上下游同时变竞争者）","infrastructure 中间层护城河依赖技术代差，迭代快"],
+ src:"来源：网易财经 2026 中层市场报道（引官宣）/ 证券时报。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ D · 趋境科技 */
+{id:"qujing",n:"趋境科技",full:"北京趋境科技有限公司",cat:"D",dot:"#0e7490",chips:"both",
+ code:"未上市",listKey:"private",listTxt:"A 轮 · 半年内累计融资超 10 亿元",
+ val:"A 轮（半年累计超 10 亿）",valSub:"估值口径未披露",
+ pw:"共建 Token 产能（规模未披露）",pwSub:"ATaaS 平台 · 高品质词元产能",
+ biz:"ATaaS（AI Token as a Service）：Token 工厂建设与联合运营 + 自营 Token 供给",
+ hi:"2026-07-13 宣布 A 轮（汇融基金领投）· 半年累计超 10 亿",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","D Token 工厂（自营+共建双模式）：自营面向模型厂/互联网平台/AI 应用公司售 Token；共建面向上市公司/国央企/智算中心提供 Token 工厂建设与联合运营"],
+     ["定位","ATaaS = AI Token as a Service——把 token 生产做成基础设施服务（AI Coding、智能客服、办公套件、企业 Agent 四大场景）"],
+     ["技术抓手","模型性能、推理效率、资源利用、缓存复用、服务隔离、质量监控、成本控制——全链路优化（官宣口径）"]
+   ]],
+   ["资本事件",[
+     ["融资","2026-07-13 宣布 A 轮，由河南投资集团旗下汇融基金领投；半年内累计融资超 10 亿元"],
+     ["资金用途","扩大高品质词元产能储备 + ATaaS 平台升级"]
+   ]],
+   ["算力与供给",[
+     ["规模","共建 Token 产能口径未披露（国央企/智算中心侧）"],
+     ["芯片结构","双轨（待核）——共建模式下国产算力占比通常高"]
+   ]]
+ ]},
+ news:[
+   "2026-07-13 A 轮融资官宣（汇融基金领投，半年累计超 10 亿元）",
+   "待补：共建 Token 工厂合作方清单 / 产能投放进度"
+ ],
+ risk:["ATaaS 共建模式回款周期依赖国央企预算节奏","未披露估值与经营数据（一级市场早期）"],
+ src:"来源：网易财经 2026 报道（官宣口径）/ 证券时报。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ D · 基流科技 */
+{id:"jiliu",n:"基流科技",full:"北京基流科技有限公司（MegaMatrix 系?）",cat:"D",dot:"#0369a1",chips:"both",
+ code:"递表（港交所）",listKey:"filed",listTxt:"2026-04-29 递表",
+ val:"未披露（递表）",valSub:"IPO 估值以聆讯后定价为准",
+ pw:"算力集群产品+运营服务（规模待核）",pwSub:"与大模型厂商深度绑定的集群运营方",
+ biz:"AI 算力集群产品 + 集群运营服务（训练/推理集群全生命周期交付）",
+ hi:"2025 收入 5.2 亿（集群产品 4.37 亿 + 运营服务 8,364 万）",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","D 算力调度/集群运营：以集群整机交付为切入，运营服务占比快速提升"],
+     ["收入结构","FY2025：总收入 5.20 亿 = 集群产品 4.37 亿（84%）+ 运营服务 8,363.7 万（16%，2024 年仅 5.2%）——业务重心向「卖服务」迁移"],
+     ["运营服务","从机房建设向集群托管运营（value-add 分成）延伸"]
+   ]],
+   ["资本事件",[
+     ["IPO","2026-04-29 递交港交所上市申请——与硅基流动同赛道先后递表"],
+     ["观察","聆讯/挂牌节奏（时效字段）以披露易为准"]
+   ]],
+   ["算力与供给",[
+     ["规模","交付集群规模 PFLOPS 口径待核（招股书细节填充期补）"],
+     ["绑定","为头部大模型厂商训练集群做建设运营——绑定单一生态的风险待评估"]
+   ]]
+ ]},
+ news:[
+   "2026-04-29 递表港交所；FY2025 收入 5.20 亿（产品 4.37 亿 + 运营 8,364 万，运营占比 5.2%→16.1%）",
+   "待补：大客户结构 / 在管集群 PFLOPS / IPO 进度"
+ ],
+ risk:["两大客户高度集中（招股书披露的常见风险）","集群产品一次性收入波动大，运营服务连续性尚未充分验证"],
+ src:"来源：网易财经 2026 报道（招股书口径）/ 证券时报。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ E · DeepSeek */
+{id:"deepseek",n:"DeepSeek",full:"杭州深度求索人工智能基础技术研究有限公司",cat:"E",dot:"#4D6BFE",chips:"cn",
+ code:"未上市（幻方量化持股）",listKey:"private",listTxt:"不融资 · 幻方系",
+ val:"—",valSub:"无公开融资/估值口径（母公司幻方为量化私募）",
+ pw:"自建+租用混部",pwSub:"API 并发上限 500-2500 · K3 发布后曾因算力瓶颈暂停 C 端新订阅",
+ biz:"开源权重模型（V4/V4.1-Flash/R 系）+ API（峰谷分时定价）——国内 token 价格锚",
+ hi:"V4.1-Flash 09-14 起接管 deepseek-v4-pro 路由（底层切换）· 定价两轮下调",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","E 大模型公司（极致效率型）：V4 挤压式 MoE + DSA 稀疏注意力路线，训练与推理成本控制即护城河"],
+     ["Token 业务","API 峰谷分时定价：V4-Pro ¥9/¥27（高峰），Flash ¥2/¥8——国内旗舰定价锚（详见《AI模型速查表》）"],
+     ["开源","MIT 权重开放，社区 GGUF 全档——拖动整个国内推理生态的理论最大单变量"],
+     ["资金","幻方量化自有资金为主（不融资叙事），无外部股东压力"]
+   ]],
+   ["算力与训练",[
+     ["规模","未披露自有算力规模；API 并发上限（500/2,500）与 C 端暂停订阅事件（2026-07-19 K3 算力瓶颈声明? 时间口径详见下条备注）是算力约束的间接证据"],
+     ["芯片结构","国产卡承载叙事强（与开源生态深度耦合），具体结构未披露"],
+     ["瓶颈事件","K3 发布后因算力瓶颈暂停 C 端新订阅——「模型代际领先但产能受限」的标志性案例"]
+   ]]
+ ]},
+ news:[
+   "2026-09-14 起 API 端 deepseek-v4-pro 请求路由至 V4.1-Flash（模型名不变底层已换，计费/质量口径注意）",
+   "V4 与 V R 系合并：推理按任务自动决定思考深度；定价两轮下调（官方公告）",
+   "待补：开源生态托管分布ube（是否仍以自有 API 为主渠道）与产能恢复情况"
+ ],
+ risk:["算力产能是最直接的增长约束（暂停订阅事件为例）","A 股概念公司众多，与其无股权或业务关系（辨识蹭概念）"],
+ src:"来源：DeepSeek 官方公告 / 《AI模型速查表》深度求索条目（定价口径 2026-10 维护）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ E · MiniMax */
+{id:"minimax",n:"MiniMax",full:"稀宇科技（上海）有限公司",cat:"E",dot:"#7C3AED",chips:"both",
+ code:"00100.HK · 港股（WVR）",listKey:"listed",listTxt:"已上市 2026-01-09 · WVR 结构",
+ val:"595.69 亿港元",valSub:"2026-11-02 收盘 169.00 港元（+4.77%）· 距 3-18 高点 1,330 港元 −87%",
+ pw:"未披露",pwSub:"视频（Hailuo）+ 文本（M 系）双线推理集群",
+ biz:"M 系文本模型（M1 开源→M3 闭源）+ Hailuo 视频系 + 海螺产品矩阵（全球用户）",
+ hi:"26H1 收入 1.2 亿美元（+283%）· 07 再融资 160 亿港币 · 闫俊杰捐 5% 股份",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","E 大模型公司（C 端全球化模型产品）：API 供 token（国内+海外双通道）+ 自营 toC 产品（海螺 AI、Talkie 等）"],
+     ["开源策略","从全开源（M1 Apache 2.0）转向主力闭源（M3），开源维护收缩"],
+     ["股东","阿里巴巴为最大机构股东（约 12%）；闫俊杰直接持股约 25% + WVR 高倍投票权"]
+   ]],
+   ["资本事件",[
+     ["上市","2026-01-09 港股上市（00100.HK，MINIMAX-W），发行价 165 港元"],
+     ["再融资","2026-07：约 95 亿港元新股配售 + 65 亿港元零息可转债，合计约 160 亿港元"],
+     ["治理","闫俊杰宣布零薪酬 + 拿出个人 5% 股份（4% 团队激励 + 1% 开源社区，四年内）"]
+   ]],
+   ["财务与算力",[
+     ["业绩","26H1 收入 1.2 亿美元（+283.1%，为 2025 全年 1.5 倍）；亏损 3.58 亿美元（−11%）；毛利率 12.1%→17.9%（+5.8pct）"],
+     ["算力","规模未披露；研发开支 +138.8% 显著低于收入增速（283%）——推理效率改善红利"],
+     ["定价","M3 旗舰 ¥2.10/¥8.40（≤512K，聚合站 9 月口径?）——低价高并发路线（对齐《AI模型速查表》）"]
+   ]]
+ ]},
+ news:[
+   "2026-07-10 完成 160 亿港元再融资（95 亿配售+65 亿可转债）；CEO 宣布零薪酬并捐 5% 股份",
+   "26H1 收入 1.2 亿美元（+283%）、亏损同比收窄 11%、毛利率 12.1%→17.9%",
+   "11-02 港股收盘 170.3 港元（+5.58%，雪球/富途口径?）——距 3-18 高点 1,330 港元回撤约 87%，波动巨大"
+ ],
+ risk:["WVR 结构创始团队所有权稀释（四分之一）与投票权依赖并存","视频多模态烧钱与 C 端全球化变现的平衡","股价 728% 振幅——典型高波动叙事型标的"],
+ src:"来源：招股书/财新/经济参考报 26H1 经营数据（2026-08）/ 证券时报 / 老虎财经。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ E · 月之暗面 */
+{id:"moonshot",n:"月之暗面",full:"北京月之暗面科技有限公司（Kimi）",cat:"E",dot:"#16191E",chips:"both",
+ code:"拟港股（未递表?）",listKey:"filed",listTxt:"Pre-IPO · 2026-07 拟启动 500 亿美元轮",
+ val:"拟 Pre-IPO 估值 500 亿美元?",valSub:"2026-07 媒体口径 · 前值 2025 底 43 亿美元 · 以最终递表为准",
+ pw:"未披露",pwSub:"K3 发布后曾暂停 C 端新订阅（算力瓶颈侧写）",
+ biz:"Kimi 系模型（K3 万亿 MoE 开放权重 + C 端长上下文应用标杆）",
+ hi:"K3 2.8T 参数开放权重 · 累计融资超 376 亿元 · 社保基金入股",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","E 大模型公司（C 端长上下文标杆）：Kimi C 端订阅 + API token 外供（¥20/¥100，国产旗舰最高输出价）"],
+     ["技术","K3：MoE 2.8T-104B?，KDA 注意力（长上下文解码 6.3×），1M 上下文；开放权重（自定义许可）"],
+     ["股东","阿里 A+轮领投（单一最大股东）、腾讯 B 轮超额跟投、美团龙珠 D 轮超 2 亿美元、社保基金长三角科创基金 2026-07 工商确权"]
+   ]],
+   ["资本事件",[
+     ["估值","2026-07 拟启动 500 亿美元 Pre-IPO 轮（媒体口径?）；2025 底为 43 亿美元——9 个月 11 倍"],
+     ["节奏","累计融资超 376 亿元人民币；创始团队持股稀释至六成多；传说最快 6 个月内港股上市——尚未见正式递表（以披露易为准）"],
+     ["产能","K3 发布后（2026-07-19 声明）因算力瓶颈暂停 C 端新订阅——估值扩张与算力供给的错配"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露；C 端暂停订阅即产能上限侧写"],
+     ["建议","正式递表后招股书将披露算力成本结构——填充期复核"]
+   ]]
+ ]},
+ news:[
+   "2026-07 K3 开放权重发布（1.56TB MXFP4，建议 64+ 卡超节点）；随后暂停 C 端新订阅（07-19）",
+   "2026-07 拟启动 500 亿美元 Pre-IPO（媒体?）；社保长三角科创基金工商确权",
+   "待补：正式递表文件 / 算力成本与调用量结构（招股书口径优先）"
+ ],
+ risk:["500 亿美元估值与 K 系商业化变现之间的空窗","母公司依赖：阿里/腾讯同时是股东与算力供给方（关联交易结构复杂）"],
+ src:"来源：环球老虎财经 2026-07 上市结构报道（含估值/稀释数据）/ 21 世纪经济报道（累计融资）/ 官方公告。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ E · 阶跃星辰 */
+{id:"stepfun",n:"阶跃星辰",full:"上海阶跃星辰智能科技有限公司（StepFun）",cat:"E",dot:"#be185d",chips:"both",
+ code:"拟港股（拆红筹）",listKey:"filed",listTxt:"Pre-IPO · 2026-05 完成 25 亿美元轮",
+ val:"25 亿美元（2026-05 Pre-IPO）",valSub:"拆红筹冲港股 · 上市窗口期待",
+ pw:"未披露",pwSub:"上海智算生态绑定（云赛/上海国资持股权）",
+ biz:"Step 系多模态大模型（Step-R / 视频 / 语音Omni）+ 消费级 AI 产品叙事（STEPX Neo AI 手机）",
+ hi:"2026-05 完成 25 亿美元 Pre-IPO · 07-13 发布 STEPX Neo AI 手机",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","E 大模型公司（上海旗舰）：多模态全栈（文本/语音/视频/Omni）+ 终端硬件耦合（AI 手机）"],
+     ["生态位","上海大模型生态的嫡系——与上海市人工智能算力公共平台、仪电集团关系紧密（云赛智联持有其 10% 股权?，口径见来源）"],
+     ["叙事","美股式「consumer AI」路线：手机 + 模型绑定拉估值"]
+   ]],
+   ["资本事件",[
+     ["融资","2026-05 完成 25 亿美元 Pre-IPO 融资——估值量级为国产未上市模型公司前列"],
+     ["结构","拆红筹，冲刺港股（2026 时点）"],
+     ["观察","25 亿美元估值折约 180 亿人民币——低于智谱/月之暗面（万亿/500亿美元），「上海系」溢价空间看资本联动"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露"],
+     ["绑定","上海智算资源（国资平台 + 国产算力适配）预计为训练主力——填充期核"]
+   ]]
+ ]},
+ news:[
+   "2026-05 完成 25 亿美元 Pre-IPO 融资，拆红筹冲港股",
+   "2026-07-13 发布 STEPX Neo AI 手机（消费级 AI 产品叙事）",
+   "云赛智联公告中提及的股权关联（上海智算公司股东，云赛持股 10%）——区域资本纽带"
+ ],
+ risk:["Pre-IPO 后上市窗口依赖港股流动性","消费级硬件叙事与模型公司的收入结构错配风险"],
+ src:"来源：环球老虎财经 2026 报道（25 亿美元/STEPX Neo）/ 南方财富（云赛-阶跃股权口径，上海智算公司层面持股结构?）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ F · 阿里云 */
+{id:"aliyun",n:"阿里云",full:"阿里云计算有限公司（阿里巴巴集团分部）",cat:"F",dot:"#FF6A00",chips:"both",
+ code:"集团：BABA.US / 9988.HK",listKey:"listed",listTxt:"集团上市 · 云业务为分部（未独立上市）",
+ val:"港股 19,792.5 亿港元",valSub:"集团口径：09988.HK 2026-11-02 收盘 99.45 港元（+1.32%）· BABA.US 10-30 收盘 98.04 美元",
+ pw:"万卡级集群多次官宣（规模未披露）",pwSub:"三年 3,800 亿 AI 投入计划（2025-02 宣布）",
+ biz:"国内公有云第一（IaaS/PaaS）+ 通义千问系模型 + 百炼 MaaS 平台",
+ hi:"CEO 吴泳铭：AI 算力短缺或持续到 2030 · 三年 3,800 亿投入",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","F 云大厂 MaaS（国内公有云第一）：云基础设施 + 自研模型（通义 Qwen 全系开源+闭源）+ 百炼聚合平台"],
+     ["Token 业务","API 通过百炼平台定价分发；Qwen3.8-Max / 3.5 系开源拉动生态调用（对齐《AI模型速查表》）"],
+     ["地位","国内公有云 IaaS 第一，规模优势+生态绑定（依易观数据口径?）——F 类中资本开支最激进"]
+   ]],
+   ["资本与开支",[
+     ["投入","2025-02 宣布三年 3,800 亿元 AI 基建投入（集团公告口径）——亚太最大单体算力扩张计划之一"],
+     ["观点","2026-08 业绩会 CEO 吴泳铭：AI 算力短缺至少持续到 2030——F 类供给紧张的旗舰论据"],
+     ["观察","云业务收入结构中 AI 相关占比（季度披露口径待补）"]
+   ]],
+   ["算力与供给",[
+     ["规模","万卡集群多次官宣，PFLOPS 口径未披露（建议按基地/集群逐项核）"],
+     ["芯片结构","英伟达 + 自研（平头哥含光?）+ 国产适配双轨"],
+     ["联动","集团资本开支 → IDC 落地 → 上游整机链（浪潮等）受益——产业链推演起点"]
+   ]]
+ ]},
+ news:[
+   "2026-08 业绩沟通会：吴泳铭称 AI 算力短缺或持续到 2030；同期腾讯刘炽平称数月前下单的算力订单售价已高出采购时 30%+",
+   "2025-02：宣布三年 3,800 亿元 AI 投入（集团口径）",
+   "Qwen3.8-Max 2026-08-13 开放权重（2.4T-A95B，自定义许可）——模型侧见《AI模型速查表》"
+ ],
+ risk:["集团层面多元业务，分部算力口径不易拆","3,800 亿投入的回报周期与云业务增长承压并存"],
+ src:"来源：经济参考报 2026-08（业绩会表态）/ 集团 2025-02 公告 / 《AI模型速查表》阿里条目。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ F · 腾讯云 */
+{id:"tencent",n:"腾讯云",full:"腾讯云计算（腾讯控股分部）",cat:"F",dot:"#0052D9",chips:"both",
+ code:"集团：0700.HK",listKey:"listed",listTxt:"集团上市 · 云业务为分部",
+ val:"港股 35,661 亿港元",valSub:"集团口径：00700.HK 2026-11-02 收盘 392.20 港元（+2.24%）",
+ pw:"未披露",pwSub:"训练/推理集群扩容中 · 订单涨价 30%+ 口径（2026-08）",
+ biz:"云 + 混元大模型系（开源 Hy 系列 + TI 平台）+ 企业微信/元宝生态",
+ hi:"混元 Hy4 preview 开源（Apache 2.0）· 算力订单现价高出采购时 30%+",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","F 云大厂：云基础设施 + 混元模型体系（Hy 系全开源放量，2026-08-28 Hy4 preview）+ TI 平台 MaaS 分发"],
+     ["生态","混元全栈在腾讯系产品（元宝/ima/CodeBuddy）内闭环调优 + 对外卖 token（TokenHub/OpenRouter 双通道）"],
+     ["牌局","混元 Hy4 Apache 2.0 开源 + 5.2 版价格锚（¥6/¥18）——腾讯从游戏/社交主业切入基础模型的旗舰叙事"]
+   ]],
+   ["资本与财务",[
+     ["观点","2026-08 刘炽平：几个月前的部分算力采购订单，现市场售价已高出采购时 30%+——算力资源涨价的直接证据"],
+     ["观察","腾讯资本开支增速 vs 阿里的 3 年 3,800 亿——F 类两大阵营的开支节奏差异"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露"],
+     ["芯片结构","英伟达系为主 + 国产适配（燧原科技为其重要投资与采购标的——详见「国产AI芯片」分组的燧原条目）"],
+     ["联动","腾讯既是燧原大股东属性的大客户（占其营收八成口径），也是云厂竞价方——供应链与竞争双重身份"]
+   ]]
+ ]},
+ news:[
+   "2026-08-28 混元 Hy4 preview 开源（MoE 770B-49B，Apache 2.0，1M 上下文）· 模型侧见《AI模型速查表》",
+   "2026-08 刘炽平：已下单算力订单现售价较采购时高 30%+（业绩会口径）",
+   "待补：年度资本开支指引 / 智算中心自建进度"
+ ],
+ risk:["宏观经济与游戏业务主导集团现金流，算力 pondering 周期错配","开源模型商业化路径（Hy4 定价低）考验 MaaS 盈利"],
+ src:"来源：经济参考报 2026-08 / 《AI模型速查表》腾讯条目 / 腾讯控股公告。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ F · 百度智能云 */
+{id:"baiduyun",n:"百度智能云",full:"百度智能云（百度集团分部）",cat:"F",dot:"#2932E1",chips:"cn",
+ code:"集团：BIDU.US / 9888.HK",listKey:"listed",listTxt:"集团上市 · 云业务为分部",
+ val:"港股 2,067.9 亿港元",valSub:"集团口径：09888.HK 2026-11-02 收盘 75.65 港元 · BIDU.US 10-30 收盘 76.40 美元",
+ pw:"未披露",pwSub:"千卡/万卡昆仑芯集群官宣 · 规模口径待核",
+ biz:"云 + 千帆 MaaS 平台 + 文心大模型系 + 昆仑芯（自研芯片，G 类联动）",
+ hi:"ERNIE 4.5 开源转向（Apache 2.0）· 昆仑芯双线升级",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","F 云大厂（差异化：自研芯片）：千帆平台聚合分发 + 文心系模型 + 昆仑芯自供——「模型+芯片耦合」最紧的 F 类"],
+     ["开源转向","ERNIE 4.5 系列 2025-06 全系开源（Apache 2.0，3B→424B）——从闭源防御转向开源拦截"],
+     ["生态","搜索基因 -> 企业级 RAG/知识库场景优势（千帆的差异化主打）"]
+   ]],
+   ["资本与开支",[
+     ["观察","集团口径 AI 收入（智能云业务）季度增速连续（具体数字待补）"],
+     ["联动","昆仑芯自产自销模式（G 类条目）决定其算力成本结构与 F 类其他三家不同——自供比例是关键观察点"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露；昆仑芯万卡集群官宣（媒体口径?）"],
+     ["芯片结构","自研昆仑芯为主 + 英伟达系存量——F 类中国产化率最高的口径"]
+   ]]
+ ]},
+ news:[
+   "ERNIE 4.5 全系开源（Apache 2.0 · 多尺寸家族），百度开源战略转向之作（模型侧见《AI模型速查表》）",
+   "千帆平台聚合分发 + 昆仑芯片迭代（具体代次以官宣为准）",
+   "待补：季度智能云增速 / 昆仑芯集群规模"
+ ],
+ risk:["集团广告基本盘承压，算力开支弹药相对阿里/腾讯紧","文心系模型在第一梯队的存在感渐弱"],
+ src:"来源：公司公告与公开报道框架 / 《AI模型速查表》百度条目。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ F · 华为云 */
+{id:"huaweiyun",n:"华为云",full:"华为云计算技术有限公司",cat:"F",dot:"#C7102E",chips:"cn",
+ code:"未上市",listKey:"private",listTxt:"未上市 · 华为整体非上市",
+ val:"—",valSub:"无公开估值（华为非上市）",
+ pw:"未披露",pwSturb:"",pwSub:"盘古 + ModelArts + 昇腾生态承载",
+ biz:"云 + 盘古大模型 + ModelArts 平台——同时是昇腾生态最强商业推手",
+ hi:"昇腾 Atlas 910 系列生态放量 · 盘古行业模型深耕",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","F 云大厂（未上市）：云基础设施 + 盘古行业大模型（不主打通用 toC）+ ModelArts 开发平台"],
+     ["位差","国内公有云第二梯队头部，但差异化在「政企信创+昇腾国产化」一体两面——与 F 类其他四家不同，平台与芯片自供深度耦合"],
+     ["生态","昇腾 + 鲲鹏 + 欧拉 + 昇思 MindSpore 全栈——把「生态即产品」做成商业模式"]
+   ]],
+   ["资本与开支",[
+     ["口径","华为非上市——无公开市值/估值；年度报告披露口径有限"],
+     ["观察","昇腾整机柜 Atlas 900/910 系列放量节奏（见 G 类华为昇腾条目——两家共享供应链叙事）"]
+   ]],
+   ["算力与供给",[
+     ["规模","未披露；国内智算中心（各地「人工智能计算中心」模式）大量以昇腾集群落地"],
+     ["芯片结构","国产全栈（昇腾）"],
+     ["联动","信创/政企场景的国产算力供给事实上主要由昇腾生态承接——B/C/D 类的国产化率都与昇腾产能挂钩"]
+   ]]
+ ]},
+ news:[
+   "盘古模型持续迭代（行业模型路线：矿山/气象/医药等）——官方发布会口径",
+   "智谱 GLM-5 代训练以昇腾为主（公开口径）——昇腾承载旗舰模型训练的标志事件（E 类联动）",
+   "待补：昇腾 910 系列年出货量口径? / 华为云智算收入占比"
+ ],
+ risk:["非上市主体，估值恒为「—」，只能以生态规模侧写","地缘政治下的供应链产能是全行业级风险"],
+ src:"来源：华为官网/公开报道框架（昇腾口径另见 G 类同名条目）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ G · 华为昇腾 */
+{id:"ascend",n:"华为昇腾",full:"华为技术有限公司（昇腾计算业务线）",cat:"G",dot:"#C7102E",chips:"cn",
+ code:"未上市",listKey:"private",listTxt:"未上市 · 华为整体非上市",
+ val:"—",valSub:"无公开估值口径",
+ pw:"—（芯片商 · 供给能力本身）",pwSub:"昇腾 910 系 + Atlas 整机柜 + CloudMatrix 超节点",
+ biz:"国产 AI 芯片 + 集群（910B/910C/910D? 代际以官宣为准）+ CANN 软件栈 + 昇思生态",
+ hi:"国产算力事实主力 · 智谱 GLM-5 以昇腾为主训练的标杆落地",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","G 国产 AI 芯片：昇腾 NPU + Atlas 整机/集群 + CloudMatrix 超节点（对标 NVL72 的国产方案）"],
+     ["地位","国产算力事实主力——英伟达对华受限窗口期内，国内智算中心的国产供给大头"],
+     ["软件栈","CANN + MindSpore 昇思 + MindIE 推理引擎——对齐《LLM推理技术速查》西侧条目"]
+   ]],
+   ["供给与产能",[
+     ["代际","910B → 910C → 后续代次：具体出货与良率口径以官宣为准（不作推测）"],
+     ["产能","中芯代工口径受限——先进制程产能是全行业硬约束（媒体口径?）"],
+     ["超节点","CloudMatrix 384 超节点（对标 NVL72）——集群级对抗英伟达的国产路线"]
+   ]],
+   ["生态联动",[
+     ["B 端","CloudMatrix 超节点方案是国产替代时间窗口锚点之一（不受 B200/GB200 对华限制影响——口径红线见③）"],
+     ["G 端","智谱 GLM-5 代以昇腾训练（公开口径）——国产训练侧最重落地证据"]
+   ]]
+ ]},
+ news:[
+   "CloudMatrix 超节点方案商业化推进（以华为全联接大会等官宣口径为准）",
+   "GLM-5/5.3、ERNIE 等旗舰模型在昇腾上训练/推理的公开适配案例持续增加",
+   "待补：910 下一代规格 / 良率与出货量（以官方渠道为准）"
+ ],
+ risk:["先进制程代工依赖（重大不确定性来源）","生态迁移成本（CUDA 生态护城河）"],
+ src:"来源：华为公开口径框架（规格/出货量数据以官方为准，不采信小道口径）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ G · 海光信息 */
+{id:"hygon",n:"海光信息",full:"海光信息技术股份有限公司",cat:"G",dot:"#9f1239",chips:"cn",
+ code:"688041.SH · 科创板",listKey:"listed",listTxt:"已上市 2022-08 · 与中科曙光整合推进中",
+ val:"4,114.08 亿元",valSub:"2026-11-02 收盘 177.00 元（+4.00%）· PE(TTM) 120.0",
+ pw:"—（芯片商）",pwSub:"CPU（海光系列）+ DCU（深算系列）；中科曙光为第一大股东",
+ biz:"国产 CPU（x86 兼容）+ DCU 加速卡双主线 — — 「CPU+DCU」双赛道国产领军",
+ hi:"26Q1-Q3 营收 149.55 亿（+57.6%）· 归母净利 28.47 亿（+45.1%）· 扣除股份支付 +76.9%",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","G 国产 AI 芯片（x86 生态派）：CPU 兼容 x86 指令集 + DCU（GPGPU，类 ROCm 生态）——迁移成本最低的国产路线"],
+     ["产品","海光 CPU（四号/五号在研）+ 深算 DCU（三号量产 / 四号在研）；新发布 1000 系列嵌入式工控 CPU（延伸边端）"],
+     ["客户","政务、金融、电信（x86 迁移敏感行业）+ 互联网推理场景——齐鲁银行百卡级 DCU 算力池项目（2026-10 落地）"]
+   ]],
+   ["资本与财务",[
+     ["业绩","26Q1-Q3：营收 149.55 亿（+57.58%）、归母净利 28.47 亿（+45.12%）；Q3 单季 58.56 亿（+45.46%）——增速稳定"],
+     ["备货","Q3 加大备货（存货周转 0.29 次），管理层称 Q4 起转化为收入与现金流（业绩会口径）"],
+     ["毛利率","26Q1-Q3 销售 58.73%→26Q3 环比回升（产品结构优化）——G 类中毛利率最稳的现金牛形态"]
+   ]],
+   ["算力与供给",[
+     ["适配","DCU 已适配 DeepSeek / Qwen3 / 混元 / 智谱等 400+ 主流大模型（覆盖绝大多数非闭源模型）——十亿级端侧到千亿级训练全场景（官方口径）"],
+     ["路线图","新一代 CPU / DCU 在算力密度、互联带宽上显著升级（业绩会口径），海光五号 + 深算四号进展顺利"],
+     ["联动","单卡参数 → 《AI芯片参数速查表》海光条目"]
+   ]]
+ ]},
+ news:[
+   "2026-10-19 三季报：26Q1-Q3 营收 149.55 亿（+57.58%）、归母净利 28.47 亿（+45.12%）；扣股份支付 +76.9%",
+   "2026-10-26 DCU 落地齐鲁银行国产化 AI 算力池（百余块 DCU，OCR/多模态/千亿参数大模型场景）",
+   "2026-10-22 业绩会：备货 Q4 转化、海光五号 CPU 与深算四号 DCU 研发按既定路线推进",
+   "行业参考：2026-09-22 与中科曙光整合预案披露后推进（换股合并口径以公告为准?）"
+ ],
+ risk:["与中科曙光整合的资产/股权结构复杂性","x86 授权（AMD）的长期合规续期","先进制程代工产能约束"],
+ src:"来源：26Q3 定期报告与业绩会（经济参考报/科创板日报 2026-10）/ 证券时报。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ G · 摩尔线程 */
+{id:"mthreads",n:"摩尔线程",full:"摩尔线程智能科技（北京）股份有限公司",cat:"G",dot:"#be123c",chips:"cn",
+ code:"688795.SH · 科创板",listKey:"listed",listTxt:"已上市 2025-12-05",
+ val:"1,525.48 亿元",valSub:"2026-11-02 收盘 324.55 元 · PE(TTM) 亏损口径 · 年初至今 −44.8%",
+ pw:"—（芯片商）· 夸娥智算集群",pwSub:"MUSA 全功能 GPU 架构 · KUAE 夸娥集群方案",
+ biz:"全功能 GPU（MUSA 架构：图形 + AI 计算）+ 夸娥智算集群方案 + MUSA 软件栈",
+ hi:"26H1 营收 17.36 亿（+147.4%）· 亏损收窄 95.7% 至 −1,156 万 · 拟港股二次上市筹备",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","G 国产 AI 芯片：全功能 GPU（MUSA 架构，图形+AI 计算双栈）——国产 GPU 中「功能最全」路线"],
+     ["战略","夸娥 KUAE 智算集群方案（KUAE-8000 等）—— 以集群级方案（软硬一体）交付而非单卡"],
+     ["生态","MUSA 软件栈 + 国产显卡驱动 + 开源社区共建（对标 CUDA 的长期工程）"]
+   ]],
+   ["资本与财务",[
+     ["业绩","26H1 营收 17.36 亿（+147.42%，超 2025 全年 15.06 亿）；归母亏损 −1,156 万，从 −2.71 亿收窄 95.73%——距离盈亏平衡最近"],
+     ["上市","2025-12-05 科创板（发行价 114.28 元）；上市后已启动港股二次上市筹备（媒体报道口径）"],
+     ["估值","首日收盘涨幅 425%（四小龙中最温和 vs 沐曦 693%）——GPU 上市潮的定价参考锚"]
+   ]],
+   ["算力与供给",[
+     ["商业化","量产交付节奏以季度/--快报为准；夸娥集群是规模化供货的主要载体"],
+     ["触发器","若 26H2 转正——国产 GPU 四小龙第二家盈利（继沐曦之后）"]
+   ]]
+ ]},
+ news:[
+   "2026-08-09 中报：26H1 营收 17.36 亿（+147%）、亏损收窄 95.7% 至 −1,156 万",
+   "26H1 报告称「全功能 GPU 市场认可度提升 + 夸娥智算集群商业化加速 + 稳定规模化供货」",
+   "已启动港股 IPO 筹备（2026-08 媒体口径，与沐曦同期）——A+H 双平台策略"
+ ],
+ risk:["盈利尚未转正（但已最接近）","全功能 GPU 战线长（图形+AI）研发费用刚性","港股二次上市摊薄"],
+ src:"来源：金融新闻网 2026-09-01（中报口径）/ A 股基本信息表 / 搜索结果（港股筹备为媒体口径?）。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ G · 沐曦股份 */
+{id:"metax",n:"沐曦股份",full:"沐曦集成电路（上海）股份有限公司",cat:"G",dot:"#a21caf",chips:"cn",
+ code:"688802.SH · 科创板",listKey:"listed",listTxt:"已上市 2025-12-17",
+ val:"1,866.47 亿元",valSub:"2026-11-02 收盘 466.50 元 · PE(TTM) 957 · 年初至今 −19.6%",
+ pw:"—（芯片商）",pwSub:"曦云 C 系训练级 GPU（自研 IP）+ 曦思 N 系推理",
+ biz:"高性能通用 GPU（自研 IP 全流程国产供应链闭环）——国产 GPU 四小龙中唯一盈利",
+ hi:"26H1 归母净利 6.12 亿（四小龙首家盈利）· 曦云 C600 量产 · 拟港股筹备",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","G 国产 AI 芯片：高性能通用 GPU，自主 IP 核 + 全流程国产供应链——信创口径最纯"],
+     ["产品","曦云 C600（训练，2025-10 发布，基于自主 GPU IP）+ 曦思 N 系（推理）——推理起量先行是盈利关键"],
+     ["先发","26H1 率先盈利（归母 +6.12 亿）+ 与寒武纪合计 29.23 亿——国产 AI 芯片商业化的实证双子星"]
+   ]],
+   ["资本与财务",[
+     ["业绩","26H1 归母净利 6.12 亿（+ 同比大幅 +?）；营收口径待补（中报细节）"],
+     ["上市","2025-12-17 科创板（发行价 104.66 元）；首日收盘涨幅 692.95%——四小龙中最热"],
+     ["后续","已启动港股二次上市筹备（2026-08 媒体口径，与摩尔线程同期）"]
+   ]],
+   ["算力与供给",[
+     ["商业化","单次盈利是「点」，后续季度连续性验证是「线」——毛利率与客户结构待中报/年报复核"],
+     ["联动","单卡参数 → 《AI芯片参数速查表》沐曦条目"]
+   ]]
+ ]},
+ news:[
+   "26H1 归母净利 6.12 亿——国产 GPU 四小龙中首家实现盈利（金融新闻网口径）",
+   "2025-10 发布曦云 C600：基于自主知识产权 GPU IP，芯片设计到封装测试全流程国产供应链闭环",
+   "2025-12-17 科创板上市（发行价 104.66 元，首日 +692.95%）· 2026-08 启动港股筹备?"
+ ],
+ risk:["盈利可持续性待验证（单次半年报口径）","科创板高 PS 估值（首日暴涨后）的消化期"],
+ src:"来源：金融新闻网 2026-09-01 / A 股基本信息表 / 百度 GPU 四小龙词条。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ G · 壁仞科技 */
+{id:"biren",n:"壁仞科技",full:"壁仞科技（上海）股份有限公司",cat:"G",dot:"#831843",chips:"cn",
+ code:"06082.HK · 港股",listKey:"listed",listTxt:"已上市 2026-01-02 · 港股国产 GPU 第一股",
+ val:"548.20 亿港元",valSub:"2026-11-02 收盘 20.08 港元 · 20 日 −44.1%（配售后承压）",
+ pw:"—（芯片商）",pwSub:"BR100 系 + BIRENSUPA 软件平台",
+ biz:"GPGPU 通用智能算力芯片（BR 系训练为主）+ 软件平台",
+ hi:"26H1 营收 12.36 亿（+1,997.6%）· 经调整亏损收窄 76.4% 至 3.37 亿",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","G 国产 AI 芯片：GPGPU 通用算力路线（BR 系）——对标路线最「激进」的国产 GPU（BR100 曾官宣对标国际旗舰）"],
+     ["产品","BR100/BR104 系通用 GPU + BIRENSUPA 软件平台（CUDA-like 生态迁移适配）"],
+     ["身份标签","港股国产 GPU 第一股（2026-01-02）——境内架构赴港路径的样板"]
+   ]],
+   ["资本与财务",[
+     ["业绩","26H1 营收 12.36 亿（同比 +1,997.6%——低基数上的爆发）；经调整亏损 3.37 亿（收窄 76.4%）"],
+     ["上市","2026-01-02 港交所（06082.HK），首日收盘 +75.82%——显著低于 A 股两兄弟（港股无涨跌幅限制下的理性定价对比样本）"],
+     ["观察","营收规模化但绝对体量（12 亿）仍待爬坡；经调整 vs IFRS 口径差异较大（填充期分列）"]
+   ]],
+   ["算力与供给",[
+     ["商业化","训练卡向智算中心/互联网客户出货节奏以定期报告为准"],
+     ["联动","《AI芯片参数速查表》壁仞条目"]
+   ]]
+ ]},
+ news:[
+   "26H1 中报：营收 12.36 亿（+1,997.6%）、经调整亏损 3.37 亿（收窄 76.4%）",
+   "2026-06-15 股东特别大会（披露事件口径）",
+   "待补：大客户结构 / BR 系下一代路线图"
+ ],
+ risk:["经调整亏损与 IFRS 口径差异需持续核对","营收爆发来自低基数，持续性待验证","港股流动性折价（对比科创板两兄弟）"],
+ src:"来源：金融新闻网 2026-09-01（中报口径）/ 港股披露易事件表。代码 06082.HK 以交易所口径为准。数据截至 2026-11-02。"
+ },
+/* ------------------------------------------------ G · 燧原科技 */
+{id:"enfincinnati",n:"燧原科技",full:"上海燧原科技股份有限公司",cat:"G",dot:"#9f1747",chips:"cn",
+ code:"科创板 · 2026-09-11 上市（代码待核）",listKey:"listed",listTxt:"已上市 2026-09-11 · 发行价 142.18 元",
+ val:"1,501.93 亿元",valSub:"2026-11-02 收盘 349.00 元（代码 688801.SH）· PE(TTM) 亏损口径 · 年初至今 +145.5%",
+ pw:"—（芯片商）",pwSub:"云燧训练 + 隧远推理（云端 AI 训练 + 推理双线）",
+嗨:"26H1 营收 11.20 亿（首破 11 亿）· 归母亏损 6.32 亿 · 腾讯系客户占比高",
+ biz:"云端 AI 训练/推理芯片（云燧/燧远系列）+「MaaS」算力方案",
+ hi:"2026-09-11 科创板挂牌（四小龙最后一家）· 发行价年内第三高",
+ body:{groups:[
+   ["身份与业务",[
+     ["商业模式","G 国产 AI 芯片：云端训练 + 推理双线芯片；生态绑定腾讯（云/投资/采购三重关系）"],
+     ["产品","云燧（训练）+ 燧远?（推理）系列——具体系列名以官网为准（本条目只列公开口径）"],
+     ["生态位","「四小龙最后一家上市」——发行市销率 61.80× 显著低于摩尔线程/沐曦首发 80-100×——注册制询价的主动折价样本"]
+   ]],
+   ["资本与财务",[
+     ["业绩","26H1 营收 11.20 亿（首次突破 11 亿）；归母亏损 6.32 亿——亏损体量大于其余三家（研发费用长期占营收超 100%）"],
+     ["上市","2026-09-11 科创板，发行价 142.18 元（年内第三高），发行市值 611.87 亿；首日打新浮盈口径约 28 万/签"],
+     ["亏损","2023-2025 累计亏损约 43 亿（媒体汇总口径?）——四小龙中烧钱最重"]
+   ]],
+   ["算力与供给",[
+     ["绑定","八成营收靠腾讯（媒体口径）——单一生态深度绑定的最强样本（B 类弘信电子为其产业链代理）"],
+     ["联动","《AI芯片参数速查表》燧原条目"]
+   ]]
+ ]},
+ news:[
+   "2026-09-11 科创板挂牌：发行价 142.18 元、发行市值 611.87 亿、市销率 61.80×（低于同赛道首发口径）",
+   "26H1 营收 11.20 亿、归母亏损 6.32 亿（研发投入刚性）",
+   "产业联动：弘信电子为燧原整机核心合作伙伴（见 B 类条目）——生态放量代理变量"
+ ],
+ risk:["客户集中度（腾讯系八成，媒体口径?）——强绑定双向风险","亏损体量最大且研发费率超 100%——商业化拐点最晚","询价折价后的破发风险窗口"],
+ src:"来源：新浪财经（蔡恩泽 2026-09-02 申购口径）/ 金融新闻网 2026-09-01 / 百度百科 GPU 四小龙词条。数据截至 2026-11-02。"
+ }
+];
+
+/* ============================ 渲染与筛选 ============================ */
+var state = { cat:"all", list:"", chipm:"", q:"" };
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function stripTags(s){return String(s).replace(/<[^>]*>/g,"")}
+function catBadge(k){
+  var c=CATS[k];
+  return '<span class="catb" style="background:'+c.soft+';color:'+c.color+'">'+k+' · '+esc(c.n)+'</span>';
+}
+function listBadge(d){
+  if(d.listKey==="listed")return '<span class="badge b-ok">已上市</span>';
+  if(d.listKey==="filed")return '<span class="badge b-warn">递表 / Pre-IPO</span>';
+  return '<span class="badge b-gray">未上市</span>';
+}
+function chipMark(d){
+  if(d.chips==="n")return '<span class="badge b-blue">英伟达系</span>';
+  if(d.chips==="cn")return '<span class="badge b-ok">国产卡</span>';
+  if(d.chips==="both")return '<span class="badge b-warn">双轨</span>';
+  return '<span class="na">—</span>';
+}
+function hit(d){
+  if(state.cat!=="all" && d.cat!==state.cat) return false;
+  if(state.list==="listed" && d.listKey!=="listed") return false;
+  if(state.list==="filed" && d.listKey!=="filed") return false;
+  if(state.list==="private" && d.listKey!=="private") return false;
+  if(state.chipm){
+    if(d.chips==="") return false;
+    if(state.chipm==="both" && d.chips!=="both") return false;
+    if(state.chipm==="n" && d.chips==="cn") return false;
+    if(state.chipm==="cn" && d.chips==="n") return false;
+  }
+  if(state.q){
+    var s=(d.n+" "+d.full+" "+d.biz+" "+d.hi+" "+d.code+" "+d.pw+" "+
+           (CATS[d.cat]?CATS[d.cat].n:"")+" "+stripTags(d.src||"")+" "+
+           stripTags(JSON.stringify(d.body||{}))).toLowerCase();
+    if(s.indexOf(state.q.toLowerCase())<0) return false;
+  }
+  return true;
+}
+function hitCount(){var n=0;orderedCompanies().forEach(function(d){if(hit(d))n++});return n}
+
+/* 渲染顺序 = 分类序（D E C B G A F），同分类按数据录入序 */
+var CAT_ORDER=["A","B","C","D","E","F","G"];
+function orderedCompanies(){
+  var out=[];
+  CAT_ORDER.forEach(function(k){COMPANIES.forEach(function(d){if(d.cat===k)out.push(d)})});
+  COMPANIES.forEach(function(d){if(CAT_ORDER.indexOf(d.cat)<0)out.push(d)});
+  return out;
+}
+function renderMain(){
+  var rows="";
+  orderedCompanies().forEach(function(d){
+    if(!hit(d))return;
+    rows+='<tr class="main" data-id="'+esc(d.id)+'" title="点击定位下方详情卡">'+
+      '<td class="col-sticky model"><span class="org-dot" style="background:'+d.dot+'"></span>'+esc(d.n)+'<span class="locate-pill">详情 ↓</span><span class="sub">'+esc(d.full)+'</span></td>'+
+      '<td>'+catBadge(d.cat)+'</td>'+
+      '<td class="num"><span class="tc-sm" title="'+esc(d.code)+'">'+esc(d.code)+'</span></td>'+
+      '<td>'+listBadge(d)+'<span class="sub" style="display:block;color:var(--text-3);font-size:10.5px;margin-top:1px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(d.listTxt)+'">'+esc(d.listTxt)+'</span></td>'+
+      '<td class="price"><b>'+esc(d.val)+'</b><span class="sub">'+d.valSub+'</span></td>'+
+      '<td class="price"><b>'+esc(d.pw)+'</b><span class="sub">'+d.pwSub+'</span></td>'+
+      '<td><span class="tc" title="'+esc(d.biz)+'">'+esc(d.biz)+'</span>'+chipMark(d)+'</td>'+
+      '<td><span class="tc" title="'+esc(d.hi)+'" style="max-width:200px">'+esc(d.hi)+'</span></td>'+
+      '</tr>';
+  });
+  document.getElementById("tbody-main").innerHTML=rows||'<tr><td colspan="8" class="empty">无命中公司 · 调整筛选</td></tr>';
+  document.getElementById("cnt-hit").textContent=hitCount();
+  bindRows();
+}
+function renderCards(){
+  var html="";
+  orderedCompanies().forEach(function(d){
+    if(!hit(d))return;
+    html+='<div class="co-card" id="co-'+esc(d.id)+'">';
+    /* 头部（点击折叠/展开） */
+    html+='<div class="co-head" data-co="'+esc(d.id)+'">'+
+          '<div class="co-head-left">'+catBadge(d.cat)+' <h3>'+esc(d.n)+'</h3>'+
+          '<span class="badge b-gray" style="font-weight:400">'+esc(d.val)+'</span>'+
+          '<span class="co-full">'+esc(d.full)+'</span></div>'+
+          '<div class="co-right"><span class="code">'+esc(d.code)+'</span>'+
+          '<span class="listst">'+listBadge(d)+' '+chipMark(d)+'</span></div>'+
+          '<span class="co-fold-arrow" title="点击展开/折叠">▼</span></div>';
+    /* 内容（默认收起） */
+    html+='<div class="co-body-wrap">';
+    d.body.groups.forEach(function(g){
+      html+='<div class="co-block"><h4>'+esc(g[0])+'</h4>';
+      g[1].forEach(function(kv){
+        html+='<div class="kv"><b>'+esc(kv[0])+'</b><span>'+kv[1]+'</span></div>';
+      });
+      html+='</div>';
+    });
+    html+='<div class="co-block"><h4>近期动态（带日期）</h4><ul>';
+    d.news.forEach(function(li){html+='<li>'+li+'</li>'});
+    html+='</ul></div>';
+    html+='<div class="co-block"><h4>风险 · 来源 · 数据截止</h4><ul>';
+    d.risk.forEach(function(li){html+='<li><b style="color:var(--danger)">⚠</b> '+li+'</li>'});
+    html+='</ul><div class="co-src">'+d.src+' <a class="co-top-link" href="#toc" onclick="backToToc(event)">↑ 回目录</a></div></div>';
+    html+='</div></div>';
+  });
+  document.getElementById("cards").innerHTML=html||'<div class="empty">无命中公司</div>';
+  document.getElementById("c-cards").textContent=hitCount()+" 张";
+  bindCardHeads();
+}
+window.backToToc=function(ev){
+  ev.preventDefault();
+  window.scrollTo({top:0,behavior:"smooth"});
+  if(history.replaceState)history.replaceState(null,"","#toc");
+};
+function bindCardHeads(){
+  Array.prototype.forEach.call(document.querySelectorAll(".co-head"),function(h){
+    h.addEventListener("click",function(ev){
+      if(ev.target&&ev.target.className==="co-top-link")return;
+      var card=h.parentNode;
+      card.classList.toggle("open");
+    });
+  });
+}
+function bindRows(){
+  Array.prototype.forEach.call(document.querySelectorAll("tr.main"),function(tr){
+    tr.addEventListener("click",function(){
+      var id=tr.getAttribute("data-id");
+      var card=document.getElementById("co-"+id);
+      if(!card)return;
+      if(getComputedStyle(card).display==="none"){
+        state={cat:"all",list:"",chipm:"",q:""};
+        document.getElementById("q").value="";
+        Array.prototype.forEach.call(document.querySelectorAll("#seg-cat button"),function(x,i){x.className=i?"":"on"});
+        Array.prototype.forEach.call(document.querySelectorAll(".chip[data-g]"),function(x){x.className="chip"});
+        render();
+        card=document.getElementById("co-"+id);
+      }
+      /* 定位后自动展开 */
+      card.classList.add("open");
+      window.scrollTo({top:card.getBoundingClientRect().top+window.pageYOffset-76,behavior:"smooth"});
+      card.classList.remove("flash");
+      void card.offsetWidth;
+      card.classList.add("flash");
+      if(history.replaceState)history.replaceState(null,"","#co-"+id);
+    });
+  });
+}
+function render(){renderMain();renderCards()}
+
+/* ---------- 事件绑定 ---------- */
+document.getElementById("q").addEventListener("input",function(){state.q=this.value.trim();render()});
+Array.prototype.forEach.call(document.querySelectorAll("#seg-cat button"),function(b){
+  b.addEventListener("click",function(){
+    state.cat=b.getAttribute("data-v");
+    Array.prototype.forEach.call(b.parentNode.children,function(x){x.className=""});
+    b.className="on";
+    render();
+  });
+});
+Array.prototype.forEach.call(document.querySelectorAll(".chip[data-g]"),function(c){
+  c.addEventListener("click",function(){
+    var g=c.getAttribute("data-g"), v=c.getAttribute("data-v");
+    if(state[g]===v){state[g]="";c.className="chip"}
+    else{
+      state[g]=v;
+      Array.prototype.forEach.call(document.querySelectorAll('.chip[data-g="'+g+'"]'),function(x){x.className="chip"});
+      c.className="chip on";
+    }
+    render();
+  });
+});
+document.getElementById("btn-reset").addEventListener("click",function(){
+  state={cat:"all",list:"",chipm:"",q:""};
+  document.getElementById("q").value="";
+  Array.prototype.forEach.call(document.querySelectorAll("#seg-cat button"),function(x,i){x.className=i?"":"on"});
+  Array.prototype.forEach.call(document.querySelectorAll(".chip[data-g]"),function(x){x.className="chip"});
+  render();
+});
+
+/* ---------- 初始化 ---------- */
+document.getElementById("cnt-all").textContent=COMPANIES.length;
+render();
+
+/* URL 锚点直达：#co-xxx 打开即定位、展开并闪烁 */
+(function(){
+  if(location.hash.indexOf("#co-")===0){
+    setTimeout(function(){
+      var card=document.getElementById(location.hash.slice(1));
+      if(card){
+        card.classList.add("open");
+        window.scrollTo({top:card.getBoundingClientRect().top+window.pageYOffset-76});
+        card.classList.add("flash");
+      }
+    },120);
+  }
+})();
+
+/* ---------- 页内目录：滚动高亮 ---------- */
+(function(){
+  var links=document.querySelectorAll("#toc a[data-sec]");
+  if(!links.length)return;
+  var secs=[];
+  Array.prototype.forEach.call(links,function(a){
+    var el=document.getElementById(a.getAttribute("data-sec"));
+    if(el)secs.push({el:el,link:a});
+  });
+  if(!secs.length)return;
+  function offsetTopOf(el){var t=0;while(el){t+=el.offsetTop;el=el.offsetParent}return t}
+  function tocH(){var t=document.getElementById("toc");return t?t.offsetHeight+12:20}
+  Array.prototype.forEach.call(links,function(a){
+    a.addEventListener("click",function(ev){
+      var sec=document.getElementById(a.getAttribute("data-sec"));
+      if(!sec)return;
+      ev.preventDefault();
+      window.scrollTo({top:offsetTopOf(sec)-tocH(),behavior:"smooth"});
+      if(history.replaceState)history.replaceState(null,"",a.getAttribute("href"));
+    });
+  });
+  function highlight(){
+    var y=window.pageYOffset+tocH()+4,cur=null;
+    for(var i=0;i<secs.length;i++){
+      if(offsetTopOf(secs[i].el)<=y)cur=secs[i];
+    }
+    Array.prototype.forEach.call(links,function(a){a.classList.remove("cur")});
+    if(cur)cur.link.classList.add("cur");
+  }
+  var tick=false;
+  window.addEventListener("scroll",function(){
+    if(tick)return;tick=true;
+    requestAnimationFrame(function(){highlight();tick=false});
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

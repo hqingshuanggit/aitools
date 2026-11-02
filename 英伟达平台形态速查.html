@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA平台与形态速查表 · SXM / HGX / DGX / MGX / EGX / RXM / NVL / Jetson</title>
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#ffffff;
+  --border:#e3e6ea;
+  --border-strong:#cfd4da;
+  --text:#1f2328;
+  --text-2:#5b6570;
+  --text-3:#8b939c;
+  --accent:#1f6feb;
+  --accent-soft:#eaf2fe;
+  --warn:#b45309;
+  --warn-soft:#fef4e6;
+  --danger:#b3261e;
+  --danger-soft:#fdecea;
+  --ok:#0a7d3b;
+  --ok-soft:#e8f5ed;
+  --chip:#f0f2f5;
+  --violet:#5a46d6;
+  --violet-soft:#f1eefe;
+  --teal:#0f6e56;
+  --teal-soft:#e1f5ee;
+  --pink:#993556;
+  --pink-soft:#fbeef2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:13.5px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1340px;margin:0 auto;padding:22px 24px 60px}
+
+/* ---------- header ---------- */
+header.top{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:18px 22px;margin-bottom:14px;
+}
+h1{font-size:20px;margin:0 0 6px;letter-spacing:.3px}
+h1 span.tagline{font-size:13px;color:var(--text-3);font-weight:400;margin-left:8px}
+.meta-line{color:var(--text-2);font-size:12.5px;margin:0}
+.meta-line b{color:var(--text);font-weight:600}
+.disclaim{
+  margin-top:10px;padding:9px 12px;background:var(--warn-soft);border-left:3px solid #e0a020;
+  border-radius:4px;color:#7a4b06;font-size:12px;line-height:1.65;
+}
+.disclaim b{font-weight:600}
+
+/* ---------- toolbar ---------- */
+.toolbar{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:12px 16px;margin-bottom:14px;position:sticky;top:0;z-index:20;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);
+}
+.tb-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search-box{position:relative;flex:0 0 280px}
+.search-box input{
+  width:100%;padding:7px 10px 7px 28px;border:1px solid var(--border-strong);border-radius:7px;
+  font-size:13px;background:#fff;color:var(--text);outline:none;
+}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search-box svg{position:absolute;left:8px;top:8px;opacity:.45}
+.cat-chip{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  background:var(--chip);border:1px solid transparent;color:var(--text-2);
+  font-size:12px;cursor:pointer;user-select:none;white-space:nowrap;
+}
+.cat-chip:hover{border-color:var(--border-strong)}
+.cat-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cat-chip .cnt{font-size:11px;opacity:.7}
+.cat-chip.on .cnt{opacity:.85}
+button.btn{
+  padding:6px 10px;border:1px solid var(--border-strong);border-radius:7px;background:#fff;
+  font-size:12.5px;color:var(--text);cursor:pointer;font-family:inherit;
+}
+button.btn:hover{border-color:var(--accent);color:var(--accent)}
+.spacer{flex:1}
+.stat{font-size:12.5px;color:var(--text-2)}
+.stat b{color:var(--text)}
+
+/* ---------- 概念层级架构图 ---------- */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.panel h2{font-size:14.5px;margin:0 0 10px}
+.panel .p-sub{font-size:11.5px;color:var(--text-3);font-weight:400;margin-left:6px}
+.diagram-shell{overflow-x:auto;display:flex;justify-content:center}
+.diagram-shell svg{display:block;flex:0 0 auto;width:800px;min-width:660px;max-width:100%;height:auto}
+@media print{.diagram-shell svg{width:100%;min-width:0}}
+
+/* ---------- table ---------- */
+.table-shell{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:78vh;
+}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;min-width:1020px}
+thead th{
+  position:sticky;top:0;z-index:10;background:#f8f9fb;color:var(--text-2);font-weight:600;
+  text-align:left;padding:7px 8px;border-bottom:1px solid var(--border-strong);white-space:nowrap;font-size:11.5px;
+}
+th.col-sticky,td.col-sticky{position:sticky;left:0;z-index:6;background:#fff;white-space:nowrap}
+thead th.col-sticky{z-index:11;background:#f8f9fb}
+tbody tr.entry{cursor:pointer}
+tbody tr.entry:hover td{background:#f8fbff}
+tbody tr.entry:hover td.col-sticky{background:#f2f7fe}
+tr.row-open td{background:#f4f9ff !important}
+tr.row-open td.col-sticky{background:#eaf3fe !important}
+td{padding:6px 8px;border-bottom:1px solid #eef0f3;vertical-align:middle}
+td.cpt{font-weight:600;color:var(--text);min-width:108px}
+td.cpt .sub{display:block;color:var(--text-3);font-size:10.5px;font-weight:400;margin-top:1px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.full{max-width:236px}
+td.full .tc{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.def{color:var(--text-2);min-width:300px}
+td.reps{max-width:210px}
+td.reps .tc{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr.group td{
+  background:#eef1f5;font-weight:700;color:var(--text-2);letter-spacing:.5px;
+  padding:6px 10px;font-size:11.5px;border-bottom:1px solid var(--border-strong);
+  position:sticky;left:0;
+}
+tr.group td .g-hint{font-weight:400;color:var(--text-3);margin-left:8px;letter-spacing:0}
+tr.detail td{background:#fafbfc;border-bottom:1px solid var(--border);cursor:default}
+.detail-inner{padding:8px 12px 10px;font-size:12px;color:var(--text-2);line-height:1.7}
+.detail-inner b{color:var(--text);font-weight:600}
+.detail-inner .seg{display:block;margin-bottom:2px}
+.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10.5px;line-height:1.5;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-blue{background:var(--accent-soft);color:var(--accent)}
+.b-gray{background:#eef0f3;color:var(--text-2)}
+.b-violet{background:var(--violet-soft);color:var(--violet)}
+.empty{padding:40px;text-align:center;color:var(--text-3)}
+
+/* ---------- panels / mini tables ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr}}
+table.mini{width:100%;font-size:12px;border-collapse:collapse}
+table.mini th,table.mini td{border-bottom:1px solid #eef0f3;padding:6px 8px;text-align:left;vertical-align:top}
+table.mini th{color:var(--text-2);font-weight:600;background:#f8f9fb;white-space:nowrap}
+table.mini td.k{font-weight:600;color:var(--text);white-space:nowrap}
+table.mini .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px}
+.panel ul{margin:0;padding-left:18px;color:var(--text-2);font-size:12.5px;line-height:1.75}
+.panel li{margin-bottom:3px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.src{font-size:11.5px;color:var(--text-3);word-break:break-all;line-height:1.7}
+footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;line-height:1.8}
+@media print{
+  .toolbar{display:none}
+  .table-shell{max-height:none;overflow:visible;border:none}
+  tr.detail{display:table-row !important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<script src="site-nav.js"></script>
+
+<header class="top">
+  <h1>NVIDIA 平台与形态速查表 <span class="tagline">SXM · HGX · DGX · MGX · EGX · RXM · NVL · OAM · Superchip · Jetson…</span></h1>
+  <p class="meta-line">数据截至 <b>2026-11-02</b> ｜ 收录 <b id="cnt-all">0</b> 个概念 / <b>6</b> 大类 ｜ 点击概念行展开「定位详解 · 易混辨析 · 口径来源」</p>
+  <div class="disclaim">
+    口径说明：DGX / SXM / HGX 等<b>官方从未正式展开全称</b>，表内「全称」为社区通行写法，仅作辅助理解；
+    <b>RXM 为 2026 年新出现的形态名，NVIDIA 未公布全称与规格</b>，采购条款须按具体 SKU 书面确认；
+    <b>EGX 品牌已淡化</b>（官方产品页 URL 现指向 RTX PRO Server）；Tesla / Quadro 为历史品牌。
+    概念定义以 NVIDIA 官网产品页与技术博客为准，本表用于选型沟通与读料，不构成采购依据。
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="tb-row">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="搜索概念 / 全称 / 定位 / 代表型号…" autocomplete="off">
+    </div>
+    <span id="cat-chips"></span>
+    <div class="spacer"></div>
+    <span class="stat">命中 <b id="cnt-hit">0</b> 个</span>
+    <button class="btn" id="btn-expand">展开全部辨析</button>
+    <button class="btn" id="btn-reset">重置</button>
+    <button class="btn" id="btn-print">打印</button>
+  </div>
+</div>
+
+<div class="panel" style="margin-bottom:14px">
+  <h2>概念层级架构图 <span class="p-sub">从芯片封装到机架集群——它们不是性能等级，而是不同层级的交付物</span></h2>
+  <div class="diagram-shell">
+  <svg viewBox="0 0 680 772" width="100%" role="img" font-family="-apple-system,'PingFang SC','Helvetica Neue',sans-serif" aria-label="NVIDIA 概念层级架构图">
+    <title>NVIDIA 概念层级架构图</title>
+    <desc>主线（实线蓝箭头）：SXM 组成 HGX 基板模组，交给原厂组成 DGX 整机、或交给 OEM 组装 HGX 整机与 RTX PRO Server，整机按 MGX 机架规范进数据中心，机架组成 SuperPOD 集群。旁支（虚线灰箭头）：PCIe、OAM/UBB、RXM、Superchip 各有去向，不沿主线。底部为边缘/车载独立旁支。蓝框=主线节点，白框=旁支/对照节点，灰字=历史。</desc>
+    <defs>
+      <marker id="nv-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+      <marker id="nv-arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="#8b939c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+
+    <!-- 图例 -->
+    <rect x="20" y="8" width="640" height="24" rx="6" fill="#f8f9fb" stroke="#e3e6ea" stroke-width="0.5"/>
+    <rect x="30" y="14" width="12" height="12" rx="3" fill="#eaf2fe" stroke="#1f6feb" stroke-width="1"/>
+    <text x="48" y="20" font-size="10.5" fill="#5b6570" dominant-baseline="central">蓝框=主线节点</text>
+    <rect x="134" y="14" width="12" height="12" rx="3" fill="#fff" stroke="#cfd4da" stroke-width="1"/>
+    <text x="152" y="20" font-size="10.5" fill="#5b6570" dominant-baseline="central">白框=旁支/对照</text>
+    <line x1="240" y1="20" x2="266" y2="20" stroke="#1f6feb" stroke-width="1.5" marker-end="url(#nv-arrow)"/>
+    <text x="272" y="20" font-size="10.5" fill="#5b6570" dominant-baseline="central">实线=主线流向</text>
+    <line x1="348" y1="20" x2="374" y2="20" stroke="#8b939c" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#nv-arrow-gray)"/>
+    <text x="380" y="20" font-size="10.5" fill="#5b6570" dominant-baseline="central">虚线=旁支去向（不沿层间箭头）</text>
+    <text x="580" y="20" font-size="10.5" fill="#8b939c" dominant-baseline="central">灰字=历史</text>
+
+    <!-- ① 芯片封装形态 -->
+    <rect x="20" y="40" width="640" height="96" rx="10" fill="#f8f9fb" stroke="#cfd4da" stroke-width="0.5"/>
+    <text x="32" y="60" font-size="11" font-weight="600" fill="#5b6570">① 芯片封装形态</text>
+    <text x="648" y="60" text-anchor="end" font-size="10" fill="#8b939c" dominant-baseline="central">GPU 怎么「装」</text>
+    <rect x="32" y="70" width="86" height="52" rx="8" fill="#eaf2fe" stroke="#1f6feb" stroke-width="1.2"/>
+    <text x="75" y="88" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1f6feb" dominant-baseline="central">SXM</text>
+    <text x="75" y="104" text-anchor="middle" font-size="9.5" fill="#185FA5" dominant-baseline="central">板载插座·NVLink</text>
+    <text x="75" y="115" text-anchor="middle" font-size="9" fill="#8b939c" dominant-baseline="central">训练 GPU 专用</text>
+    <rect x="130" y="70" width="112" height="52" rx="8" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="186" y="88" text-anchor="middle" font-size="12.5" fill="#1f2328" dominant-baseline="central">PCIe</text>
+    <text x="186" y="104" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">通用插卡</text>
+    <text x="186" y="115" text-anchor="middle" font-size="9" fill="#8b939c" dominant-baseline="central">推理/边缘主力</text>
+    <rect x="254" y="70" width="104" height="52" rx="8" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="306" y="88" text-anchor="middle" font-size="12.5" fill="#1f2328" dominant-baseline="central">OAM/UBB</text>
+    <text x="306" y="104" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">OCP 开放模块</text>
+    <text x="306" y="115" text-anchor="middle" font-size="9" fill="#8b939c" dominant-baseline="central">AMD 阵营对照</text>
+    <rect x="370" y="70" width="110" height="52" rx="8" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="425" y="88" text-anchor="middle" font-size="12.5" fill="#1f2328" dominant-baseline="central">RXM</text>
+    <text x="425" y="104" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">工作站卡液冷</text>
+    <text x="425" y="115" text-anchor="middle" font-size="9" fill="#8b939c" dominant-baseline="central">机架部署形态</text>
+    <rect x="492" y="70" width="156" height="52" rx="8" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="570" y="88" text-anchor="middle" font-size="12.5" fill="#1f2328" dominant-baseline="central">Superchip</text>
+    <text x="570" y="104" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">CPU+GPU 合封</text>
+    <text x="570" y="115" text-anchor="middle" font-size="9" fill="#8b939c" dominant-baseline="central">GB10 / GH·GB·VR 平台基础</text>
+
+    <!-- ① → ② 主线 -->
+    <line x1="75" y1="136" x2="75" y2="162" stroke="#1f6feb" stroke-width="1.5" marker-end="url(#nv-arrow)"/>
+    <text x="85" y="152" font-size="10" fill="#1f6feb" dominant-baseline="central">主线：8×SXM + NVSwitch 集成到一块基板 → 成为模组</text>
+
+    <!-- ② 基板模组 -->
+    <rect x="20" y="166" width="640" height="64" rx="10" fill="#e1f5ee" stroke="#0f6e56" stroke-width="0.5"/>
+    <text x="32" y="186" font-size="11" font-weight="600" fill="#085041">② 基板模组</text>
+    <text x="648" y="186" text-anchor="end" font-size="10" fill="#8b939c" dominant-baseline="central">算力「发动机+底盘」</text>
+    <rect x="32" y="194" width="86" height="26" rx="13" fill="#fff" stroke="#1f6feb" stroke-width="1.2"/>
+    <text x="75" y="207" text-anchor="middle" font-size="12" font-weight="600" fill="#1f6feb" dominant-baseline="central">HGX</text>
+    <text x="132" y="207" font-size="10" fill="#0f6e56" dominant-baseline="central">8×SXM 打包成模组，卖给 OEM（Dell / 超微 / 联想 / HPE…）自配 CPU·机箱·软件</text>
+
+    <!-- ② → ③ 分叉 -->
+    <line x1="75" y1="230" x2="75" y2="258" stroke="#1f6feb" stroke-width="1.5" marker-end="url(#nv-arrow)"/>
+    <text x="26" y="248" font-size="10" fill="#1f6feb" dominant-baseline="central">原厂路径</text>
+    <line x1="180" y1="230" x2="180" y2="258" stroke="#1f6feb" stroke-width="1.5" marker-end="url(#nv-arrow)"/>
+    <text x="192" y="248" font-size="10" fill="#1f6feb" dominant-baseline="central">OEM 路径</text>
+
+    <!-- ③ 原厂整机 -->
+    <rect x="20" y="262" width="316" height="128" rx="10" fill="#eaf2fe" stroke="#185FA5" stroke-width="0.5"/>
+    <text x="32" y="282" font-size="11" font-weight="600" fill="#0C447C">③ 原厂整机（谁组装·卖给谁·什么场景）</text>
+    <rect x="32" y="292" width="74" height="26" rx="13" fill="#fff" stroke="#1f6feb" stroke-width="1.2"/>
+    <text x="69" y="305" text-anchor="middle" font-size="12" font-weight="600" fill="#1f6feb" dominant-baseline="central">DGX</text>
+    <text x="114" y="305" font-size="9.5" fill="#0C447C" dominant-baseline="central">原厂整机·全栈软件·可拼 SuperPOD</text>
+    <rect x="32" y="324" width="74" height="26" rx="13" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="69" y="337" text-anchor="middle" font-size="11.5" fill="#1f2328" dominant-baseline="central">OVX</text>
+    <text x="114" y="337" font-size="9.5" fill="#5b6570" dominant-baseline="central">数字孪生参考架构（L40S / RTX PRO）</text>
+    <rect x="32" y="356" width="180" height="24" rx="12" fill="#f0f2f5" stroke="none"/>
+    <text x="122" y="368" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">DGX Spark / Station（桌面旁支）</text>
+    <rect x="220" y="356" width="106" height="24" rx="12" fill="#f0f2f5" stroke="none"/>
+    <text x="273" y="368" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">EGX（历史·已淡出）</text>
+
+    <!-- ③' OEM / 企业服务器 -->
+    <rect x="348" y="262" width="312" height="128" rx="10" fill="#f6f7f9" stroke="#c9ced6" stroke-width="0.5" stroke-dasharray="4 3"/>
+    <text x="360" y="282" font-size="11" font-weight="600" fill="#5b6570">③' OEM / 企业服务器（与原厂平行）</text>
+    <rect x="360" y="292" width="288" height="26" rx="13" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="504" y="305" text-anchor="middle" font-size="11.5" fill="#1f2328" dominant-baseline="central">OEM HGX 整机（4/8 卡服务器）</text>
+    <rect x="360" y="324" width="288" height="26" rx="13" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="504" y="337" text-anchor="middle" font-size="11.5" fill="#1f2328" dominant-baseline="central">RTX PRO Server（MGX 2U/4U/6U · PCIe/RXM）</text>
+    <text x="504" y="368" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">企业私有化推理 · vGPU 云工作站 · 数字孪生</text>
+
+    <!-- 旁支虚线：PCIe / OAM / RXM → ③' -->
+    <path d="M186 122 C186 168 320 200 380 250 C420 280 470 290 500 290" fill="none" stroke="#8b939c" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#nv-arrow-gray)"/>
+    <text x="270" y="243" font-size="9" fill="#8b939c">PCIe 卡流向</text>
+    <path d="M425 122 C425 210 470 270 492 290" fill="none" stroke="#8b939c" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#nv-arrow-gray)"/>
+    <text x="446" y="255" font-size="9" fill="#8b939c">RXM 液冷</text>
+    <!-- 旁支虚线：Superchip → GB/VR 平台标注 -->
+    <path d="M570 122 C570 150 600 165 608 180" fill="none" stroke="#8b939c" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#nv-arrow-gray)"/>
+    <text x="528" y="182" font-size="9" fill="#8b939c">GB/VR 平台芯片基础</text>
+
+    <!-- ③/③' → ④ -->
+    <line x1="75" y1="390" x2="75" y2="418" stroke="#1f6feb" stroke-width="1.5" marker-end="url(#nv-arrow)"/>
+    <text x="85" y="408" font-size="10" fill="#1f6feb" dominant-baseline="central">主线整机按 MGX 规范装进数据中心</text>
+    <line x1="504" y1="390" x2="504" y2="418" stroke="#8b939c" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#nv-arrow-gray)"/>
+
+    <!-- ④ 机架架构 -->
+    <rect x="20" y="422" width="640" height="64" rx="10" fill="#faeeda" stroke="#854F0B" stroke-width="0.5"/>
+    <text x="32" y="442" font-size="11" font-weight="600" fill="#633806">④ 机架架构</text>
+    <text x="648" y="442" text-anchor="end" font-size="10" fill="#8b939c" dominant-baseline="central">整机柜交付·NVLink 域</text>
+    <rect x="32" y="450" width="74" height="26" rx="13" fill="#fff" stroke="#1f6feb" stroke-width="1.2"/>
+    <text x="69" y="463" text-anchor="middle" font-size="12" font-weight="600" fill="#1f6feb" dominant-baseline="central">MGX</text>
+    <text x="116" y="463" font-size="10" fill="#854F0B" dominant-baseline="central">机架「骨架」标准 · 代际：Oberon / Kyber / ETL · NVL72 / 144 / 576</text>
+
+    <!-- ④ → ⑤ -->
+    <line x1="69" y1="486" x2="69" y2="514" stroke="#1f6feb" stroke-width="1.5" marker-end="url(#nv-arrow)"/>
+    <text x="79" y="504" font-size="10" fill="#1f6feb" dominant-baseline="central">机架 × N → 集群 / AI 工厂</text>
+
+    <!-- ⑤ 集群参考 -->
+    <rect x="20" y="518" width="640" height="64" rx="10" fill="#f1eefe" stroke="#5a46d6" stroke-width="0.5"/>
+    <text x="32" y="538" font-size="11" font-weight="600" fill="#3C3489">⑤ 集群参考</text>
+    <text x="648" y="538" text-anchor="end" font-size="10" fill="#8b939c" dominant-baseline="central">可复制的部署蓝图</text>
+    <rect x="32" y="546" width="196" height="26" rx="13" fill="#fff" stroke="#1f6feb" stroke-width="1.2"/>
+    <text x="130" y="559" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1f6feb" dominant-baseline="central">DGX SuperPOD / BasePOD</text>
+    <text x="244" y="559" font-size="10" fill="#5a46d6" dominant-baseline="central">Vera Rubin POD（多机架组合）· DGX Cloud（云上）</text>
+
+    <!-- 分隔栏 -->
+    <line x1="20" y1="602" x2="660" y2="602" stroke="#b4b2a9" stroke-width="0.8" stroke-dasharray="2 3"/>
+    <text x="340" y="618" text-anchor="middle" font-size="10.5" fill="#8b939c">以下为独立旁支 · 不属于数据中心主线</text>
+
+    <!-- 边缘/车载旁支 -->
+    <rect x="20" y="632" width="640" height="64" rx="10" fill="#fbeef2" stroke="#993556" stroke-width="0.5"/>
+    <text x="32" y="652" font-size="11" font-weight="600" fill="#72243E">边缘 / 车载旁支</text>
+    <text x="648" y="652" text-anchor="end" font-size="10" fill="#8b939c" dominant-baseline="central">独立于数据中心链路</text>
+    <rect x="32" y="660" width="80" height="26" rx="13" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="72" y="673" text-anchor="middle" font-size="11.5" fill="#1f2328" dominant-baseline="central">Jetson</text>
+    <rect x="122" y="660" width="60" height="26" rx="13" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="152" y="673" text-anchor="middle" font-size="11.5" fill="#1f2328" dominant-baseline="central">IGX</text>
+    <rect x="192" y="660" width="68" height="26" rx="13" fill="#fff" stroke="#cfd4da" stroke-width="0.8"/>
+    <text x="226" y="673" text-anchor="middle" font-size="11.5" fill="#1f2328" dominant-baseline="central">DRIVE</text>
+    <text x="274" y="673" font-size="9.5" fill="#993556" dominant-baseline="central">机器人/嵌入式 · 工业安全边缘 · 车载计算</text>
+    <rect x="530" y="660" width="118" height="24" rx="12" fill="#f0f2f5" stroke="none"/>
+    <text x="589" y="672" text-anchor="middle" font-size="9.5" fill="#8b939c" dominant-baseline="central">EGX（原边缘品牌·历史）</text>
+
+    <!-- OAM 旁支去向：开放阵营 -->
+    <path d="M306 122 C306 170 260 210 232 262" fill="none" stroke="#8b939c" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#nv-arrow-gray)"/>
+    <text x="222" y="228" font-size="9" fill="#8b939c">OAM → AMD 系 UBB</text>
+  </svg>
+  </div>
+</div>
+
+<div class="table-shell">
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th class="col-sticky">概念</th>
+        <th>全称 / 字面</th>
+        <th>一句话定位</th>
+        <th>代表产品 / 型号</th>
+        <th>状态</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h2>高频混淆速辨 <span class="p-sub">最容易混的 7 组</span></h2>
+    <table class="mini">
+      <tr><th>混淆对</th><th>一句话辨析</th></tr>
+      <tr><td class="k">DGX vs HGX</td><td>同源算力底座，差别是<b>谁造整机</b>：DGX=原厂整机+全栈软件；HGX=卖给 OEM 的基板模组</td></tr>
+      <tr><td class="k">HGX vs MGX</td><td>不同层级：HGX=板级模组（8 卡基板）；MGX=机箱/机架级架构规范（骨架标准）</td></tr>
+      <tr><td class="k">SXM vs PCIe vs OAM vs RXM</td><td>SXM=NVIDIA 板载插座模块；PCIe=通用插卡；OAM=OCP 开放模块（AMD 阵营）；RXM=工作站卡的<b>液冷机架</b>形态</td></tr>
+      <tr><td class="k">NVL vs NVLink</td><td>NVLink=互联技术本身；NVL72=用该技术把 72 卡组成一个互联域的产品命名</td></tr>
+      <tr><td class="k">EGX vs OVX vs RTX PRO Server</td><td>EGX=边缘品牌（2019，已淡出）；OVX=数字孪生参考架构；RTX PRO Server=2025 起的企业 AI 服务器（官方用其承接原 EGX 页面）</td></tr>
+      <tr><td class="k">Jetson AGX vs DRIVE AGX</td><td>同用 AGX 前缀：Jetson AGX=机器人/嵌入式旗舰；DRIVE AGX=车载计算机</td></tr>
+      <tr><td class="k">SuperPOD vs POD</td><td>SuperPOD=DGX 品牌的集群参考架构；Vera Rubin POD=多机型机架组合的新一代产品叙事</td></tr>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>产品名拆解示例 <span class="p-sub">按段读型号，不再被命名绕晕</span></h2>
+    <table class="mini">
+      <tr><th>示例型号</th><th>逐段含义</th></tr>
+      <tr><td class="k mono">DGX GB300 NVL72</td><td>DGX=原厂整机 · GB300=Grace+Blackwell Ultra 超芯片 · NVL72=72 卡 NVLink 域整机架</td></tr>
+      <tr><td class="k mono">HGX B300 NVL16</td><td>HGX=卖给 OEM 的基板模组 · B300=Blackwell Ultra GPU · NVL16=16 卡 NVLink 域</td></tr>
+      <tr><td class="k mono">H100 SXM5</td><td>H100=Hopper 架构 GPU · SXM5=第 5 代插座式板载封装</td></tr>
+      <tr><td class="k mono">Vera Rubin NVL72</td><td>Vera=CPU 名 · Rubin=GPU 架构名 · NVL72=机架级互联域</td></tr>
+      <tr><td class="k mono">GB200 NVL2</td><td>GB=Grace+Blackwell 合封 · 200=数据中心级 · NVL2=2 卡 NVLink 域单机</td></tr>
+      <tr><td class="k mono">RTX PRO 6000 Blackwell Server Edition</td><td>RTX PRO=专业产品线 · 6000=旗舰档 · Blackwell=架构 · Server Edition=数据中心 24/7 被动散热版（另有 Workstation / Max-Q 档）</td></tr>
+      <tr><td class="k mono">Jetson AGX Thor T5000</td><td>Jetson=嵌入式模组 · AGX=旗舰前缀 · Thor=芯片代 · T5000=顶配（128GB）</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="panel" style="margin-top:14px">
+  <h2>来源与口径备注</h2>
+  <ul>
+    <li>概念定义以 <b>NVIDIA 官网产品页 / 技术博客 / 新闻稿</b>为准：HGX、DGX 系列页（nvidia.com/data-center/…）、Blackwell 架构页、Vera Rubin POD 技术博客（developer.nvidia.com）、RTX PRO Server 发布稿（2025.03 GTC）、DGX Spark / Station 产品页。</li>
+    <li>关键事实锚点：<b>EGX 产品页 URL（/data-center/products/egx）现展示 RTX PRO Server</b>——EGX→RTX PRO Server 的承接为官方行为，非推测；<b>RXM</b> 仅见于 RTX PRO 6000 / 5500 Blackwell 规格页的「液冷方案以 RXM 形态提供」表述；<b>SXM 各代与架构对应关系</b>按 NVIDIA datasheet 惯例整理。</li>
+    <li>第三方参考（概念辨析类）：gpusmith、aiwiki、simcentric 及中文产业媒体，仅用于交叉验证定义，不用于参数引用。</li>
+    <li>芯片级参数（算力 / 显存 / 功耗）请查本站<b>《AI芯片参数速查表》</b>；集群配置与机柜 / 电力测算请查<b>《算力集群配置模型》</b>与<b>《算力电力速查》</b>，本表不重复收录。</li>
+  </ul>
+</div>
+
+<footer>
+  NVIDIA 平台与形态速查表 · 概念定义截至 2026-11-02 · 与本站其他速查表同目录共用 site-nav.js<br>
+  全称标注为社区通行写法者不代表官方口径；正式采购与投标文件请以 NVIDIA 官方文档及书面确认为准
+</footer>
+</div>
+
+<script>
+/* ============================ 数据 ============================ */
+/* cat: A 封装形态 / B 基板模组 / C 整机与系统 / D 机架与集群 / E 边缘与车载 / F 命名与历史品牌
+   name=概念 full=全称/字面 def=一句话定位 reps=代表产品 st=状态 stc=状态徽标色 detail=展开辨析 */
+const CATS = [
+  {id:"A", label:"① 封装形态", hint:"芯片怎么「装」"},
+  {id:"B", label:"② 基板模组", hint:"怎么卖给 OEM"},
+  {id:"C", label:"③ 整机与系统", hint:"谁组装 · 卖给谁"},
+  {id:"D", label:"④ 机架与集群", hint:"怎么进机房"},
+  {id:"E", label:"⑤ 边缘与车载", hint:"云外的算力"},
+  {id:"F", label:"⑥ 命名规则与历史品牌", hint:"防混淆"}
+];
+const DATA = [
+/* ---------- A 封装形态 ---------- */
+{cat:"A",name:"SXM",full:"插座式板载模块（社区常写 Server PCI Express Module；官方仅称 SXM，未正式展开）",
+ def:"GPU 的板载封装形态：模块水平贴装在基板专用插座上，走 NVLink 全互联、供电由基板供给，功耗可达 700–2,300W 级",
+ reps:"SXM2(P100/V100) → SXM4(A100) → SXM5(H100/H200) → SXM6(B200/B300)；Rubin 沿用 SXM",
+ st:"现行主力",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>训练集群标配形态，每代与 GPU 架构一一对应、不跨代兼容；插在 HGX 基板（OEM 机型）或 DGX 整机（原厂机型）上。</span><span class='seg'><b>易混：</b>vs PCIe（插卡、功耗与互联受限）；vs OAM（OCP 开放标准模块，AMD 与部分国产卡采用）。</span><span class='seg'><b>口径：</b>「全称」为社区通行写法，NVIDIA 官方从未正式展开，投标文件勿引用全称。</span>"},
+{cat:"A",name:"PCIe",full:"PCIe 附加卡（Add-in Card，AIC）",
+ def:"标准 PCIe 插槽插卡形态：部署灵活、风冷友好，功耗受插槽+辅助供电约束（≤600W 级），多卡并行依赖 PCIe 总线而非 NVLink",
+ reps:"H100/H200 PCIe、L40S、RTX PRO 6000 Blackwell Server Edition（96GB / 600W）",
+ st:"现行",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>推理、边缘与企业私有化主力形态。同芯片下 PCIe 版通常功耗墙更低；Server Edition 是面向数据中心 24/7 被动散热的变体（支持 MIG 多实例与机密计算）。</span><span class='seg'><b>易混：</b>PCIe 版与 SXM 版不可同机混插设计；多卡张量并行带宽差距大（见本站《LLM推理技术速查》）。</span>"},
+{cat:"A",name:"OAM / UBB",full:"OCP Accelerator Module / Universal Baseboard（开放加速模块 / 通用基板）",
+ def:"OCP 开放标准的加速器模块形态：统一尺寸、连接器与供电规范，8 模块插一块 UBB 通用基板，避免专有形态锁定",
+ reps:"AMD MI300X / MI325X / MI355X（OAM + UBB）；部分国产卡（壁仞 166M/166L 等）",
+ st:"现行（开放阵营）",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>SXM+HGX 组合的开放标准对照物；AMD Infinity Fabric 承担卡间互联角色。国产卡多按 OAM 设计以兼容基板与生态。</span><span class='seg'><b>易混：</b>OAM 是模块规范、UBB 是基板规范，二者合起来对应「HGX 基板 + SXM 模块」的封闭组合。</span>"},
+{cat:"A",name:"RXM",full:"官方未公布全称（2026 年随 RTX PRO 系列出现的新形态名）",
+ def:"工作站级 GPU 的液冷机架形态：把 RTX PRO 工作站卡改为液冷、面向数据中心托管机架部署",
+ reps:"RTX PRO 6000 / 5500 Blackwell 的液冷版（官网规格页注明「液冷方案以 RXM 形态提供」）",
+ st:"新 · 规格未公开",stc:"blue",
+ detail:"<span class='seg'><b>定位：</b>让 96GB / 84GB 大显存工作站卡进入托管机架，配合 MIG 切分（6000 可 1×96 / 2×48 / 4×24GB）做云工作站、VDI 与本地推理。</span><span class='seg'><b>易混：</b>与 SXM / OAM 无关——RXM 是 PCIe 工作站卡的液冷部署形态，不是芯片封装标准。</span><span class='seg'><b>口径：</b>NVIDIA 未公布 RXM 全称与尺寸/供电规范，勿写入采购技术条款，按具体 SKU 书面确认。</span>"},
+{cat:"A",name:"Superchip",full:"超级芯片（CPU+GPU 合封，NVLink-C2C 互联）",
+ def:"把 CPU 与 GPU 封装为一个整体、共享一致性内存的超级芯片——Grace 时代的核心芯片形态",
+ reps:"GB10（DGX Spark 用）、GH200（Grace Hopper）、GB200 / GB300（Grace Blackwell）；Rubin 代配 Vera CPU",
+ st:"现行",stc:"ok",
+ detail:"<span class='seg'><b>命名法：</b>CPU 名+GPU 架构名——GH=Grace+Hopper、GB=Grace+Blackwell、VR=Vera+Rubin；数字表性能级（10=桌面、200/300=数据中心，Ultra=半代增强）。</span><span class='seg'><b>易混：</b>Superchip 是芯片层概念；装进整机后才成为 DGX / HGX / NVL 产品（如 72 颗 GB200 组成 GB200 NVL72）。</span>"},
+/* ---------- B 基板模组 ---------- */
+{cat:"B",name:"HGX",full:"基板模组 + 参考设计（社区称 High-performance GPU eXpansion；官方未正式展开）",
+ def:"8×SXM GPU + NVSwitch 集成在一块基板上的「发动机+底盘」，以模组形式卖给 OEM，CPU/内存/机箱/软件由厂商自配",
+ reps:"HGX H100 / H200、HGX B200 / B300 NVL16、HGX Rubin NVL8（2026H2）",
+ st:"现行主力",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>云厂商与 OEM 主流路径——Dell / 超微 / 联想 / HPE 用 HGX 出整机，算力与 DGX 同级、更便宜可定制；另有 4 卡与 16 卡（NVL16）变体。</span><span class='seg'><b>易混：</b>DGX vs HGX 之别在「谁造整机、带不带全栈软件」；MGX 是机箱/机架级架构规范，与 HGX（板级）不同层。</span>"},
+/* ---------- C 整机与系统 ---------- */
+{cat:"C",name:"DGX",full:"原厂整机品牌（早期全称诸说不一，官方已不再展开）",
+ def:"NVIDIA 原厂设计、软硬件全栈深度整合的 AI 超算整机：开箱即用、原厂支持、可拼 SuperPOD",
+ reps:"DGX H100 / H200 / B200 / B300、DGX GB200 / GB300 NVL72、DGX Vera Rubin NVL72",
+ st:"现行主力",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>与 HGX 同源算力底座、交付方式不同：DGX=原厂整机+DGX OS / AI Enterprise 全栈；HGX=模组卖给 OEM。机架级 DGX（如 DGX GB300 NVL72）为整机柜交付、必配液冷。</span><span class='seg'><b>速查：</b>「DGX」是家族总品牌，下分机架/服务器、桌面（Spark / Station）、量子（Quantum）、云（Cloud）与集群参考（SuperPOD / BasePOD）。</span>"},
+{cat:"C",name:"DGX Spark",full:"桌面个人 AI 超算（前身 Project DIGITS，CES 2025 发布、2025.10 发售）",
+ def:"便当盒尺寸桌面超算：GB10 Grace Blackwell Superchip + 128GB 统一内存，本地可跑 200B 参数模型",
+ reps:"DGX Spark（GB10、128GB LPDDR5X）；同款芯片进联想 / 华硕桌面及 RTX Spark PC 芯片（与 MediaTek 合作）",
+ st:"现行",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>个人与实验室本地 AI（推理 + 微调原型），DGX 生态的桌面入口，预装 DGX OS 并衔接 NeMo / Isaac / Holoscan 等平台。</span><span class='seg'><b>易混：</b>Spark=桌面超算（GB10、128GB）；Station=工作站级塔式机（GB300、748GB），档位与定位不同。</span>"},
+{cat:"C",name:"DGX Station",full:"桌面工作站级 AI 超算",
+ def:"塔式桌面超算：Blackwell GPU + Grace CPU 超芯片 + 大容量一致性内存，无需机房即可部署训练/推理",
+ reps:"DGX Station GB300（748GB 一致性内存、水冷）；历代 DGX Station A100 等",
+ st:"现行",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>「办公室里的 DGX」，面向小型团队的集中算力；用水冷与大容量一致性内存，功率与噪音按办公环境设计。</span><span class='seg'><b>易混：</b>与 DGX Spark（个人桌面、GB10）为两个档位；与 DGX 服务器/机架（机房形态）交付环境不同。</span>"},
+{cat:"C",name:"DGX Quantum",full:"量子-经典混合超算参考（与 Quantum Machines 合作）",
+ def:"Grace Hopper 超芯片 + OPX+ 量子控制器同机：量子纠错、校准与混合算法在峰值性能下运行",
+ reps:"DGX Quantum（Grace Hopper + Quantum Machines OPX+）",
+ st:"利基",stc:"blue",
+ detail:"<span class='seg'><b>定位：</b>面向量子计算研究机构的混合系统参考设计，非通用 AI 采购品类，收录仅为家族完整性。</span>"},
+{cat:"C",name:"DGX Cloud",full:"云上 DGX（早期：伙伴云上租用式 AI 服务；现：NVIDIA 内部 AI 云环境）",
+ def:"DGX 能力上云——官方现定位为「NVIDIA 内部构建与运营 AI 的云环境」：训练其开源模型、验证新系统架构",
+ reps:"早期经 OCI / Azure / Google Cloud 等伙伴提供 DGX 实例",
+ st:"演进中",stc:"blue",
+ detail:"<span class='seg'><b>口径提示：</b>「按需租 DGX」的早期服务叙事已收缩，官网现描述为内部 AI 工厂环境；引用时须区分历史服务定位与当前官方口径。</span>"},
+{cat:"C",name:"DGX SuperPOD / BasePOD",full:"DGX 集群参考架构（SuperPOD=大规模；BasePOD=中小规模）",
+ def:"把多台 DGX / 机架 + InfiniBand / 以太网 + 管理软件打包成可复制部署的集群参考设计",
+ reps:"DGX Vera Rubin SuperPOD（14×NVL72 = 1,008 GPU，50.4 EFLOPS NVFP4）；DGX BasePOD（配认证存储/网络）",
+ st:"现行",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>SuperPOD 是「产品化 AI 工厂」参考，BasePOD 是数机架级企业配置。</span><span class='seg'><b>易混：</b>SuperPOD（DGX 品牌集群参考架构）与 Vera Rubin POD（多机架产品组合）是两层概念。</span>"},
+{cat:"C",name:"OVX",full:"Omniverse OVX（图形 + AI 参考架构）",
+ def:"面向 Omniverse 数字孪生 / 工业仿真的服务器参考架构：L40S（现 RTX PRO 6000 SE）+ ConnectX-7 + BlueField-3，全栈认证",
+ reps:"OVX L40S Server（4 / 8 GPU 配置；Dell / HPE / 联想 / 超微等出品）",
+ st:"现行",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>3D 协同、机器人模拟（Isaac Sim）、合成数据、XR 的专用整机参考；GPU 已从 L40S 向 RTX PRO 6000 Server Edition 延伸。</span><span class='seg'><b>易混：</b>OVX 偏图形+仿真；EGX 偏边缘推理；RTX PRO Server 是 2025 后企业 AI 统一服务器品牌。</span>"},
+{cat:"C",name:"RTX PRO Server",full:"企业 AI / 工业 AI 通用服务器平台（GTC 2025.03 发布）",
+ def:"以 RTX PRO 6000 / 4500 Blackwell Server Edition 为核心的整机服务器：风冷或液冷、MGX 机箱，主打企业私有化推理、云工作站与数字孪生",
+ reps:"8×RTX PRO 6000 SE（整机 800GB GDDR7、13TB/s、30 PFLOPS FP4）；MGX 2U/4U/6U 配置",
+ st:"现行（2025 起）",stc:"ok",
+ detail:"<span class='seg'><b>证据：</b>NVIDIA 官网原 EGX 产品页 URL（/data-center/products/egx）现即 RTX PRO Server 页——官方用其承接 EGX 生态位。液冷版即 RXM 形态。</span><span class='seg'><b>定位：</b>企业「AI 工厂入门」与 vGPU 虚拟工作站/推理的统一服务器品牌，与 OVX 的 GPU 路线汇合。</span>"},
+{cat:"C",name:"EGX",full:"Edge GPU eXtension（社区写法）；边缘 AI 平台品牌（GTC 2019 发布）",
+ def:"边缘 AI 平台：低功耗 PCIe 卡（T4 / L4 / L40S）+ 远程管理，面向工厂 / 零售 / 智慧城市的边缘推理",
+ reps:"EGX A100、EGX L4 / L40S 服务器",
+ st:"历史 / 已淡出",stc:"gray",
+ detail:"<span class='seg'><b>现状：</b>品牌已淡化——官方 EGX 页面 URL 指向 RTX PRO Server；工业安全边缘由 IGX / Jetson 承接。</span><span class='seg'><b>速查用法：</b>旧资料中见到 EGX 按「边缘推理服务器/平台」理解即可；新采购直接看 RTX PRO Server 或 IGX / Jetson。</span>"},
+/* ---------- D 机架与集群 ---------- */
+{cat:"D",name:"MGX",full:"模块化服务器 / 机架参考架构（Computex 2023 发布；社区称 Modular GPU Acceleration）",
+ def:"标准化机架「骨架」：托盘、线缆盒、液冷分配、铜排、电源等统一规范，OEM 据此快速衍生 x86 / Grace、GPU / DPU、1U-6U 到整机架的多形态产品",
+ reps:"第三代 MGX；GB200 NVL72（Oberon）、Vera Rubin NVL72、MGX ETL、Kyber 均属 MGX 家族",
+ st:"现行主力",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>面向「GPU 换代不换机架生态」，降低 OEM 开发成本与部署时间；一台 OEM 服务器 = MGX 机箱 + HGX 模组 + 自选 CPU。</span><span class='seg'><b>易混：</b>MGX 是架构规范（不直接卖给最终用户）；HGX 是具体模组产品——层级不同。</span>"},
+{cat:"D",name:"Oberon / Kyber / ETL",full:"MGX 机架家族代际代号",
+ def:"Oberon=Blackwell 代 NVL72 机架（水平托盘、铜缆背板、液冷）；Kyber=Rubin Ultra 起的新机架（垂直刀片、PCB 中板替代铜缆、800VDC，单机 NVL144）；ETL=以太网机架变体",
+ reps:"Oberon NVL72、Kyber NVL144 / 576、MGX ETL（可装 256 节点 / Vera CPU 机架等）",
+ st:"现行 / 路线图",stc:"warn",
+ detail:"<span class='seg'><b>用途：</b>读懂机架代际与 NVL 域规模——Oberon 时代 NVL72，Kyber 时代 NVL144 / 576。ETL 让 MGX 机架生态跑 Spectrum-X 以太网脊背（Vera Rubin POD 的 CPU / 存储 / 推理机架使用）。</span>"},
+{cat:"D",name:"NVL##（NVLink 域命名）",full:"NVL + 数字 = 一个 NVLink 互联域内的 GPU 数量",
+ def:"型号后缀命名体系：NVL72 即 72 卡 NVLink 全互联整机架（整架可视为一颗巨型 GPU）；NVL8=8 卡基板域；NVL144 / 576=Kyber 机架扩展",
+ reps:"GB200 / GB300 / Vera Rubin NVL72、HGX B300 NVL16、HGX Rubin NVL8、GB200 NVL2",
+ st:"命名规则",stc:"blue",
+ detail:"<span class='seg'><b>另注：</b>另有双卡桥接产品 H100 NVL（188GB）/ H200 NVL（282GB）——同为 NVL 前缀，语义是「双卡 NVLink 桥接 PCIe 卡」。</span><span class='seg'><b>易混：</b>NVL ≠ NVLink——后者是互联技术本身。</span>"},
+{cat:"D",name:"POD",full:"Vera Rubin POD（2026 引入的多机架「超算单元」）",
+ def:"由五类 MGX 机架组成的 AI 工厂积木：NVL72 计算 + Groq LPX 推理 + Vera CPU + BlueField-4 STX 存储 + Spectrum-6 SPX 网络机架",
+ reps:"Vera Rubin POD（可含多套 NVL72 与 LPX 机架）",
+ st:"新（2026）",stc:"blue",
+ detail:"<span class='seg'><b>与 SuperPOD 区别：</b>POD 强调「多机型机架组合」的新一代产品叙事，SuperPOD 是 DGX 品牌的集群参考架构；Vera Rubin 时代两者并存互补。</span>"},
+/* ---------- E 边缘与车载 ---------- */
+{cat:"E",name:"Jetson（含 AGX）",full:"嵌入式 AI 模组家族（SOM 形态）",
+ def:"面向机器人 / 无人机 / 自主机器的模组化边缘计算机；AGX=旗舰前缀、NX=中端、Nano=入门，软硬一体（JetPack）",
+ reps:"AGX Orin（275 TOPS）→ Jetson Thor（Blackwell；T4000 64GB / T5000 128GB，FP4 稀疏 2,070 TFLOPS）",
+ st:"现行主力",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>具身智能（GR00T）、AMR、边缘视觉的主力平台；人形机器人时代 Thor 是「大脑」标配候选。</span><span class='seg'><b>易混：</b>Jetson AGX（机器人/嵌入式）与 DRIVE AGX（车载）同用 AGX 前缀、体系不同。</span>"},
+{cat:"E",name:"IGX",full:"工业级安全边缘平台（社区写法 Industrial GPU eXtension）",
+ def:"在 Jetson AGX Orin 基础上加功能安全（ASIL）、冗余供电与企业级软件栈的工业边缘平台，十年全栈支持",
+ reps:"IGX Orin 500 / 700（可选 RTX 6000 Ada GPU）",
+ st:"现行（利基）",stc:"ok",
+ detail:"<span class='seg'><b>定位：</b>强监管工业场景（医疗设备、人机协作产线）的安全增强平台。</span><span class='seg'><b>与 Jetson 区别：</b>Jetson 给开发者和机器人厂商做产品，IGX 给工业集成商做「合规+安全」部署平台。</span>"},
+{cat:"E",name:"DRIVE",full:"车载 AI 计算平台系列（DRIVE AGX 车载计算机 + DRIVE OS + Hyperion 参考架构）",
+ def:"自动驾驶 / 智能座舱全套平台：DRIVE AGX Orin（254 TOPS，量产中）→ DRIVE AGX Thor（约 2,000 TFLOPS FP8 含稀疏，2025 量产）",
+ reps:"DRIVE AGX Orin / Thor；NVIDIA Hyperion（2026.09 由 DRIVE Hyperion 改名）",
+ st:"现行主力",stc:"ok",
+ detail:"<span class='seg'><b>趋势：</b>Thor 单芯片多域隔离（智驾+座舱合一）。</span><span class='seg'><b>易混：</b>AGX 前缀跨 Jetson / DRIVE 两系；Hyperion 是车端参考硬件架构（传感器+计算），DRIVE OS 是系统软件。</span>"},
+/* ---------- F 命名规则与历史品牌 ---------- */
+{cat:"F",name:"GB / GH / VR 命名法",full:"超芯片与平台的命名规则（CPU 名 + GPU 架构名）",
+ def:"首字母=CPU（G=Grace、V=Vera），后接 GPU 架构名：GH=Grace+Hopper、GB=Grace+Blackwell、VR=Vera+Rubin；数字表性能级（10=桌面、200/300=数据中心，Ultra=半代增强）",
+ reps:"GH200、GB200 / GB300、GB10、VR200 / VR300（路线图代号）",
+ st:"命名规则",stc:"blue",
+ detail:"<span class='seg'><b>用法：</b>GB 开头=Grace CPU 合封的 Blackwell 系统；纯 GPU 单卡直接架构名+数字（B200、H100、R200）。Rubin 代 GPU 与 Vera CPU 的平台整体称 Vera Rubin。</span>"},
+{cat:"F",name:"Tesla（历史）",full:"数据中心加速卡旧品牌（2007–2020，Tesla V100 等）",
+ def:"早期数据中心 GPU 品牌前缀；2020 年因与汽车业务同名停用，此后直接以架构名命名数据中心卡",
+ reps:"Tesla P100 / V100 / A100（过渡期叫法）",
+ st:"历史",stc:"gray",
+ detail:"<span class='seg'><b>速查用途：</b>旧资料中 “Tesla” 仅表数据中心卡品牌，与特斯拉汽车公司无关。</span>"},
+{cat:"F",name:"Quadro（历史）",full:"专业图形卡旧品牌（至 2020 年淘汰）",
+ def:"工作站专业卡品牌：2020 年并入 RTX A 系列，2025 年 GTC 升级为 RTX PRO 系列（工作站 + 服务器全线）",
+ reps:"Quadro RTX 8000 → RTX 6000 Ada → RTX PRO 6000 Blackwell",
+ st:"历史",stc:"gray",
+ detail:"<span class='seg'><b>脉络：</b>Quadro → RTX（光追世代）→ RTX PRO（AI 世代重命名）；看到 Quadro 视为 RTX PRO 前身即可。</span>"},
+{cat:"F",name:"GeForce",full:"消费级 GPU 品牌（GeForce RTX 50 系）",
+ def:"桌面 / 笔记本消费卡品牌：与数据中心线共享架构（Blackwell）但产品形态、认证与服务完全不同",
+ reps:"RTX 5090、RTX 5080",
+ st:"现行（对照项）",stc:"gray",
+ detail:"<span class='seg'><b>收录目的：</b>区分消费线与专业线——RTX 前缀是 2018 年起的光追产品名（跨 GeForce / PRO 两线），勿将 GeForce 卡用于数据中心采购（无 ECC / 无企业支持）。</span>"}
+];
+
+/* ============================ 渲染 ============================ */
+const ST_CLS = {ok:"b-ok", warn:"b-warn", blue:"b-blue", gray:"b-gray", violet:"b-violet"};
+const tbody = document.getElementById("tbody");
+const qInput = document.getElementById("q");
+const chipsBox = document.getElementById("cat-chips");
+const cntAll = document.getElementById("cnt-all");
+const cntHit = document.getElementById("cnt-hit");
+let activeCat = "";
+let opened = new Set();
+
+cntAll.textContent = DATA.length;
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+function buildChips(){
+  let html = '<span class="cat-chip on" data-cat="">全部 <span class="cnt">'+DATA.length+'</span></span>';
+  CATS.forEach(function(c){
+    var n = DATA.filter(function(d){return d.cat===c.id;}).length;
+    html += '<span class="cat-chip" data-cat="'+c.id+'">'+c.label+' <span class="cnt">'+n+'</span></span>';
+  });
+  chipsBox.innerHTML = html;
+  chipsBox.querySelectorAll(".cat-chip").forEach(function(ch){
+    ch.addEventListener("click",function(){
+      chipsBox.querySelectorAll(".cat-chip").forEach(function(x){x.classList.remove("on");});
+      ch.classList.add("on");
+      activeCat = ch.getAttribute("data-cat");
+      render();
+    });
+  });
+}
+
+function match(d,q){
+  if(!q) return true;
+  var hay = (d.name+" "+d.full+" "+d.def+" "+d.reps+" "+d.st+" "+d.detail).toLowerCase();
+  return hay.indexOf(q)>-1;
+}
+
+function render(){
+  var q = qInput.value.trim().toLowerCase();
+  var rows = [];
+  CATS.forEach(function(c){
+    var items = DATA.filter(function(d){return d.cat===c.id && (!activeCat||activeCat===c.id) && match(d,q);});
+    if(!items.length) return;
+    rows.push('<tr class="group"><td colspan="5">'+c.label+'<span class="g-hint">'+c.hint+'</span></td></tr>');
+    items.forEach(function(d,idx){
+      var id = c.id+"-"+idx;
+      var isOpen = opened.has(id);
+      rows.push(
+        '<tr class="entry'+(isOpen?" row-open":"")+'" data-id="'+id+'">'+
+        '<td class="col-sticky cpt">'+esc(d.name)+'<span class="sub">'+esc(d.st)+'</span></td>'+
+        '<td class="full"><span class="tc" title="'+esc(d.full)+'">'+esc(d.full)+'</span></td>'+
+        '<td class="def">'+esc(d.def)+'</td>'+
+        '<td class="reps"><span class="tc" title="'+esc(d.reps)+'">'+esc(d.reps)+'</span></td>'+
+        '<td><span class="badge '+(ST_CLS[d.stc]||"b-gray")+'">'+esc(d.st)+'</span></td>'+
+        '</tr>'
+      );
+      rows.push('<tr class="detail" data-for="'+id+'" style="'+(isOpen?"":"display:none")+'"><td colspan="5"><div class="detail-inner">'+d.detail+'</div></td></tr>');
+    });
+  });
+  if(!rows.length) rows.push('<tr><td colspan="5" class="empty">没有匹配的概念——换个关键词试试</td></tr>');
+  tbody.innerHTML = rows.join("");
+  var hit = tbody.querySelectorAll("tr.entry").length;
+  cntHit.textContent = hit;
+  tbody.querySelectorAll("tr.entry").forEach(function(tr){
+    tr.addEventListener("click",function(){
+      var id = tr.getAttribute("data-id");
+      var det = tbody.querySelector('tr.detail[data-for="'+id+'"]');
+      if(opened.has(id)){opened.delete(id);tr.classList.remove("row-open");det.style.display="none";}
+      else{opened.add(id);tr.classList.add("row-open");det.style.display="";}
+    });
+  });
+}
+
+qInput.addEventListener("input",render);
+document.getElementById("btn-expand").addEventListener("click",function(){
+  if(opened.size){opened.clear();this.textContent="展开全部辨析";}
+  else{tbody.querySelectorAll("tr.entry").forEach(function(tr){opened.add(tr.getAttribute("data-id"));});this.textContent="收起全部辨析";}
+  render();
+});
+document.getElementById("btn-reset").addEventListener("click",function(){
+  qInput.value="";activeCat="";
+  chipsBox.querySelectorAll(".cat-chip").forEach(function(x){x.classList.remove("on");});
+  chipsBox.querySelector(".cat-chip").classList.add("on");
+  opened.clear();
+  document.getElementById("btn-expand").textContent="展开全部辨析";
+  render();
+});
+document.getElementById("btn-print").addEventListener("click",function(){window.print();});
+
+buildChips();
+render();
+</script>
+</body>
+</html>
