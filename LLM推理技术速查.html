@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM 推理技术速查 · 推理引擎 · 并行策略 · PD 分离 · KV 显存与批调度 · 投机解码 · 量化</title>
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#ffffff;
+  --border:#e3e6ea;
+  --border-strong:#cfd4da;
+  --text:#1f2328;
+  --text-2:#5b6570;
+  --text-3:#8b939c;
+  --accent:#1f6feb;
+  --accent-soft:#eaf2fe;
+  --warn:#b45309;
+  --warn-soft:#fef4e6;
+  --danger:#b3261e;
+  --danger-soft:#fdecea;
+  --ok:#0a7d3b;
+  --ok-soft:#e8f5ed;
+  --chip:#f0f2f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:13.5px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1340px;margin:0 auto;padding:22px 24px 60px}
+
+/* ---------- header ---------- */
+header.top{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:18px 22px;margin-bottom:14px;
+}
+h1{font-size:20px;margin:0 0 6px;letter-spacing:.3px}
+h1 span.tagline{font-size:13px;color:var(--text-3);font-weight:400;margin-left:8px}
+h1 span.ver{
+  display:inline-block;font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);
+  border-radius:5px;padding:1px 7px;margin-right:8px;vertical-align:2px;letter-spacing:.5px;
+}
+.meta-line{color:var(--text-2);font-size:12.5px;margin:0}
+.meta-line b{color:var(--text);font-weight:600}
+.disclaim{
+  margin-top:10px;padding:9px 12px;background:var(--warn-soft);border-left:3px solid #e0a020;
+  border-radius:4px;color:#7a4b06;font-size:12px;line-height:1.65;
+}
+.disclaim b{color:#5c3a05}
+
+/* ---------- generic panel ---------- */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:14px}
+.panel>h2{font-size:15px;margin:0 0 4px}
+.panel>h2 .sub{font-size:12px;color:var(--text-3);font-weight:400;margin-left:8px}
+.panel>h3{font-size:13.5px;margin:18px 0 8px}
+.panel .lead{color:var(--text-2);font-size:12.5px;margin:0 0 12px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- 页内目录 ---------- */
+#toc{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  margin:0 -24px 14px;padding:9px 24px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+}
+#toc .toc-t{font-size:12px;font-weight:700;color:var(--text-3);margin-right:2px;white-space:nowrap}
+#toc a{
+  font-size:12px;color:var(--text-2);text-decoration:none;white-space:nowrap;
+  padding:3px 11px;border-radius:20px;border:1px solid transparent;cursor:pointer;
+  transition:color .15s,background .15s,border-color .15s;
+}
+#toc a:hover{color:var(--accent);border-color:#a8c7f5;background:#eaf2fe}
+#toc a.cur{
+  background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;
+}
+@media(max-width:640px){
+  .wrap{padding:18px 14px 50px}
+  #toc{margin:0 -14px 12px;padding:8px 14px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  #toc::-webkit-scrollbar{display:none}
+}
+
+/* ---------- 回目录链接（每节自动注入） ---------- */
+.back-toc-row{display:flex;justify-content:flex-end;margin:-2px 0 2px}
+.back-toc{
+  font-size:11.5px;color:var(--text-3);text-decoration:none;white-space:nowrap;
+  padding:2px 10px;border-radius:20px;border:1px solid var(--border);background:#fff;
+  cursor:pointer;transition:color .15s,border-color .15s,background .15s;
+}
+.back-toc:hover{color:var(--accent);border-color:#a8c7f5;background:var(--accent-soft);text-decoration:none}
+
+/* ---------- ① 引擎卡片 ---------- */
+.eng-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+@media(max-width:1000px){.eng-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.eng-grid{grid-template-columns:1fr}}
+.eng-card{
+  border:1px solid var(--border);border-top:3px solid var(--c,var(--accent));
+  border-radius:10px;background:#fff;padding:13px 15px;display:flex;flex-direction:column;
+}
+.eng-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.eng-head .eng-name{font-size:16.5px;font-weight:700;color:var(--c,var(--accent))}
+.eng-head .eng-org{font-size:11px;color:var(--text-3)}
+.eng-tag{
+  display:inline-block;font-size:11.5px;font-weight:600;color:var(--c,var(--accent));
+  background:#eef5fe;
+  background:color-mix(in srgb,var(--c,#1f6feb) 9%,#fff);
+  border-radius:5px;padding:1px 8px;margin:7px 0 9px;align-self:flex-start;
+}
+.eng-rows{margin:0;display:grid;grid-template-columns:72px 1fr;row-gap:7px;column-gap:10px;font-size:12px}
+.eng-rows dt{color:var(--text-3);font-weight:600;line-height:1.6}
+.eng-rows dd{margin:0;color:var(--text-2);line-height:1.65}
+.eng-rows dd b{color:var(--text)}
+.pick{
+  border-left:3px solid var(--accent);background:var(--accent-soft);
+  border-radius:4px;padding:11px 15px;margin-top:14px;font-size:13px;line-height:2;color:#1a3a6b;
+}
+.pick b{color:#0b2e5e}
+
+/* ---------- ② 并行卡片 ---------- */
+.par-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+@media(max-width:900px){.par-grid{grid-template-columns:1fr}}
+.par-card{border:1px solid var(--border);border-radius:10px;background:#fff;padding:13px 15px}
+.par-card .pc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.par-card .pc-head .pc-name{font-size:15.5px;font-weight:700}
+.par-card .pc-head .pc-full{font-size:11px;color:var(--text-3)}
+.par-card .pc-head .pc-abbr{
+  display:inline-block;font-size:12.5px;font-weight:800;color:#fff;background:var(--accent);
+  border-radius:5px;padding:1px 8px;letter-spacing:.5px;
+}
+.par-card .pc-head .pc-abbr.ep{background:#7c3aed}
+.par-fig{margin:8px 0 10px;border:1px dashed var(--border-strong);border-radius:8px;background:#fbfcfd;padding:6px 6px 2px}
+.par-fig svg{display:block;width:100%;height:auto}
+.par-card .pc-rows{margin:0;display:grid;grid-template-columns:64px 1fr;row-gap:6px;column-gap:10px;font-size:12px}
+.par-card .pc-rows dt{color:var(--text-3);font-weight:600;line-height:1.6}
+.par-card .pc-rows dd{margin:0;color:var(--text-2);line-height:1.65}
+.par-card .pc-rows dd b{color:var(--text)}
+.par-note{
+  margin-top:12px;padding:9px 12px;background:#f8f9fb;border:1px dashed var(--border-strong);
+  border-radius:8px;font-size:12px;color:var(--text-2);line-height:1.7;
+}
+.par-note b{color:var(--text)}
+
+/* 组合策略表 */
+table.cmp{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;margin-top:8px}
+table.cmp th{
+  background:#f8f9fb;color:var(--text-2);font-weight:600;text-align:left;
+  padding:8px 10px;border-bottom:1px solid var(--border-strong);font-size:11.5px;
+}
+table.cmp td{padding:8px 10px;border-bottom:1px solid #eef0f3;vertical-align:top}
+table.cmp td b{color:var(--text)}
+table.cmp tbody tr:hover td{background:#f8fbff}
+
+/* ---------- ③ PD 分离 ---------- */
+.arch{margin:12px 0 4px}
+.arch-lane{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;justify-content:center}
+.arch .node{
+  border:1px solid var(--border);border-radius:10px;background:#fff;padding:10px 14px;
+  font-size:12.5px;font-weight:600;text-align:center;min-width:130px;flex:1;
+  display:flex;flex-direction:column;justify-content:center;line-height:1.5;
+}
+.arch .node small{font-weight:400;color:var(--text-3);font-size:11px;margin-top:3px;line-height:1.5}
+.arch .node.router{background:#f8f9fb;border-color:var(--border-strong)}
+.arch .node.pool-p{background:var(--accent-soft);border-color:#a8c7f5}
+.arch .node.pool-d{background:var(--ok-soft);border-color:#bfe3cc}
+.arch .flow{
+  align-self:center;color:var(--text-3);font-size:15px;font-weight:700;
+  padding:0 2px;flex:none;
+}
+.arch .flow.kvflow{color:var(--warn);font-size:12.5px;white-space:nowrap}
+.arch-back{
+  margin-top:8px;border-top:2px dashed var(--border-strong);padding-top:6px;
+  text-align:center;font-size:11.5px;color:var(--text-3);
+}
+.kv-lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+@media(max-width:860px){.kv-lanes{grid-template-columns:1fr}}
+.quan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
+@media(max-width:1000px){.quan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.quan-grid{grid-template-columns:1fr}}
+.kv-lane{border:1px solid var(--border);border-radius:10px;padding:11px 13px;background:#fbfcfd}
+.kv-lane .kl-t{font-size:12.5px;font-weight:700;color:var(--text)}
+.kv-lane .kl-t .lv{font-size:10.5px;font-weight:700;border-radius:4px;padding:0 6px;margin-right:6px;color:#fff;background:var(--accent)}
+.kv-lane .kl-t .lv.b{background:var(--warn)}
+.kv-lane .kl-t .lv.c{background:var(--text-3)}
+.kv-lane .kl-d{font-size:11.5px;color:var(--text-2);line-height:1.7;margin-top:5px}
+.kv-lane .kl-d b{color:var(--text)}
+.stack-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.stack-chips .sc{
+  border:1px solid var(--border);border-radius:8px;background:#fff;padding:6px 11px;
+  font-size:11.5px;color:var(--text-2);line-height:1.55;
+}
+.stack-chips .sc b{color:var(--text)}
+.pd-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:860px){.pd-2col{grid-template-columns:1fr}}
+.pd-box{border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.pd-box.gain{background:var(--ok-soft);border-color:#bfe3cc}
+.pd-box.cost{background:var(--danger-soft);border-color:#eec7c3}
+.pd-box .pb-t{font-size:13px;font-weight:700;margin-bottom:6px}
+.pd-box.gain .pb-t{color:var(--ok)}
+.pd-box.cost .pb-t{color:var(--danger)}
+.pd-box ul{margin:0;padding-left:0;list-style:none}
+.pd-box li{
+  position:relative;padding:4px 0 4px 14px;font-size:12px;color:var(--text-2);line-height:1.65;
+}
+.pd-box li:before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:2px}
+.pd-box.gain li:before{background:var(--ok)}
+.pd-box.cost li:before{background:var(--danger)}
+.pd-box li b{color:var(--text)}
+.verdict{
+  border-left:3px solid var(--accent);background:var(--accent-soft);
+  border-radius:4px;padding:11px 15px;margin-top:14px;font-size:13px;line-height:1.9;color:#1a3a6b;
+}
+.verdict b{color:#0b2e5e}
+
+/* ---------- ④ PagedAttention ---------- */
+.pa-2col{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px;margin-top:12px}
+@media(max-width:900px){.pa-2col{grid-template-columns:1fr}}
+.pa-panel{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:#fbfcfd}
+.pa-panel .pa-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:8px}
+.pa-cells{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:3px}
+.pa-cells i{
+  display:block;height:16px;border-radius:3px;background:#fff;border:1px solid #e3e6ea;
+}
+.pa-cells i.used{background:#1f6feb;border-color:#1f6feb}
+.pa-cells i.idle{
+  background:repeating-linear-gradient(45deg,#f0f2f5 0 4px,#e7eaef 4px 7px);
+  border-color:#dfe3e8;
+}
+.pa-cells i.rB{background:#7c3aed;border-color:#7c3aed}
+.pa-cells i.share{background:linear-gradient(90deg,#1f6feb 50%,#7c3aed 50%);border-color:#4a55b8}
+.pa-cells i.free{background:#fff;border-color:#e3e6ea}
+.pa-note{font-size:11.5px;color:var(--text-2);margin-top:8px;line-height:1.65}
+.pa-note b{color:var(--text)}
+.pa-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:11px;color:var(--text-3)}
+.pa-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1px solid #e3e6ea}
+.pa-desc{font-size:12.5px;color:var(--text-2);line-height:1.75}
+.pa-desc b{color:var(--text)}
+.pa-desc .formula{
+  display:inline-block;background:#f8f9fb;border:1px dashed var(--border-strong);border-radius:6px;
+  padding:4px 10px;margin:4px 0;font-variant-numeric:tabular-nums;color:var(--text);
+}
+.pa-desc ol{margin:8px 0 0;padding-left:18px}
+.pa-desc ol li{margin-bottom:6px}
+.pa-desc ol li b{color:var(--text)}
+
+/* KV 计算器 */
+.kv-grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;margin-top:12px}
+@media(max-width:960px){.kv-grid{grid-template-columns:minmax(0,1fr)}}
+label.fl{display:block;font-size:12px;color:var(--text-2);font-weight:600;margin:0 0 4px}
+label.fl small{font-weight:400;color:var(--text-3)}
+input[type=number],select{
+  padding:7px 9px;border:1px solid var(--border-strong);border-radius:7px;background:#fff;
+  font-size:13px;color:var(--text);outline:none;font-family:inherit;width:100%;
+  font-variant-numeric:tabular-nums;
+}
+input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=number]:disabled{background:#f0f2f5;color:var(--text-3)}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.qchip{
+  display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;
+  background:var(--chip);border:1px solid transparent;color:var(--text-2);
+  font-size:11.5px;cursor:pointer;user-select:none;white-space:nowrap;
+}
+.qchip:hover{border-color:var(--border-strong)}
+.qchip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.kv-inputs{background:#f8f9fb;border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kv-inputs .fg{margin-bottom:12px}
+.kv-inputs .fg:last-child{margin-bottom:0}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:11.5px;color:var(--text-3);margin-top:4px;line-height:1.5}
+.kv-out{display:flex;flex-direction:column;gap:10px}
+.kv-out .kcard{
+  border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:#fff;flex:1;
+  display:flex;flex-direction:column;justify-content:center;min-height:86px;
+}
+.kv-out .kcard .k-tag{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text-3);margin-bottom:3px}
+.kv-out .kcard .k-val{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.kv-out .kcard .k-val small{font-size:13px;font-weight:600;color:inherit;margin-left:2px}
+.kv-out .kcard .k-formula{font-size:11.5px;color:var(--text-3);margin-top:5px;font-variant-numeric:tabular-nums;line-height:1.5}
+.kv-out .kcard.hl{background:var(--ok-soft);border-color:#bfe3cc}
+.kv-out .kcard.hl .k-val{color:var(--ok)}
+.kv-out .kcard.hl .k-tag{color:var(--ok)}
+
+/* ---------- ⑥ 量化 ---------- */
+.qm-card{border:1px solid var(--border);border-radius:10px;background:#fff;padding:13px 15px;display:flex;flex-direction:column}
+.qm-card .qm-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qm-card .qm-name .bits{
+  font-size:10.5px;font-weight:700;border-radius:4px;padding:1px 6px;color:#fff;
+  background:var(--accent);letter-spacing:.5px;white-space:nowrap;
+}
+.qm-card .qm-name .msr{font-size:10.5px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:4px;padding:1px 6px}
+.qm-card .qm-full{font-size:11px;color:var(--text-3);margin:2px 0 8px}
+.qm-card .qm-desc{font-size:12px;color:var(--text-2);line-height:1.65}
+.qm-card .qm-desc b{color:var(--text)}
+.qm-badge{margin-top:auto;padding-top:8px;font-size:11.5px}
+.qm-badge.rank{
+  margin-top:8px;border-radius:5px;padding:5px 10px;font-size:11.5px;line-height:1.55;
+  background:#f8f9fb;border:1px dashed var(--border-strong);color:var(--text-2);
+}
+.qm-badge.rank b{color:var(--text)}
+.qm-badge .b-ok,.qm-badge .b-warn{border-radius:4px;padding:1px 6px;font-weight:600;white-space:nowrap}
+.qm-badge .b-ok{background:var(--ok-soft);color:var(--ok)}
+.qm-badge .b-warn{background:var(--warn-soft);color:var(--warn)}
+.qm-chiprow{display:flex;flex-wrap:wrap;gap:6px}
+table.cmp.wide{min-width:0}
+table.cmp small{font-size:10.5px;color:var(--text-3);font-weight:400}
+/* 量化表：周向色阶（压缩越高颜色越深暖） */
+table.cmp td.reco{white-space:normal;font-size:11.5px;color:var(--text-2)}
+/* 实测对比两栏（三个测试盒：窄屏退化 1 列，宽屏 A/B 上排 + C 下排左） */
+.test-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.test-2col .span2{grid-column:1 / -1}
+@media(max-width:900px){.test-2col{grid-template-columns:1fr}.test-2col .span2{grid-column:auto}}
+.test-box{border:1px solid var(--border);border-radius:10px;background:#fbfcfd;padding:12px 14px}
+.test-box .tb-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.test-box .tb-title{font-size:13.5px;font-weight:700}
+.test-box .tb-sub{font-size:11px;color:var(--text-3)}
+.test-box .tb-note{font-size:11.5px;color:var(--text-3);line-height:1.6;margin:2px 0 8px}
+table.miniq{width:100%;border-collapse:collapse;font-size:12px}
+table.miniq th{
+  background:#f8f9fb;color:var(--text-2);font-weight:600;text-align:left;
+  padding:6px 8px;border-bottom:1px solid var(--border-strong);font-size:11px;
+}
+table.miniq td{padding:6px 8px;border-bottom:1px solid #eef0f3;text-align:left;vertical-align:middle}
+table.miniq td.num,table.miniq th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.miniq tr.ref td,table.miniq tr.ref th{background:var(--accent-soft)}
+table.miniq tr.ref td{font-weight:700;color:var(--accent)}
+.q-strike{color:var(--danger);font-weight:700}
+.q-good{color:var(--ok);font-weight:700}
+
+/* ---------- ⑦ 来源 ---------- */
+.src-list{margin:8px 0 0;padding-left:0;list-style:none}
+.src-list li{
+  position:relative;padding:6px 0 6px 14px;border-bottom:1px dashed #eceef2;
+  font-size:12px;color:var(--text-2);line-height:1.7;
+}
+.src-list li:last-child{border-bottom:none}
+.src-list li b{color:var(--text)}
+.src-list li:before{content:"";position:absolute;left:0;top:13px;width:6px;height:6px;border-radius:2px;background:var(--accent)}
+
+footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;line-height:1.8}
+
+@media print{
+  .chip-row,.no-print,#toc,.back-toc-row{display:none !important}
+  body{background:#fff}
+  .panel,.eng-card,.par-card,.kv-lane,.pd-box{border-color:#ccc}
+  .kv-inputs{display:none}
+  .kv-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<script src="site-nav.js"></script>
+
+<header class="top">
+  <h1><span class="ver">速查</span>LLM 推理技术速查 <span class="tagline">推理引擎 · 并行策略 · PD 分离 · KV 显存与批调度 · 投机解码 · 量化</span></h1>
+  <p class="meta-line">对象：<b>大模型在线推理（推理服务）工程选型</b> ｜ 内容基线 <b>2026-10</b> ｜ 引擎特性演进很快，决策前请以各官方文档复核</p>
+    <div class="disclaim">
+    口径说明：本页以「<b>prefill 计算受限 vs decode 访存受限</b>」作为贯穿主线；性能数字均为<b>公开报告口径</b>（论文 / 官方博客），
+    随硬件、模型版本、量化与负载配置变化极大，仅作量级参考，不可直接外推到自有业务。
+  </div>
+</header>
+
+<nav id="toc" aria-label="页内目录">
+  <span class="toc-t">目录</span>
+  <a href="#sec1" data-sec="sec1">① 推理引擎</a>
+  <a href="#sec2" data-sec="sec2">② 并行策略</a>
+  <a href="#sec3" data-sec="sec3">③ PD 分离</a>
+  <a href="#sec4" data-sec="sec4">④ KV 显存与批调度</a>
+  <a href="#sec5" data-sec="sec5">⑤ 投机解码</a>
+  <a href="#sec6" data-sec="sec6">⑥ 量化对比</a>
+  <a href="#sec7" data-sec="sec7">⑦ 来源与口径</a>
+</nav>
+
+<!-- ============ ① 推理引擎对比 ============ -->
+<section class="panel" id="sec1">
+  <h2>① 主流推理引擎对比 <span class="sub">覆盖在线服务主战场：vLLM / SGLang / TensorRT-LLM 等</span></h2>
+  <p class="lead">
+    判断一个引擎，先看三件事：<b>批处理机制</b>（吞吐根基，见 ④）、<b>硬件生态</b>（可部署到哪）、<b>工程化配套</b>（路由 / 集群 / PD 分离）。
+    训练框架与端侧 NPU 工具链不在本页范围。
+  </p>
+
+  <div class="eng-grid">
+    <div class="eng-card" style="--c:#1f6feb">
+      <div class="eng-head"><span class="eng-name">vLLM</span><span class="eng-org">UC Berkeley Sky Computing Lab 起源 · Apache-2.0</span></div>
+      <span class="eng-tag">社区事实标准 · 多硬件生态最广</span>
+      <dl class="eng-rows">
+        <dt>招牌机制</dt>
+        <dd><b>PagedAttention</b> + 连续批处理；V1 引擎统一 prefill/decode 调度（v0.8.0 起默认），<b>chunked prefill、prefix caching 默认开启</b>；调度按固定 token 预算切步，天然支持长输入分块。</dd>
+        <dt>生态硬件</dt>
+        <dd>NVIDIA / AMD / Intel / TPU 官方支持，<b>昇腾（vllm-ascend）</b>、海光、寒武纪、摩尔线程等有后端插件；OpenAI 兼容 API、生产栈（Kubernetes Router）配套完整。</dd>
+        <dt>适用场景</dt>
+        <dd>通用在线服务<b>默认首选</b>；多硬件平台交付；从研究验证到大规模生产的完整路径；PD 分离集群化（1P1D / XPYD）由官方主线推进。</dd>
+        <dt>注意边界</dt>
+        <dd>流水线并行（PP）在 V1 重构中回归（此前为 V0 能力），跨机 PP 以官方文档为准；单点极致性能常被专用栈（TRT-LLM）反超。</dd>
+      </dl>
+    </div>
+
+    <div class="eng-card" style="--c:#0ea5e9">
+      <div class="eng-head"><span class="eng-name">SGLang</span><span class="eng-org">LMSYS 社区 · Apache-2.0</span></div>
+      <span class="eng-tag">极致吞吐 · RadixAttention 前缀复用</span>
+      <dl class="eng-rows">
+        <dt>招牌机制</dt>
+        <dd><b>RadixAttention</b>：按前缀树管理 KV 缓存，多轮对话 / 相同系统提示词场景命中率高；调度与 kernel 深度调优，公开基准吞吐常领先。</dd>
+        <dt>生态硬件</dt>
+        <dd>NVIDIA / AMD 主力，昇腾等国产平台积极适配；DeepSeek 系优化深入（DP attention、DeepEP、EPLB、两批重叠）。</dd>
+        <dt>适用场景</dt>
+        <dd>高并发在线服务、<b>MoE 大模型服务</b>、Agent / 多轮长前缀复用场景；公开复现：12 节点 × 8 H100（96 卡）服务 DeepSeek-V3/R1，PD 分离 + DeepEP + EPLB，2k 输入口径下每节点 <b>52.3k 输入 / 22.3k 输出 token/s</b>（2025-05，LMSYS）。</dd>
+        <dt>注意边界</dt>
+        <dd>模型与生态覆盖弱于 vLLM；版本迭代快，生产锁定版本需回归测试；部分高级特性文档滞后于代码。</dd>
+      </dl>
+    </div>
+
+    <div class="eng-card" style="--c:#76b900">
+      <div class="eng-head"><span class="eng-name">TensorRT-LLM</span><span class="eng-org">NVIDIA · Apache-2.0 开源（深度绑定 TensorRT 生态）</span></div>
+      <span class="eng-tag">NVIDIA 集群单机密度与延迟标杆</span>
+      <dl class="eng-rows">
+        <dt>招牌机制</dt>
+        <dd>in-flight batching（连续批处理 NVIDIA 术语体系）+ paged KV cache；深度绑定 CUTLASS / cuBLAS / FlashInfer kernel 库，<b>AOT 编译 + CUDA Graph</b> 去除运行时调度开销——「单实例」指<b>单个引擎进程</b>（单卡或一个 TP/PP 卡组，多实例即 ② 节 DP 副本扩展），其绝对性能上限高；总吞吐 ≈ 单实例吞吐 × 副本数，副本基数即 DP 扩容天花板。</dd>
+        <dt>生态硬件</dt>
+        <dd><b>仅 NVIDIA</b>；官方 BLS 容器、NVIDIA Dynamo（路由层）联动，NVL72 等机柜级方案首选栈之一。</dd>
+        <dt>适用场景</dt>
+        <dd>延迟敏感（TTV 首字）型 API、大流量 NVIDIA 生产集群、英伟达硬件的极致性价比压榨。</dd>
+        <dt>注意边界</dt>
+        <dd>生态深度绑定 NVIDIA（TensorRT 编译器闭源）；新模型 / 新量化格式（GGUF 类社区格式）跟进节奏慢于开源栈；编译与调优门槛高，运维复杂度大；Windows 主线支持已于 0.18.0 弃用（转向独立的 TensorRT for RTX）。</dd>
+      </dl>
+    </div>
+
+    <div class="eng-card" style="--c:#f59e0b">
+      <div class="eng-head"><span class="eng-name">llama.cpp / Ollama</span><span class="eng-org">开源社区 · MIT</span></div>
+      <span class="eng-tag">端侧与本地推理</span>
+      <dl class="eng-rows">
+        <dt>招牌机制</dt>
+        <dd><b>GGUF 量化格式</b>（Q4_K_M 等），纯 CPU / 消费级 GPU 可跑数十 B 模型；llama.cpp 是内核，Ollama 在其上封装「拉模型即用」体验。</dd>
+        <dt>生态硬件</dt>
+        <dd>Mac（Metal）、Windows/Linux（CUDA/Vulkan/ROCm）、CPU only 全覆盖。</dd>
+        <dt>适用场景</dt>
+        <dd>个人本地助手、隐私敏感数据、离线环境、原型调试；量化生态成熟（社区模型 GGUF 版本最全）。</dd>
+        <dt>注意边界</dt>
+        <dd>面向单用户小并发设计，<b>不是服务端引擎</b>；长上下文吞吐与并发能力与 vLLM 类引擎差一个量级以上。</dd>
+      </dl>
+    </div>
+
+    <div class="eng-card" style="--c:#2563eb">
+      <div class="eng-head"><span class="eng-name">DeepInfer</span><span class="eng-org">DeepSeek-AI · Apache-2.0 · 2026-10 开源</span></div>
+      <span class="eng-tag">DeepSeek 官方生产推理引擎开源版</span>
+      <dl class="eng-rows">
+        <dt>招牌机制</dt>
+        <dd><b>DeepSeek 自研 kernel 全家桶</b>（FlashMLA / DeepGEMM / DeepEP / TileKernels + 定制 TileLang kernel）；<b>DSpark 置信度调度投机解码</b>（并行 backbone + 轻量序列头起草，置信度决定验证预算，最大 draft 长度默认 5，见 ⑤ 节）；Attention DP / balanced CP + MoE EP + EPLB；<b>异步调度</b>（CPU 批调度与 GPU 执行重叠，默认开启）；另有批不变推理、确定性采样（均限 NVIDIA）与结构化输出（regex / JSON schema / EBNF）。官方致谢：基于 vLLM 深度定制，借鉴 SGLang 与 TRT-LLM。</dd>
+        <dt>生态硬件</dt>
+        <dd><b>仅最新代际</b>：NVIDIA SM100（Blackwell）+ 华为昇腾 950 NPU；环境要求 CUDA 13 / CANN 9.2、Python 3.12、GCC ≥13，源码构建。官方基准口径：prefill 4 卡 / decode 64 卡 SM100 的吞吐-延迟 Pareto 曲线（附复现脚本）。</dd>
+        <dt>适用场景</dt>
+        <dd>DeepSeek 模型<b>生产级吞吐部署</b>（官方 App 同款引擎）；大规模离线推理（合成数据 / 蒸馏 / 评测）；研究生产级 MoE 推理工程（EPLB、置信度投机解码、异步调度的参考实现）。</dd>
+        <dt>注意边界</dt>
+        <dd><b>单模型专用</b>（仅 DeepSeek-V4.1-Flash）；硬件门槛极高（普通消费卡不支持）；<b>开源版仅离线推理</b>——完整在线服务还需自建 KV cache 系统、PD 分离与跨副本负载均衡（官方口径：多数引擎侧功能已实现，服务组件未包含）。</dd>
+      </dl>
+    </div>
+
+    <div class="eng-card" style="--c:#e11d48">
+      <div class="eng-head"><span class="eng-name">Strata</span><span class="eng-org">Niko1221 个人项目 · MIT · 2026-09 开源</span></div>
+      <span class="eng-tag">端侧爆款：消费 PC 本地跑 125B MoE</span>
+      <dl class="eng-rows">
+        <dt>招牌机制</dt>
+        <dd><b>动态专家缓存</b>：GPU 只存热专家 + attention，全量 24,576 个专家放系统内存由 CPU 协同算，超大 n-gram 表落 SSD，三方各干各的互不空转；配<b>投机解码</b>（draft→verify，官方口径净得 1.6~1.8×）。基于 llama.cpp / ggml 组件构建，一键脚本装机。</dd>
+        <dt>生态硬件</dt>
+        <dd>N 卡 RTX 20~50 系 / AMD（HIP）/ Intel Arc（Linux）/ macOS Metal；门槛 <b>12GB 显存 + 32~64GB 内存</b>。主打 Qwen3.8-Flash-Next（125B MoE，每 token 仅激活约 6B）：RTX 5070 单卡 Q2_0 档 <b>94 tok/s</b>（官方基准口径）。</dd>
+        <dt>适用场景</dt>
+        <dd>游戏 PC 本地跑百 B 级 MoE：本地起 OpenAI / Anthropic 兼容 API + MCP，Claude Code、Codex CLI 等可直连本地不落云；隐私离线与省 API 费场景。</dd>
+        <dt>注意边界</dt>
+        <dd><b>单模型专用引擎</b>（绑 Qwen3.8 系）；个人项目、迭代极快（开源首月 50+ 个版本），无高并发与可用性设计，<b>明确非生产级</b>；专家缓存方向已被主线 llama.cpp 跟进。</dd>
+      </dl>
+    </div>
+
+    <div class="eng-card" style="--c:#7c3aed">
+      <div class="eng-head"><span class="eng-name">其他玩家</span><span class="eng-org">国产与垂直栈</span></div>
+      <span class="eng-tag">昇腾 / 国产平台与生态位工具</span>
+      <dl class="eng-rows">
+        <dt>LMDeploy</dt>
+        <dd>上海 AI Lab（InternLM 系）出品，TurboMind 内核，<b>昇腾 / 寒武纪</b>等国产硬件适配好，企业级 serving 工具链。</dd>
+        <dt>MindIE</dt>
+        <dd>华为昇腾<b>官方推理套件</b>（随 CANN 商用交付），昇腾集群生产部署的配套主力，能力口径随 CANN 版本演进。</dd>
+        <dt>TGI</dt>
+        <dd>Hugging Face 官方推理服务，OpenAI 兼容；近两年社区重心明显转向 vLLM 类主流栈，新特性节奏放缓。</dd>
+        <dt>选型提示</dt>
+        <dd>① 端侧跑大 MoE → 先看 <b>Strata</b> 能否覆盖；② 国产卡场景判断顺序：厂商官方栈（MindIE / CANN 生态）→ 国产友好开源栈（LMDeploy / vllm-ascend / SGLang 社区适配）→ 自行移植，工程量逐级上升。</dd>
+      </dl>
+    </div>
+
+    <div class="eng-card" style="--c:#0a7d3b;border-top-style:dashed">
+      <div class="eng-head"><span class="eng-name">选型速判</span><span class="eng-org">一句话定方向</span></div>
+      <dl class="eng-rows" style="margin-top:8px">
+        <dt>通用在线</dt>
+        <dd>不确定就选 <b>vLLM</b>：生态最广、踩坑材料最多、迁移成本低。</dd>
+        <dt>极致吞吐</dt>
+        <dd>有kernel级调优能力、跑 MoE / DeepSeek 系 → <b>SGLang</b>，吃透 DP attention + EP 全套。</dd>
+        <dt>极致延迟</dt>
+        <dd>纯 NVIDIA 集群、P99 卡死线 → <b>TensorRT-LLM</b>（接受绑定与维护成本）。</dd>
+        <dt>端侧本地</dt>
+        <dd>个人电脑 / 隐私离线 → <b>llama.cpp / Ollama</b>；想跑百 B 级 MoE 且显存只有 12~24GB → <b>Strata</b>（单模型专用，非生产）。</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ② 并行策略 ============ -->
+<section class="panel" id="sec2">
+  <h2>② 四种主流并行：TP · PP · DP · EP <span class="sub">原理 · 优势 · 硬件配置要求</span></h2>
+  <p class="lead">
+    速查主线：<b>TP 切矩阵、PP 切层、DP 切请求、EP 切专家</b>。前三种对 dense 与 MoE 模型通用；
+    <b>EP（Expert Parallelism，专家并行）</b>是 MoE 模型的专属切片方式，也是 DeepSeek-V3 生产部署的核心。
+  </p>
+
+  <div class="par-grid">
+    <!-- TP -->
+    <div class="par-card">
+      <div class="pc-head">
+        <span class="pc-abbr">TP</span><span class="pc-name">张量并行</span>
+        <span class="pc-full">Tensor Parallelism · 切权重矩阵</span>
+      </div>
+      <div class="par-fig">
+        <svg viewBox="0 0 360 148" role="img" aria-label="TP 示意：权重矩阵列切分到多卡，每层 all-reduce">
+          <text x="180" y="12" text-anchor="middle" font-size="10.5" fill="#5b6570">权重矩阵按列切分，每卡持一份</text>
+          <rect x="17" y="20" width="326" height="40" rx="3" fill="#eaf2fe" stroke="#1f6feb"/>
+          <line x1="98.5" y1="20" x2="98.5" y2="60" stroke="#1f6feb" stroke-width="1"/>
+          <line x1="180" y1="20" x2="180" y2="60" stroke="#1f6feb" stroke-width="1"/>
+          <line x1="261.5" y1="20" x2="261.5" y2="60" stroke="#1f6feb" stroke-width="1"/>
+          <text x="57.75" y="44" text-anchor="middle" font-size="11" fill="#1a3a6b">W₁</text>
+          <text x="139.25" y="44" text-anchor="middle" font-size="11" fill="#1a3a6b">W₂</text>
+          <text x="220.75" y="44" text-anchor="middle" font-size="11" fill="#1a3a6b">W₃</text>
+          <text x="302.25" y="44" text-anchor="middle" font-size="11" fill="#1a3a6b">W₄</text>
+          <line x1="57.75" y1="60" x2="53" y2="94" stroke="#cfd4da" stroke-dasharray="3,2"/>
+          <line x1="139.25" y1="60" x2="138" y2="94" stroke="#cfd4da" stroke-dasharray="3,2"/>
+          <line x1="220.75" y1="60" x2="223" y2="94" stroke="#cfd4da" stroke-dasharray="3,2"/>
+          <line x1="302.25" y1="60" x2="308" y2="94" stroke="#cfd4da" stroke-dasharray="3,2"/>
+          <rect x="17" y="96" width="72" height="28" rx="6" fill="#fff" stroke="#cfd4da"/>
+          <rect x="102" y="96" width="72" height="28" rx="6" fill="#fff" stroke="#cfd4da"/>
+          <rect x="187" y="96" width="72" height="28" rx="6" fill="#fff" stroke="#cfd4da"/>
+          <rect x="272" y="96" width="72" height="28" rx="6" fill="#fff" stroke="#cfd4da"/>
+          <text x="53" y="114" text-anchor="middle" font-size="10" fill="#1f2328">GPU 0</text>
+          <text x="138" y="114" text-anchor="middle" font-size="10" fill="#1f2328">GPU 1</text>
+          <text x="223" y="114" text-anchor="middle" font-size="10" fill="#1f2328">GPU 2</text>
+          <text x="308" y="114" text-anchor="middle" font-size="10" fill="#1f2328">GPU 3</text>
+          <text x="95.5" y="114" text-anchor="middle" font-size="12" fill="#b45309">⇄</text>
+          <text x="180.5" y="114" text-anchor="middle" font-size="12" fill="#b45309">⇄</text>
+          <text x="265.5" y="114" text-anchor="middle" font-size="12" fill="#b45309">⇄</text>
+          <text x="180" y="140" text-anchor="middle" font-size="10" fill="#8b939c">每层前向 2 次 all-reduce · 通信频繁，强依赖 NVLink 片内互联</text>
+        </svg>
+      </div>
+      <dl class="pc-rows">
+        <dt>原理</dt>
+        <dd>把每层权重矩阵按<b>列 / 行切块</b>分散到多卡：每卡只算部分矩阵乘，再 <b>all-reduce</b> 汇总结果。对被并行用户透明，单卡逻辑几乎不变。</dd>
+        <dt>优势</dt>
+        <dd>单卡显存需求近似 ÷TP；<b>无流水线气泡</b>，小 batch / 单请求也能受益，是降低单请求时延最直接的并行。</dd>
+        <dt>硬件要求</dt>
+        <dd><b>高带宽片内互联必备</b>（NVLink / NVSwitch；国产卡看对应片内互联能力）。通信每层两次、延迟敏感，故一般 <b>不出机柜节点</b>：</dd>
+        <dt>常用取值</dt>
+        <dd>TP = 节点内 GPU 数，典型 <b>TP2 / TP4 / TP8</b>；DeepSeek-V3 官方口径仅 TP4（控制通信开销）。</dd>
+      </dl>
+    </div>
+
+    <!-- PP -->
+    <div class="par-card">
+      <div class="pc-head">
+        <span class="pc-abbr">PP</span><span class="pc-name">流水线并行</span>
+        <span class="pc-full">Pipeline Parallelism · 切层阶段</span>
+      </div>
+      <div class="par-fig">
+        <svg viewBox="0 0 360 152" role="img" aria-label="PP 示意：阶段切分与流水线气泡">
+          <rect x="10" y="16" width="77.5" height="34" rx="6" fill="#eaf2fe" stroke="#1f6feb"/>
+          <rect x="97.5" y="16" width="77.5" height="34" rx="6" fill="#eaf2fe" stroke="#1f6feb"/>
+          <rect x="185" y="16" width="77.5" height="34" rx="6" fill="#eaf2fe" stroke="#1f6feb"/>
+          <rect x="272.5" y="16" width="77.5" height="34" rx="6" fill="#eaf2fe" stroke="#1f6feb"/>
+          <text x="48.75" y="30" text-anchor="middle" font-size="10.5" fill="#1a3a6b">阶段 1</text>
+          <text x="136.25" y="30" text-anchor="middle" font-size="10.5" fill="#1a3a6b">阶段 2</text>
+          <text x="223.75" y="30" text-anchor="middle" font-size="10.5" fill="#1a3a6b">阶段 3</text>
+          <text x="311.25" y="30" text-anchor="middle" font-size="10.5" fill="#1a3a6b">阶段 4</text>
+          <text x="48.75" y="43" text-anchor="middle" font-size="9" fill="#5b6570">L1–L20</text>
+          <text x="136.25" y="43" text-anchor="middle" font-size="9" fill="#5b6570">L21–L40</text>
+          <text x="223.75" y="43" text-anchor="middle" font-size="9" fill="#5b6570">L41–L60</text>
+          <text x="311.25" y="43" text-anchor="middle" font-size="9" fill="#5b6570">L61–L80</text>
+          <text x="92.5" y="37" text-anchor="middle" font-size="12" fill="#8b939c">→</text>
+          <text x="180" y="37" text-anchor="middle" font-size="12" fill="#8b939c">→</text>
+          <text x="267.5" y="37" text-anchor="middle" font-size="12" fill="#8b939c">→</text>
+          <text x="26" y="66" font-size="9" fill="#5b6570">S1</text>
+          <text x="26" y="80" font-size="9" fill="#5b6570">S2</text>
+          <text x="26" y="94" font-size="9" fill="#5b6570">S3</text>
+          <text x="26" y="108" font-size="9" fill="#5b6570">S4</text>
+          <!-- Gantt: 7 time steps × 4 stages, M=4 micro-batches -->
+          <g>
+            <!-- row 0 (S1): busy t0..t3 -->
+            <rect x="34" y="58" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="56" y="58" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="78" y="58" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="100" y="58" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="122" y="58" width="20" height="12" rx="2" fill="#f0f2f5"/>
+            <rect x="144" y="58" width="20" height="12" rx="2" fill="#f0f2f5"/>
+            <rect x="166" y="58" width="20" height="12" rx="2" fill="#f0f2f5"/>
+            <!-- row 1 (S2): bubble t0, busy t1..t4 -->
+            <rect x="34" y="72" width="20" height="12" rx="2" fill="#fdecea" stroke="#e6b3ad"/>
+            <rect x="56" y="72" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="78" y="72" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="100" y="72" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="122" y="72" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="144" y="72" width="20" height="12" rx="2" fill="#f0f2f5"/>
+            <rect x="166" y="72" width="20" height="12" rx="2" fill="#f0f2f5"/>
+            <!-- row 2 (S3) -->
+            <rect x="34" y="86" width="20" height="12" rx="2" fill="#fdecea" stroke="#e6b3ad"/>
+            <rect x="56" y="86" width="20" height="12" rx="2" fill="#fdecea" stroke="#e6b3ad"/>
+            <rect x="78" y="86" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="100" y="86" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="122" y="86" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="144" y="86" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="166" y="86" width="20" height="12" rx="2" fill="#f0f2f5"/>
+            <!-- row 3 (S4) -->
+            <rect x="34" y="100" width="20" height="12" rx="2" fill="#fdecea" stroke="#e6b3ad"/>
+            <rect x="56" y="100" width="20" height="12" rx="2" fill="#fdecea" stroke="#e6b3ad"/>
+            <rect x="78" y="100" width="20" height="12" rx="2" fill="#fdecea" stroke="#e6b3ad"/>
+            <rect x="100" y="100" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="122" y="100" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="144" y="100" width="20" height="12" rx="2" fill="#1f6feb"/>
+            <rect x="166" y="100" width="20" height="12" rx="2" fill="#1f6feb"/>
+          </g>
+          <text x="196" y="66" font-size="9" fill="#5b6570">■ 计算</text>
+          <text x="196" y="80" font-size="9" fill="#5b6570">■ 气泡（空转）</text>
+          <text x="196" y="94" font-size="9" fill="#5b6570">□ 排空</text>
+          <text x="180" y="126" text-anchor="middle" font-size="10" fill="#8b939c">4 微批 · 4 阶段：首尾空转即「气泡」，微批越多气泡占比越小</text>
+          <text x="180" y="142" text-anchor="middle" font-size="10" fill="#8b939c">气泡占比 ≈ (PP−1) / (微批数 + PP−1)</text>
+        </svg>
+      </div>
+      <dl class="pc-rows">
+        <dt>原理</dt>
+        <dd>按 <b>transformer 层切成若干阶段</b>（如 80 层切 4 段），微批次像流水线一样逐段流动；阶段间只传<b>边界激活值</b>（通信量小）。</dd>
+        <dt>优势</dt>
+        <dd>通信量最小、<b>可跨节点走 IB / 以太</b>；把「单机装不下」变成「多机拼装」，扩展显存上限；对互联要求低于 TP。</dd>
+        <dt>硬件要求</dt>
+        <dd>普通 RDMA / 以太即可；但需要<b>足够大的并发（微批数）</b>填满流水线，低流量时段空转严重。</dd>
+        <dt>代价</dt>
+        <dd>气泡降低有效利用率；单 token 穿越所有阶段，<b>首字时延略增</b>；训练用 1F1B / 交织式调度压缩气泡，推理靠在途请求数填充。</dd>
+      </dl>
+    </div>
+
+    <!-- DP -->
+    <div class="par-card">
+      <div class="pc-head">
+        <span class="pc-abbr">DP</span><span class="pc-name">数据并行</span>
+        <span class="pc-full">Data Parallelism · 切请求</span>
+      </div>
+      <div class="par-fig">
+        <svg viewBox="0 0 360 148" role="img" aria-label="DP 示意：多副本各处理不同请求，层内零通信">
+          <text x="180" y="12" text-anchor="middle" font-size="10.5" fill="#5b6570">同一份完整模型 × N 个副本，各自处理不同请求</text>
+          <!-- tower 1 -->
+          <rect x="40" y="28" width="70" height="13" rx="2" fill="#d7e7fd" stroke="#1f6feb"/>
+          <rect x="40" y="43" width="70" height="13" rx="2" fill="#c7dbfb" stroke="#1f6feb"/>
+          <rect x="40" y="58" width="70" height="13" rx="2" fill="#d7e7fd" stroke="#1f6feb"/>
+          <rect x="40" y="73" width="70" height="13" rx="2" fill="#c7dbfb" stroke="#1f6feb"/>
+          <!-- tower 2 -->
+          <rect x="150" y="28" width="70" height="13" rx="2" fill="#d7e7fd" stroke="#1f6feb"/>
+          <rect x="150" y="43" width="70" height="13" rx="2" fill="#c7dbfb" stroke="#1f6feb"/>
+          <rect x="150" y="58" width="70" height="13" rx="2" fill="#d7e7fd" stroke="#1f6feb"/>
+          <rect x="150" y="73" width="70" height="13" rx="2" fill="#c7dbfb" stroke="#1f6feb"/>
+          <!-- tower 3 -->
+          <rect x="260" y="28" width="70" height="13" rx="2" fill="#d7e7fd" stroke="#1f6feb"/>
+          <rect x="260" y="43" width="70" height="13" rx="2" fill="#c7dbfb" stroke="#1f6feb"/>
+          <rect x="260" y="58" width="70" height="13" rx="2" fill="#d7e7fd" stroke="#1f6feb"/>
+          <rect x="260" y="73" width="70" height="13" rx="2" fill="#c7dbfb" stroke="#1f6feb"/>
+          <text x="36" y="62" text-anchor="end" font-size="9.5" fill="#5b6570">请求 A →</text>
+          <text x="146" y="62" text-anchor="end" font-size="9.5" fill="#5b6570">请求 B →</text>
+          <text x="256" y="62" text-anchor="end" font-size="9.5" fill="#5b6570">请求 C →</text>
+          <text x="75" y="102" text-anchor="middle" font-size="10" fill="#1f2328">GPU / 副本 1</text>
+          <text x="185" y="102" text-anchor="middle" font-size="10" fill="#1f2328">GPU / 副本 2</text>
+          <text x="295" y="102" text-anchor="middle" font-size="10" fill="#1f2328">GPU / 副本 3</text>
+          <text x="130" y="62" text-anchor="middle" font-size="11" fill="#8b939c">✕</text>
+          <text x="240" y="62" text-anchor="middle" font-size="11" fill="#8b939c">✕</text>
+          <text x="180" y="128" text-anchor="middle" font-size="10" fill="#8b939c">推理时副本间零通信（无梯度同步）</text>
+          <text x="180" y="143" text-anchor="middle" font-size="10" fill="#8b939c">扩容 = 加副本 + 前端请求级负载均衡（Router）</text>
+        </svg>
+      </div>
+      <dl class="pc-rows">
+        <dt>原理</dt>
+        <dd>每个卡组持一份<b>完整模型副本</b>，上层把不同请求分给不同副本；模型本身不切片。推理无反向传播，<b>副本间零通信</b>（训练时才有梯度同步）。</dd>
+        <dt>优势</dt>
+        <dd><b>吞吐最干净的扩展方式</b>（近线性）；实现简单；对互联零要求；是最便宜的横向扩容手段。</dd>
+        <dt>硬件要求</dt>
+        <dd>每个副本须独立容纳完整模型（或副本内部再嵌 TP）；<b>前端需要请求级负载均衡</b>：vLLM 生产栈 Router、SGLang Router 等承担此事。</dd>
+        <dt>常用取值</dt>
+        <dd>与 TP 组合时 DP = 总卡数 ÷ TP 组规模；DeepSeek-V3 官方口径 <b>prefill DP8 / decode DP80</b>。</dd>
+      </dl>
+    </div>
+
+    <!-- EP -->
+    <div class="par-card">
+      <div class="pc-head">
+        <span class="pc-abbr ep">EP</span><span class="pc-name">专家并行</span>
+        <span class="pc-full">Expert Parallelism · MoE 切专家</span>
+      </div>
+      <div class="par-fig">
+        <svg viewBox="0 0 360 148" role="img" aria-label="EP 示意：token 路由到专家所在卡，all-to-all 两次">
+          <rect x="8" y="50" width="72" height="38" rx="6" fill="#fef4e6" stroke="#e0a020"/>
+          <text x="44" y="68" text-anchor="middle" font-size="10.5" fill="#7a4b06">本批 token</text>
+          <text x="44" y="80" text-anchor="middle" font-size="8.5" fill="#a06b1e">router 选 top-k 专家</text>
+          <!-- GPU 2x2 -->
+          <g>
+            <rect x="150" y="16" width="100" height="50" rx="6" fill="#fff" stroke="#cfd4da"/>
+            <text x="158" y="30" font-size="9.5" fill="#1f2328">GPU 0</text>
+            <rect x="158" y="36" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="178" y="47" text-anchor="middle" font-size="8.5" fill="#5b21b6">E1</text>
+            <rect x="202" y="36" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="222" y="47" text-anchor="middle" font-size="8.5" fill="#5b21b6">E2</text>
+            <rect x="202" y="52" width="40" height="10" rx="3" fill="#fff" stroke="#c4b5fd" stroke-dasharray="2,2"/>
+            <rect x="150" y="82" width="100" height="50" rx="6" fill="#fff" stroke="#cfd4da"/>
+            <text x="158" y="96" font-size="9.5" fill="#1f2328">GPU 1</text>
+            <rect x="158" y="102" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="178" y="113" text-anchor="middle" font-size="8.5" fill="#5b21b6">E3</text>
+            <rect x="202" y="102" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="222" y="113" text-anchor="middle" font-size="8.5" fill="#5b21b6">E4</text>
+            <rect x="258" y="16" width="100" height="50" rx="6" fill="#fff" stroke="#cfd4da"/>
+            <text x="266" y="30" font-size="9.5" fill="#1f2328">GPU 2</text>
+            <rect x="266" y="36" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="286" y="47" text-anchor="middle" font-size="8.5" fill="#5b21b6">E5</text>
+            <rect x="310" y="36" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="330" y="47" text-anchor="middle" font-size="8.5" fill="#5b21b6">E2*</text>
+            <rect x="258" y="82" width="100" height="50" rx="6" fill="#fff" stroke="#cfd4da"/>
+            <text x="266" y="96" font-size="9.5" fill="#1f2328">GPU 3</text>
+            <rect x="266" y="102" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="286" y="113" text-anchor="middle" font-size="8.5" fill="#5b21b6">E6</text>
+            <rect x="310" y="102" width="40" height="15" rx="3" fill="#ede9fe" stroke="#c4b5fd"/><text x="330" y="113" text-anchor="middle" font-size="8.5" fill="#5b21b6">E7</text>
+          </g>
+          <!-- lines token -> GPUs -->
+          <line x1="80" y1="62" x2="150" y2="44" stroke="#e0a020" stroke-width="1.2"/>
+          <line x1="80" y1="66" x2="258" y2="44" stroke="#e0a020" stroke-width="1.2" stroke-dasharray="4,3"/>
+          <line x1="80" y1="72" x2="150" y2="102" stroke="#e0a020" stroke-width="1.2" stroke-dasharray="2,2"/>
+          <line x1="80" y1="76" x2="258" y2="102" stroke="#e0a020" stroke-width="1.2"/>
+          <text x="113" y="48" text-anchor="middle" font-size="9.5" fill="#b45309">dispatch →</text>
+          <text x="115" y="96" text-anchor="middle" font-size="9.5" fill="#b45309">← combine</text>
+          <text x="8" y="145" font-size="10" fill="#8b939c">每层 all-to-all × 2 · E2* = 热点专家冗余副本（EPLB） · 依赖 RDMA 网络</text>
+        </svg>
+      </div>
+      <dl class="pc-rows">
+        <dt>原理</dt>
+        <dd>MoE 模型专属：把<b>不同专家放到不同 GPU</b>，token 经 router 找到专家所在卡（dispatch），算完再送回（combine），每层 <b>all-to-all × 2</b>。</dd>
+        <dt>优势</dt>
+        <dd>容纳单机放不下的超大 MoE；专家批集中后万卡级服务可行；配合冗余专家 / EPLB 可以压平热点。</dd>
+        <dt>硬件要求</dt>
+        <dd><b>RDMA / IB + 工程化</b>是硬门槛；跨机 all-to-all 时延直接决定收益，推荐 DeepEP 类专用 kernel 与 IBGDA/GPUDirect 直传。</dd>
+        <dt>官方口径</dt>
+        <dd>DeepSeek-V3：每 token 激活 8 专家 + 1 共享；<b>prefill EP32</b>（4 节点 32 卡，每卡 8+1 专家，32 个冗余专家）；<b>decode EP320</b>（40 节点 320 卡，每卡仅 1 专家，64 卡托管冗余 + 共享专家）。</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="par-note">
+    <b>从属并行，知道即可：</b>SP（序列并行）常与 TP 联用，减少 LayerNorm / Dropout 处的通信；CP（上下文并行）把超长序列按维度切块，
+    主要服务长上下文的 prefill/微调阶段。速查主线抓住 <b>TP 切矩阵、PP 切层、DP 切请求、EP 切专家</b> 四主轴，其余按框架文档选配。
+  </div>
+
+  <h3>并行组合速查（怎么拼）</h3>
+  <table class="cmp">
+    <thead>
+      <tr><th style="width:26%">场景起点</th><th style="width:30%">推荐组合</th><th>一句话理由</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>模型单卡放得下（≤ 约 14B）</td><td><b>纯 DP</b>（多副本 + 前端 Router）</td><td>吞吐近线性扩展，层内零通信，实现与运维最简单</td></tr>
+      <tr><td>单机 8 卡可容纳（70B 级 dense）</td><td><b>TP8</b>（或 TP4×DP2）</td><td>TP 不出节点，NVLink 内消化通信；小 batch 延迟最稳</td></tr>
+      <tr><td>dense 模型跨机（405B 级）</td><td><b>TP8 × PPn</b></td><td>TP 留在机内，PP 只传边界激活跨机走 IB，通信量最小</td></tr>
+      <tr><td>大型 MoE（DeepSeek / Qwen-MoE 级）</td><td><b>TP + DP + EP（+ 冗余专家 / EPLB）</b></td><td>按官方部署口径拼装；decode 做小 TP、大 EP 以压时延</td></tr>
+      <tr><td>长上下文 prefill 成为瓶颈</td><td>上述组合 + <b>CP / 长 chunk 切分</b></td><td>序列维再切一刀，缓解单步计算过长、配合 PD 分离更顺</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ ③ PD 分离 ============ -->
+<section class="panel" id="sec3">
+  <h2>③ PD 分离架构 <span class="sub">Prefill–Decode Disaggregation · 预填充/解码解耦</span></h2>
+  <p class="lead">
+    一条请求分两段：<b>prefill（预填充）一次性吃整个输入，算力受限 compute-bound</b>；
+    <b>decode（解码）逐 token 生成，每步都读全量权重 + KV，访存受限 memory-bound</b>。
+    两者资源画像几乎相反，混在一池 GPU 里就会互相干扰——这是 PD 分离的全部动机。
+  </p>
+
+  <div class="arch">
+    <div class="arch-lane">
+      <span class="node">客户端<small>prompt + 流式输出</small></span>
+      <span class="flow">→</span>
+      <span class="node router">路由器 / 网关<small>按 SLO 与 KV 位置分发请求</small></span>
+      <span class="flow">→</span>
+      <span class="node pool-p">Prefill 池<small>计算受限 · 大 batch · 长输入切片处理<br>产出 KV Cache</small></span>
+      <span class="flow kvflow">KV 迁移 →</span>
+      <span class="node pool-d">Decode 池<small>访存受限 · 常驻大 batch<br>逐步生成 token</small></span>
+    </div>
+    <div class="arch-back">解码 token 流式返回客户端（ITL 平稳不再被长 prefill 打断）</div>
+  </div>
+
+  <h3>KV 迁移通道：分离成败的关键</h3>
+  <p class="lead" style="margin-bottom:8px">传输量 = KV 张量大小（与上下文长度、KV 精度成正比）。长上下文场景下 KV 迁移本身可占可观带宽，通道选型三级：</p>
+  <div class="kv-lanes">
+    <div class="kv-lane">
+      <div class="kl-t"><span class="lv">A</span>机内 / 超节点直连</div>
+      <div class="kl-d"><b>NVLink / NVSwitch 域内</b>（如 NVL72 整机柜）跨卡直传，时延最低、工程最简单；超节点架构把 PD 分离半径缩到机柜内。</div>
+    </div>
+    <div class="kv-lane">
+      <div class="kl-t"><span class="lv b">B</span>跨机 RDMA（上规模主流）</div>
+      <div class="kl-d"><b>IB / RoCE + GPUDirect / IBGDA</b> 绕过 CPU；传输层代表：NIXL（vLLM V1 后端）、Mooncake（Moonshot 开源）、HiRad、NVSHMEM / UCX 系。</div>
+    </div>
+    <div class="kv-lane">
+      <div class="kl-t"><span class="lv c">C</span>内存 / SSD 分级中转</div>
+      <div class="kl-d">KV 先落 <b>CPU 内存或本地 SSD</b>（LMCache 类分级缓存），容量换带宽；prefill 池可即时释放显存，适合输入超长 + 命中复用场景。</div>
+    </div>
+  </div>
+
+  <h3>主流引擎 PD 能力现状（以官方文档为准）</h3>
+  <div class="stack-chips">
+    <span class="sc"><b>vLLM V1</b>：1P1D / XPYD 拓扑，NIXL 传输后端 + 生产栈 Router（KV 感知调度），官方主线方向</span>
+    <span class="sc"><b>SGLang</b>：PD 分离原生支持，Mooncake / HiRad 等传输集成，DeepSeek 服务公开案例</span>
+    <span class="sc"><b>TensorRT-LLM</b>：disaggregated serving + NVIDIA Dynamo 路由，NVL72 官方参考架构</span>
+    <span class="sc"><b>MindIE 等</b>：同类能力随昇腾 CANN 版本演进，选型前查 release notes</span>
+  </div>
+
+  <div class="pd-2col">
+    <div class="pd-box gain">
+      <div class="pb-t">收益（为什么值得）</div>
+      <ul>
+        <li><b>ITL 平稳</b>：解码不再被长 prefill 打断，尾延迟（P99）显著收敛；</li>
+        <li><b>两池独立伸缩</b>：输入长就扩 P 池、输出长就扩 D 池，不再整池复制；</li>
+        <li><b>硬件可异构</b>：P 池选高算力、D 池选大显存高带宽，卡型可分开选型；</li>
+        <li><b>goodput 提升</b>：公开研究口径（DistServe / Splitwise / Anyscale 等）同 GPU 同 SLO 下 <b>1.3~2.3×</b>——但注意口径是 SLO 内有效吞吐，不是裸吞吐。</li>
+      </ul>
+    </div>
+    <div class="pd-box cost">
+      <div class="pb-t">代价（什么场景别上）</div>
+      <ul>
+        <li><b>KV 迁移开销</b>：长上下文下传输量与延迟不可忽视，通道设计是第一风险点；</li>
+        <li><b>架构复杂度</b>：多一跳路由与两池容量规划，运维 / 排障成本上升；</li>
+        <li><b>负载太轻不划算</b>：并发不足时 P、D 两池互相空转，反而劣化；</li>
+        <li><b>共址已够用的场景</b>：中小规模用 <b>共址 + chunked prefill + prefix caching</b> 通常下就够了，不必为分离而分离。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="verdict">
+    <b>速判：</b>输入长、流量大、SLO 敏感、突发多的生产服务 → PD 分离是标配路线；
+    量小、输入短、内部工具型服务 → 共址 + chunked prefill 先跑，观测到 ITL 尖刺再考虑分离。
+  </div>
+</section>
+
+<!-- ============ ④ KV 显存与批调度 ============ -->
+<section class="panel" id="sec4">
+  <h2>④ PagedAttention · RadixAttention · Continuous Batching <span class="sub">KV 显存与批调度三机制</span></h2>
+  <p class="lead">
+    KV Cache 是在线推理第一瓶颈（见下方计算器）。本节三个机制是一条递进链：
+    <b>PagedAttention 管好 KV 的「存」</b>（分页消除浪费）→ <b>RadixAttention 管好 KV 的「用」</b>（前缀复用）→
+    <b>Continuous Batching 管好 GPU 的「批」</b>（任意步换发请求）。三件都是行业标配；
+    批调度一族术语繁多（iteration-level scheduling / continuous batching / in-flight batching），本节一并讲清。
+  </p>
+
+  <div class="par-note" style="margin-top:0">
+    <b>先辨析一对最易混淆的概念：FlashAttention ≠ PagedAttention。</b>
+    <b>FlashAttention</b> 是 kernel 级优化——把 attention 计算分块（tile）流式执行，不落完整 N×N 注意力矩阵，解决的是<b>「算得快」</b>（IO 感知，减少 HBM 读写）；
+    <b>PagedAttention</b> 是显存管理——KV 按块分页、按需分配，解决的是<b>「放得下」</b>（消除碎片、提高并发）。
+    两者<b>正交且可叠加</b>：现代引擎的 attention kernel 既用 FlashAttention 式分块计算，又从分页块中读取 KV（FlashInfer 等 kernel 库即做此事）。
+  </div>
+
+  <div class="pa-2col">
+    <div class="pa-desc">
+      <b>问题起点：</b>每生成一个 token，都要重读全部权重与该请求的 KV，KV Cache 随上下文线性膨胀。
+      传统做法按最大长度为每个请求<b>整段连续预留</b>显存，实际用不满 →
+      <span class="formula">论文口径：浪费 60%~80%（内部碎片 + 外部碎片 + 超额预留）</span>
+      显存利用率低直接限制并发 batch 大小，吞吐上不去。
+      <ol>
+        <li><b>分页：</b>KV 按固定大小切块（典型 <b>16 token / 块</b>），逻辑上用「块表」把不连续的物理块串成一条序列，按需分配、用完即回收进空闲池;</li>
+        <li><b>浪费收敛：</b>只有每请求最后一块可能半空，浪费 <b>&lt;4%</b>（论文口径），接近消除碎片；</li>
+        <li><b>解锁连续批处理：</b>块粒度回收让请求可以在<b>任意步</b>完成退出、新请求随时加入（continuous batching），GPU 不再等整批；</li>
+        <li><b>解锁前缀复用：</b>相同的系统提示词 / 多轮历史命中同一批 KV 块，<b>prefix caching</b> 直接跳过重复计算（块哈希 + 引用计数）——SGLang 把它做成前缀树，见下 RadixAttention。</li>
+      </ol>
+    </div>
+    <div class="pa-panel">
+      <div class="pa-title">图示：连续预留 vs 分页分配（一格 ≈ 16 token）</div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:11.5px;color:var(--text-3);margin-bottom:5px">传统：按 max_len 整段预留，本请求只用到开头一小截</div>
+        <div class="pa-cells" id="pa-cells-a"></div>
+      </div>
+      <div>
+        <div style="font-size:11.5px;color:var(--text-3);margin-bottom:5px">分页：按需领块，块回池复用，前缀块还能跨请求共享</div>
+        <div class="pa-cells" id="pa-cells-b"></div>
+      </div>
+      <div class="pa-legend">
+        <span><i style="background:#1f6feb"></i>请求 A 的块</span>
+        <span><i style="background:#7c3aed"></i>请求 B 的块</span>
+        <span><i style="background:linear-gradient(90deg,#1f6feb 50%,#7c3aed 50%)"></i>共享前缀块</span>
+        <span><i style="background:repeating-linear-gradient(45deg,#f0f2f5 0 4px,#e7eaef 4px 7px)"></i>预留未用 / 空闲</span>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:18px">RadixAttention（SGLang）：把前缀复用做成一棵「基树」</h3>
+  <div class="pa-2col">
+    <div class="pa-desc">
+      <b>问题：</b>PagedAttention 的 prefix caching 按「整条前缀」命中——多轮Agent 对话里，
+      每轮历史只是<b>上一轮再追加几行</b>，前缀其实层层嵌套；不同请求命中前缀长长短短，要能各自停在树的不同高度。
+      <ol>
+        <li><b>组织：</b>所有历史请求的 KV 块按前缀挂进一棵 <b>radix tree（基树）</b>——公共前缀只存一份，节点分叉处才分开存；树节点带引用计数 + LRU 淘汰（内置监控里就是「hit rate」指标）；</li>
+        <li><b>命中：</b>新请求先在树上匹配，匹配到哪一层就<b>直接复用到哪一层</b>（部分命中也是收益），只对未命中的尾部做 prefill；</li>
+        <li><b>效果：</b>系统提示词 / few-shot 模板 / 多轮对话这类「共享前缀」负载，TTFT 大幅下降（命中部分不用算），
+          显存里一份 KV 服务万条分枝——这是 SGLang 在 Agent / 多轮负载上吞吐领先的看家机制；</li>
+        <li><b>代价与边界：</b>前缀粒度带管理开销，<b>前缀几乎不重复的负载（如每条 prompt 都是独立长文）收益趋零</b>，此时退化为普通 PagedAttention 场景——按业务分布选机制，不看名气。</li>
+      </ol>
+    </div>
+    <div class="pa-panel">
+      <div class="pa-title">图示：radix tree 上的前缀共享（共享段只存一份 KV）</div>
+      <svg viewBox="0 0 340 190" role="img" aria-label="RadixAttention 前缀树示意">
+        <text x="170" y="14" text-anchor="middle" font-size="10.5" fill="#5b6570">公共前缀节点只存一份 KV，分叉后各自延伸</text>
+        <rect x="200" y="22" width="120" height="24" rx="5" fill="#eaf2fe" stroke="#1f6feb"/>
+        <text x="260" y="38" text-anchor="middle" font-size="10" fill="#1a3a6b">系统提示词（root）</text>
+        <rect x="52" y="66" width="120" height="24" rx="5" fill="#eaf2fe" stroke="#1f6feb"/>
+        <text x="112" y="82" text-anchor="middle" font-size="10" fill="#1a3a6b">工具描述 + few-shot</text>
+        <rect x="194" y="66" width="120" height="24" rx="5" fill="#f3e8ff" stroke="#7c3aed"/>
+        <text x="254" y="82" text-anchor="middle" font-size="10" fill="#4c1d95">知识库片段 A</text>
+        <rect x="20" y="110" width="110" height="24" rx="5" fill="#f3e8ff" stroke="#7c3aed"/>
+        <text x="75" y="126" text-anchor="middle" font-size="10" fill="#4c1d95">对话 A 第1轮</text>
+        <rect x="140" y="110" width="110" height="24" rx="5" fill="#f3e8ff" stroke="#7c3aed"/>
+        <text x="195" y="126" text-anchor="middle" font-size="10" fill="#4c1d95">对话 A 第2轮</text>
+        <rect x="264" y="110" width="72" height="24" rx="5" fill="#fef4e6" stroke="#e0a020"/>
+        <text x="300" y="126" text-anchor="middle" font-size="10" fill="#7a4b06">问题 B</text>
+        <line x1="240" y1="46" x2="150" y2="66" stroke="#cfd4da" stroke-width="1.2"/>
+        <line x1="270" y1="46" x2="284" y2="66" stroke="#cfd4da" stroke-width="1.2"/>
+        <line x1="100" y1="90" x2="75" y2="110" stroke="#cfd4da" stroke-width="1.2"/>
+        <line x1="130" y1="90" x2="185" y2="110" stroke="#cfd4da" stroke-width="1.2"/>
+        <text x="25" y="158" font-size="9.5" fill="#0a7d3b">✓ 命中整棵子树 → 免 prefill</text>
+        <text x="25" y="174" font-size="9.5" fill="#8b939c">节点 LRU 淘汰 · 引用计数防误删在用块</text>
+      </svg>
+      <div class="pa-note">新请求「对话 A 第3轮」沿树匹配到「对话 A 第2轮」整条路径，只有新增的一轮需要 prefill；「问题 B」命中到「知识库片段 A」层，分叉以下才计算。命中越深，省得越多。</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:18px">Continuous Batching（连续批处理）：GPU 不再「等整批」</h3>
+  <div class="pa-2col">
+    <div class="pa-desc">
+      <b>问题：</b>最朴素的静态批处理（static batching）把一批请求<b>捆到整批最慢请求为止</b>——
+      生成长度参差时先完成的请求在批里干等，算力大量空转。
+      <b>三个名字，一个机制：</b>Orca（OSDI'22）提出 <b>iteration-level scheduling</b>（迭代级调度）；
+      vLLM 论文（SOSP'23）沿用 <b>continuous batching</b> 术语并随 PagedAttention 普及；NVIDIA TensorRT-LLM 产品名叫
+      <b>in-flight batching</b>（官方文档注明与前两者同义，其实现捆绑 paged KV cache）。
+      <ol>
+        <li><b>调度器主循环（每步 forward 前做四件事）：</b>① 摘除本步完成的请求并回收其 KV 块；② 先服务 running 队列的 decode，再在<b>本步 token 预算</b>内从等待队列吸收新请求；③ 打包「decode 全体 + prefill 切片」一次前向；④ 采样输出、回到 ①。GPU 任何一步都不空转；</li>
+        <li><b>prefill 与 decode 混跑：</b>同一批里既有算 prefill 的也有算 decode 的，slot 随完成随释放、随排队随补位（以 vLLM V1 的统一调度为代表，chunked prefill 与 prefix caching 由此默认开启、零配置）；</li>
+        <li><b>效果：</b>Orca 论文（OSDI'22）在 GPT-3 175B 上对比 FasterTransformer，同延迟级下吞吐 <b>36.9×</b>——这是迭代级调度对静态批的公开基线口径，增益大小取决于生成长度差异（长度越参差收益越大）；vLLM 论文（SOSP'23）另报同延迟下 2~4× 吞吐（对比 FasterTransformer / Orca）。</li>
+        <li><b>代价：</b>批内动态插队使序列长度参差——decode 优先时新请求 TTFT 排队；反之 prefill 抢跑会打断 decode 造成 ITL 尖刺。这一矛盾正衔接 ③ PD 分离的动机。</li>
+      </ol>
+      <b>配套机制 · chunked prefill：</b>长输入按固定 token 预算切片、多步吃完（不占满单步、不饿死同批 decode）——
+      即 ③ 节「共址 + chunked prefill」方案里的同名机制，本机制的重要组成部分而非可选项。
+      <b>与其他机制的关系：</b>continuous batching 负责「批怎么换」，PagedAttention 负责「KV 存得下」，RadixAttention 负责「别重复算」——三者叠加才凑齐高吞吐推理，缺一不可。
+    </div>
+    <div class="pa-panel">
+      <div class="pa-title">图示：静态批 vs 连续批处理的时间线</div>
+      <svg viewBox="0 0 340 196" role="img" aria-label="静态批与连续批处理对比">
+        <text x="170" y="12" text-anchor="middle" font-size="10.5" fill="#5b6570">静态批：整批等到最慢的请求 B 结束才回流</text>
+        <g font-size="9.5">
+          <rect x="20" y="22" width="180" height="16" rx="3" fill="#1f6feb"/><text x="28" y="34" fill="#fff">请求 A（短，早早生成完）</text>
+          <rect x="20" y="40" width="300" height="16" rx="3" fill="#c9503f"/><text x="28" y="52" fill="#fff">请求 B（长，整批被它拖着）</text>
+          <rect x="20" y="58" width="230" height="16" rx="3" fill="#1f6feb"/><text x="28" y="70" fill="#fff">请求 C（中）</text>
+          <rect x="200" y="22" width="120" height="16" rx="3" fill="#fdecea" stroke="#e6b3ad"/><text x="206" y="34" fill="#b3261e">A 干等 B（空转段）</text>
+          <rect x="250" y="58" width="70" height="16" rx="3" fill="#fdecea" stroke="#e6b3ad"/>
+          <text x="330" y="86" text-anchor="middle" font-size="9" fill="#8b939c">t →</text>
+        </g>
+        <text x="170" y="106" text-anchor="middle" font-size="10.5" fill="#5b6570">连续批：谁完成谁走，空位立刻被排队请求补上</text>
+        <g font-size="9.5">
+          <rect x="20" y="114" width="110" height="16" rx="3" fill="#1f6feb"/><text x="28" y="126" fill="#fff">A</text>
+          <rect x="134" y="114" width="90" height="16" rx="3" fill="#0ea5e9"/><text x="142" y="126" fill="#fff">新请求 D 插入</text>
+          <rect x="226" y="114" width="74" height="16" rx="3" fill="#0ea5e9"/><text x="234" y="126" fill="#fff">新请求 F</text>
+          <rect x="20" y="132" width="300" height="16" rx="3" fill="#c9503f"/><text x="28" y="144" fill="#fff">B（继续自己的，无人陪跑）</text>
+          <rect x="20" y="150" width="180" height="16" rx="3" fill="#1f6feb"/><text x="28" y="162" fill="#fff">C</text>
+          <rect x="204" y="150" width="116" height="16" rx="3" fill="#0ea5e9"/><text x="212" y="162" fill="#fff">新请求 E</text>
+          <text x="330" y="178" text-anchor="middle" font-size="9" fill="#8b939c">t →</text>
+        </g>
+        <text x="20" y="192" font-size="9.5" fill="#0a7d3b">同一时段挤进更多请求 → 吞吐上升（长度越参差越明显）</text>
+      </svg>
+      <div class="pa-note">A 提前完成后其 KV 块即刻回池，slot 立刻给排队的 D/F；B 自顾自继续生成。引擎每步 forward 前完成这轮「换发」，GPU 从不空等整批。</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:18px">KV 压缩：量化之外的三条路（改写「全量 KV 常驻显存」前提）</h3>
+  <p class="lead" style="margin-bottom:8px">
+    ④ 节计算器的前提是全量 KV 常驻显存；KV 压缩技术改写这个前提本身。与 ⑥ 节 KV 量化（降精度）互补，这里是<b>降条目数</b>的三条路线：
+  </p>
+  <div class="kv-lanes">
+    <div class="kv-lane">
+      <div class="kl-t"><span class="lv">A</span>剪枝驱逐</div>
+      <div class="kl-d"><b>H2O</b>（Heavy-Hitter Oracle）：保留「重击者」token 的 KV，驱逐低分 token；<b>StreamingLLM</b>：保留开头 attention sink + 滑动窗口，实现流式无限长度。代价：有损，长上下文召回任务需按业务验证。</div>
+    </div>
+    <div class="kv-lane">
+      <div class="kl-t"><span class="lv b">B</span>合并 / 聚合</div>
+      <div class="kl-d"><b>PyramidKV / PyramidInfer</b> 等：按层分配预算——浅层多留（细节）、深层少留（抽象），把预算从均匀分配改为金字塔分配；另有 token 级合并（相邻相似 token 的 KV 合并）。同样有损，但预算可控。</div>
+    </div>
+    <div class="kv-lane">
+      <div class="kl-t"><span class="lv c">C</span>跨层共享</div>
+      <div class="kl-d"><b>YOCO / CLA</b>（You Only Cache Once / Cross-Layer Attention）：深层直接复用浅层已算的 KV，KV 总量近似 ÷ 层数。模型架构侧改动，需模型原生支持，推理侧被动受益。</div>
+    </div>
+  </div>
+  <div class="par-note">
+    <b>选型速判：</b>显存吃紧先动 <b>KV 量化（⑥ 节，fp8 KV 近无损）</b>，再考虑剪枝 / 合并（有损，按业务验收）；跨层共享看模型是否原生支持。
+    另有 <b>CPU/SSD 分层卸载</b>（LMCache / Mooncake，见 ③ 节通道 C）作为「容量换带宽」的扩容路线——量化、压缩、卸载三招可叠加，但误差也叠加，逐层验收。
+  </div>
+
+  <h3>配套计算器：每 token KV 显存速算 <span style="font-size:11px;font-weight:400;color:var(--text-3)">（PagedAttention 省的正是这笔账）</span></h3>
+  <div class="kv-grid">
+    <div class="kv-inputs">
+      <div class="fg">
+        <label class="fl" for="sel-model">模型预设</label>
+        <select id="sel-model">
+          <option value="llama70" selected>Llama-3-70B（GQA）</option>
+          <option value="llama8">Llama-3-8B（GQA）</option>
+          <option value="qwen72">Qwen2.5-72B（GQA）</option>
+          <option value="dsv3">DeepSeek-V3（MLA）</option>
+          <option value="custom">自定义（GQA / MQA）</option>
+        </select>
+      </div>
+      <div class="fg duo">
+        <div>
+          <label class="fl" for="in-kvh">KV 头数<small>（GQA 压缩后）</small></label>
+          <input type="number" id="in-kvh" value="8" min="1" step="1">
+        </div>
+        <div>
+          <label class="fl" for="in-hd">头维 head_dim</label>
+          <input type="number" id="in-hd" value="128" min="1" step="8">
+        </div>
+      </div>
+      <div class="fg duo">
+        <div>
+          <label class="fl" for="in-layers">层数</label>
+          <input type="number" id="in-layers" value="80" min="1" step="1">
+        </div>
+        <div>
+          <label class="fl" for="sel-bytes">KV 精度<small>（每元素字节）</small></label>
+          <select id="sel-bytes">
+            <option value="2">bf16 / fp16（2B）</option>
+            <option value="1">fp8 / int8（1B）</option>
+            <option value="0.5">int4（0.5B）</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl" for="in-ctx">上下文长度 <small>（token）</small></label>
+        <input type="number" id="in-ctx" value="32768" min="1" step="1024">
+        <div class="chip-row no-print">
+          <span class="qchip" data-ctx="4096">4k</span>
+          <span class="qchip" data-ctx="32768">32k</span>
+          <span class="qchip" data-ctx="131072">128k</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl" for="in-conc">并发请求数</label>
+        <input type="number" id="in-conc" value="1" min="1" step="1">
+        <div class="chip-row no-print">
+          <span class="qchip on" data-conc="1">1</span>
+          <span class="qchip" data-conc="64">64</span>
+          <span class="qchip" data-conc="256">256</span>
+        </div>
+      </div>
+      <div class="hint" id="mla-hint">公式：KV/token = 2 × KV头数 × 头维 × 层数 × 每元素字节。MLA 模型（DeepSeek 系）无逐头 KV，直接按 latent 维度计算；以各模型 config.json 为准。</div>
+    </div>
+
+    <div class="kv-out">
+      <div class="kcard">
+        <div class="k-tag">每 token KV 显存</div>
+        <div class="k-val" id="out-kvtok">—</div>
+        <div class="k-formula" id="f-kvtok">—</div>
+      </div>
+      <div class="kcard">
+        <div class="k-tag">单请求 KV（全上下文）</div>
+        <div class="k-val" id="out-kvreq">—</div>
+        <div class="k-formula" id="f-kvreq">—</div>
+      </div>
+      <div class="kcard hl">
+        <div class="k-tag">KV 总需求（单请求 × 并发）→ 折合 80GB 卡</div>
+        <div class="k-val" id="out-kvtotal">—</div>
+        <div class="k-formula" id="f-kvtotal">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ⑤ 投机解码 ============ -->
+<section class="panel" id="sec5">
+  <h2>⑤ 投机解码 <span class="sub">Speculative Decoding · 用「猜-验证」换时延</span></h2>
+  <p class="lead">
+    原理一句话：<b>草稿先猜 k 个 token，大模型一次 forward 并行验证，接受最长正确前缀</b>。
+    数学根基是拒绝采样——接受准则保证<b>输出分布与原模型完全一致（无损）</b>，不靠温度 hack。
+    收益公式：<span class="formula">每步期望 token 数 = (1 − a^(g+1)) ÷ (1 − a)</span>（a = 接受率，g = 草稿长度）——
+    一切投机解码研究都在提高 a 或降低草稿成本。
+  </p>
+
+  <div class="pa-2col">
+    <div class="pa-desc">
+      <b>变体谱系（按「草稿从哪来」分三代）：</b>
+      <ol>
+        <li><b>独立小模型草稿</b>：同族小模型（如 1B 起草 70B）逐 token 起草。要求同 tokenizer，否则接受率崩；需双份显存与调度；<b>DistillSpec</b> 用蒸馏对齐分布可再提 10~45%；</li>
+        <li><b>免草稿模型</b>：<b>n-gram / prompt-lookup</b>——直接从 prompt 里查 n-gram 当草稿，零训练零显存，RAG / 摘要 / 代码编辑等「复述型」负载接受率 0.75~0.85，创作型仅 0.5~0.65；<b>自投机</b>（early-exit / LayerSkip，浅层起草全层验证，最高约 2×）；</li>
+        <li><b>挂在目标模型上的头</b>（当前主流）：<b>Medusa</b>（多头并行预测，2.2~3.6×）；<b>EAGLE 系</b>（在目标模型倒数第二层特征上自回归起草，EAGLE-2 动态草稿树 3.05~4.26×，<b>EAGLE-3</b> 多层特征融合 + training-time test，<b>最高 6.5×</b>、Llama-3.3-70B 实测 3.9~4.1×、SGLang H100 上 158→373 tok/s）；<b>MTP</b>（DeepSeek-V3 原生多 token 预测头，随 checkpoint 发布，SGLang 首个集成，输出吞吐 +60% 口径，第 2 token 接受率 85~90%）。</li>
+      </ol>
+      <b>引擎支持：</b>vLLM（n-gram / EAGLE / Medusa / MTP）、SGLang（EAGLE-2/3、MTP，首个 EAGLE-3 与 MTP 集成方）、TensorRT-LLM（Medusa / EAGLE 内置）、DeepInfer（DeepSeek 生产栈的 DSpark：并行 backbone 起草 + 置信度调度验证，DeepSeek-V4 官方口径对单用户加速 60~85%）。
+    </div>
+    <div class="pa-panel">
+      <div class="pa-title">图示：猜-验证循环（以 g=4 为例）</div>
+      <svg viewBox="0 0 340 208" role="img" aria-label="投机解码猜验证循环示意">
+        <text x="170" y="12" text-anchor="middle" font-size="10.5" fill="#5b6570">草稿头先猜 4 个，目标模型一次 forward 验证，接受最长正确前缀</text>
+        <rect x="14" y="24" width="150" height="30" rx="6" fill="#fef4e6" stroke="#e0a020"/>
+        <text x="89" y="43" text-anchor="middle" font-size="10.5" fill="#7a4b06">草稿（小模型 / 头）逐个猜</text>
+        <line x1="164" y1="39" x2="188" y2="39" stroke="#8b939c" stroke-width="1.2"/>
+        <text x="176" y="34" text-anchor="middle" font-size="9" fill="#8b939c">→</text>
+        <rect x="190" y="24" width="136" height="30" rx="6" fill="#eaf2fe" stroke="#1f6feb"/>
+        <text x="258" y="43" text-anchor="middle" font-size="10.5" fill="#1a3a6b">目标模型 1 次 forward 并行验证</text>
+        <text x="30" y="76" font-size="10" fill="#5b6570">草稿序列：</text>
+        <g font-size="10.5" font-weight="600">
+          <rect x="92" y="64" width="26" height="20" rx="4" fill="#e8f5ed" stroke="#0a7d3b"/><text x="105" y="78" text-anchor="middle" fill="#0a7d3b">t₁</text>
+          <rect x="122" y="64" width="26" height="20" rx="4" fill="#e8f5ed" stroke="#0a7d3b"/><text x="135" y="78" text-anchor="middle" fill="#0a7d3b">t₂</text>
+          <rect x="152" y="64" width="26" height="20" rx="4" fill="#e8f5ed" stroke="#0a7d3b"/><text x="165" y="78" text-anchor="middle" fill="#0a7d3b">t₃</text>
+          <rect x="182" y="64" width="26" height="20" rx="4" fill="#fdecea" stroke="#b3261e"/><text x="195" y="78" text-anchor="middle" fill="#b3261e">t₄</text>
+        </g>
+        <text x="222" y="78" font-size="9.5" fill="#0a7d3b">✓✓✓</text>
+        <text x="248" y="78" font-size="9.5" fill="#b3261e">✗</text>
+        <text x="30" y="106" font-size="10" fill="#5b6570">本步产出：</text>
+        <g font-size="10.5" font-weight="600">
+          <rect x="92" y="94" width="26" height="20" rx="4" fill="#0a7d3b"/><text x="105" y="108" text-anchor="middle" fill="#fff">t₁</text>
+          <rect x="122" y="94" width="26" height="20" rx="4" fill="#0a7d3b"/><text x="135" y="108" text-anchor="middle" fill="#fff">t₂</text>
+          <rect x="152" y="94" width="26" height="20" rx="4" fill="#0a7d3b"/><text x="165" y="108" text-anchor="middle" fill="#fff">t₃</text>
+          <rect x="182" y="94" width="26" height="20" rx="4" fill="#c9503f"/><text x="195" y="108" text-anchor="middle" fill="#fff">t₄′</text>
+        </g>
+        <text x="222" y="108" font-size="9.5" fill="#5b6570">t₄ 处由目标模型改写为 t₄′，</text>
+        <text x="222" y="121" font-size="9.5" fill="#5b6570">从 t₄′ 继续下一轮猜</text>
+        <text x="30" y="140" font-size="10" fill="#5b6570">本步成本：</text>
+        <text x="92" y="140" font-size="10" fill="#5b6570">草稿 4 步（廉价） + 目标 1 步（全价）→ 净得 4 token</text>
+        <rect x="14" y="156" width="312" height="40" rx="6" fill="#f8f9fb" stroke="#cfd4da" stroke-dasharray="4,3"/>
+        <text x="24" y="172" font-size="9.5" fill="#5b6570">关键性质：拒绝采样保证输出分布与目标模型完全一致（无损）；</text>
+        <text x="24" y="186" font-size="9.5" fill="#5b6570">接受率 a 决定一切——草稿越贴近目标分布，接受越长，加速越接近理论上限</text>
+      </svg>
+      <div class="pa-note">接受 3 个 + 改写 1 个 = 一次全价 forward 净得 4 token。若草稿全错则白付草稿成本、只净得 1 token——<b>收益完全由接受率决定</b>。</div>
+    </div>
+  </div>
+
+  <div class="verdict" style="margin-top:14px">
+    <b>适用边界（重要）：</b>投机解码是<b>低并发时延优化</b>，不是万能加速——
+    ① <b>低并发 / 时延敏感</b>（batch 1~8）：GPU 有空闲算力，验证近乎免费，收益最大（batch 1 约 1.8×，随 batch 增大递减：batch 8 约 1.25×、batch 32 约 1.05×）；
+    ② <b>高并发饱和吞吐</b>：GPU 已被真实请求填满，验证挤占算力，<b>吞吐反而下降</b>（MagicDec 口径：batch 32 时可跌破 1×，长上下文下可回正）——饱和吞吐场景先测再上；
+    ③ <b>TTFT 无益</b>：只加速 decode 阶段，草稿模型还要额外 prefill，短输出负载净亏；
+    ④ 负载越「可预测」接受率越高（代码 / 结构化 / 复述型 &gt; 创作型），上线前用真实业务分布测接受率。
+  </div>
+</section>
+
+<!-- ============ ⑥ 量化技术对比 ============ -->
+<section class="panel" id="sec6">
+  <h2>⑥ 量化技术对比 <span class="sub">GGUF / FP8 / AWQ / GPTQ / bitsandbytes / NF4</span></h2>
+  <p class="lead">
+    降本三件套：<b>减半显存（FP8）、扩并发（放宽 KV 精度）、省卡（INT4）</b>。选量化先分场合：
+    <b>服务端</b>（vLLM / SGLang / TRT-LLM 双精度权重路线）vs <b>端与本地</b>（llama.cpp GGUF 路线）——两条技术栈、两套命名体系，别混着比。
+  </p>
+
+  <div class="quan-grid">
+    <div class="qm-card">
+      <div class="qm-name">FP8 <span class="bits">8-bit 浮点</span><span class="msr">硬件原生</span></div>
+      <div class="qm-full">E4M3 / E5M2 · Hopper 起有 FP8 Tensor Core</div>
+      <div class="qm-desc">浮点格式量化，<b>校准成本最低</b>；Hopper/Blackwell 上有 Tensor Core 加速：<b>H100 实测吞吐 +26.7%、TTFT −20%</b>（同精度级最大收益）。A100 及更老的卡只有省显存收益，无计算加速。</div>
+      <div class="qm-badge"><span class="b-ok">H100 及以上首选默认</span></div>
+    </div>
+    <div class="qm-card">
+      <div class="qm-name">AWQ <span class="bits">INT4 · W4A16</span></div>
+      <div class="qm-full">Activation-aware Weight Quantization（MIT）</div>
+      <div class="qm-desc">激活感知：靠<b>校准集找出敏感通道</b>（约 1% 权重），用 per-channel 缩放保护——不混合精度、不剪枝。质量口碑稳，<b>同 4-bit 下通常比 GPTQ 好 1~3 分</b>（推理 / 代码类基准）。</div>
+      <div class="qm-badge"><span class="b-ok">4-bit 服务端首选</span></div>
+    </div>
+    <div class="qm-card">
+      <div class="qm-name">GPTQ <span class="bits">INT4 · W4A16</span></div>
+      <div class="qm-full">逐层 Hessian 重建 · 后处理式</div>
+      <div class="qm-desc">最经典的 4-bit 方案，社区量化版本<b>生态最广</b>（TheBloke 仓库），量化出包速度快。同位宽下<b>质量普遍略逊 AWQ</b>；个别引擎实现有坑，上线前以目标引擎实测为准。</div>
+      <div class="qm-badge"><span class="b-warn">生态成熟 · 质量被 AWQ 反超</span></div>
+    </div>
+    <div class="qm-card">
+      <div class="qm-name">GGUF K-quant <span class="bits">2~8-bit 混精</span><span class="msr">端侧专用</span></div>
+      <div class="qm-full">llama.cpp 生态 · Ollama 默认拉 Q4_K_M</div>
+      <div class="qm-desc"><b>分块 + 超级块</b>、缩放因子也量化、敏感张量保高位——同位宽下质量优于老式均匀量化，<b>Q4_K_M 实测约 4.9 bpw 而非 4.0</b>（档位数字 ≠ 实际位宽）。I-quant（IQ 系）同体积质量更优，但偏 N 卡，CPU/Mac 上反而慢。</div>
+      <div class="qm-badge"><span class="b-ok">CPU / Mac / 单机默认 K-quant</span></div>
+    </div>
+    <div class="qm-card">
+      <div class="qm-name">bitsandbytes <span class="bits">INT8 / NF4</span></div>
+      <div class="qm-full">LLM.int8() / QLoRA 的 NF4 底座</div>
+      <div class="qm-desc"><b>免校准、开箱即用</b>（transformers 一行加载）；NF4 是 QLoRA 微调标配。但没有服务级 kernel 优化，<b>吞吐明显偏低</b>：A100 vLLM 实测 5,916 tok/s，仅为 BF16 的约 57%。</div>
+      <div class="qm-badge"><span class="b-warn">方便但慢 · 微调场景用</span></div>
+    </div>
+    <div class="qm-card">
+      <div class="qm-name">SmoothQuant <span class="bits">INT8 · W8A8</span></div>
+      <div class="qm-full">激活离群值吸收后整数量化</div>
+      <div class="qm-desc">把激活离群值<b>按通道吸收进权重</b>再做 W8A8 整数量化，INT8 Tensor Core 可用、质量接近 FP8，体积比 INT4 大。<b>Ampere 时代的主流方案</b>；在已支持 FP8 的卡上通常直接用 FP8。</div>
+      <div class="qm-badge"><span class="b-warn">Ampere 时代方案 · 新部署少用</span></div>
+    </div>
+    <div class="qm-card">
+      <div class="qm-name">NVFP4 / MXFP4 <span class="bits">FP4 · Blackwell 原生</span><span class="msr">硬件原生</span></div>
+      <div class="qm-full">Blackwell 代际 4-bit 浮点格式 · block 微缩放</div>
+      <div class="qm-desc"><b>NVFP4</b>：block-16 微缩放（FP8 块 scale + FP32 张量 scale），精度优于 MXFP4（block-32）；<b>MXFP4</b>：OCP MX 标准的 32 元素块格式。吞吐收益<b>只在 Blackwell 原生 FP4 Tensor Core 上兑现</b>（大批量计算受限段收益最大）；Hopper 上退化为 W4A16 只省显存。TRT-LLM / vLLM 已有成熟 NVFP4 路径。注意：小模型 4-bit 掉分更多，代码 / 结构化输出类任务对 4-bit 误差敏感，上线前必须过业务验收。</div>
+      <div class="qm-badge"><span class="b-warn">Blackwell 专属 · 按业务验收</span></div>
+    </div>
+    <div class="qm-card">
+      <div class="qm-name">KV Cache 量化 <span class="bits">fp8_e4m3 等</span></div>
+      <div class="qm-full">KV 精度独立于权重 · 误差乘性叠加</div>
+      <div class="qm-desc">权重误差 × KV 误差<b>会相乘</b>，两头都压 4-bit 质量崩得快。KV 是显存大户（见 ④ 计算器），fp8 KV 减半占用后 <b>H100 实测吞吐还 +1.6%</b>。fp8 KV 需 Ada 及以上显卡支持。</div>
+      <div class="qm-badge"><span class="b-warn">长上下文显存吃紧先动 KV</span></div>
+    </div>
+    <div class="qm-card" style="border-top:3px dashed var(--border-strong)">
+      <div class="qm-name">选型速判</div>
+      <div class="qm-desc" style="margin-top:6px">
+        <b>服务端 · Hopper+</b>：FP8 权重 + FP8 KV 一步到位；<br>
+        <b>服务端 · 老卡 / 显存紧</b>：AWQ（质量优先）或 GPTQ（生态优先）；<br>
+        <b>端侧</b>：16GB+ 显存选 Q5_K_M / Q6_K，8~12GB 选 Q4_K_M，N 卡 4-bit 选 IQ4_XS；<br>
+        <b>微调</b>：QLoRA（NF4 底座）；<b>对齐评测</b>：BF16 不量化。
+      </div>
+      <div class="qm-badge"><span class="b-ok">完整决策链见本节底部</span></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px">示例模型 · Llama-3.1-8B-Instruct：不同量化版本实测对比</h3>
+  <p class="lead" style="margin-bottom:8px">三条线分开看：<b>A 端侧</b>（GGUF 各档：体积 vs 困惑度增量）、<b>B 服务端</b>（vLLM 同引擎同模型：显存 / 延迟 / 吞吐 / 精度）、<b>C 4-bit 同档对决</b>（Q4_K_M vs IQ4_XS）。困惑度增量口径为 llama-quantize（Llama-3-8B），KLD 为 Mistral-7B 第三方独立口径，五基准均分见来源节（arXiv 2601.14277）。</p>
+  <div class="test-2col">
+    <div class="test-box">
+      <div class="tb-head"><span class="tb-title">A · 端侧线：GGUF 各档（bartowski 仓库实测）</span><span class="tb-sub">8B · 实际 bpw 与文件 GB</span></div>
+      <div class="tb-note">文件体积 = bartowski/Meta-Llama-3.1-8B-Instruct-GGUF 仓库实测字节；困惑度增量为 llama-quantize 官方口径（Llama-3-8B）；KLD 为 Mistral-7B 第三方独立口径（IQ4_XS 行沿用 KLD 因 PPL 未列）。相对体积以 BF16=100% 计。</div>
+      <table class="miniq">
+        <thead>
+          <tr>
+            <th>量化档</th><th class="num">实际 bpw</th><th class="num">体积 GB</th>
+            <th class="num">PPL 增量</th><th class="num">相对体积</th><th>档位点评</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ref"><td><b>BF16 基线</b></td><td class="num">16.0</td><td class="num">16.1</td><td class="num">0</td><td class="num">100%</td><td>参考基线</td></tr>
+          <tr><td>Q8_0</td><td class="num">8.5</td><td class="num">8.54</td><td class="num q-good">+0.0026</td><td class="num">53%</td><td>近无损（但注意 3%+ 争论）</td></tr>
+          <tr><td>Q6_K</td><td class="num">6.6</td><td class="num">6.60</td><td class="num q-good">+0.0217</td><td class="num">41%</td><td>近 Q8 质量、更小体积</td></tr>
+          <tr><td>Q5_K_M</td><td class="num">5.7</td><td class="num">5.73</td><td class="num q-good">+0.0569</td><td class="num">35%</td><td>甜点位：代码/数学首选</td></tr>
+          <tr><td>Q4_K_M</td><td class="num">4.9</td><td class="num">4.92</td><td class="num">+0.1754</td><td class="num">30%</td><td><b>社区默认</b> · 性价比之王</td></tr>
+          <tr><td>IQ4_XS</td><td class="num">4.46</td><td class="num">4.45</td><td class="num">0.0088*</td><td class="num">28%</td><td>*KLD 口径；N 卡更快更准</td></tr>
+          <tr><td>Q3_K_M</td><td class="num">4.0</td><td class="num">4.02</td><td class="num q-strike">+0.6569</td><td class="num">25%</td><td>可感知降质 · 应急用</td></tr>
+          <tr><td>Q2_K</td><td class="num">3.2</td><td class="num">3.18</td><td class="num q-strike">+3.52</td><td class="num">20%</td><td>明显伤模 · 仅流程验证</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="test-box">
+      <div class="tb-head"><span class="tb-title">B · 服务端线：vLLM 同模型实测（A10G 24GB）</span><span class="tb-sub">decode 受限对比 · 512 输入/128 输出</span></div>
+      <div class="tb-note">对象同一个 Meta-Llama-3.1-8B-Instruct。vLLM 行：权重显存、单请求延迟（512 进 / 128 出）与 200 并发请求吞吐（1,024 进 / 128 出）；GGUF 行：llama.cpp 口径 pp = prefill 吞吐、tg = 单流 decode 速度。两引擎口径不同，组内可比分组间严。</div>
+      <table class="miniq">
+        <thead>
+          <tr>
+            <th>格式</th><th class="num">权重显存</th><th class="num">延迟 (512in/128out)</th>
+            <th class="num">吞吐 tok/s</th><th class="num">GSM8K</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="ref"><td><b>BF16（vLLM）</b></td><td class="num">16.8 GiB</td><td class="num">4.68 s</td><td class="num">117</td><td>87.5%</td></tr>
+          <tr><td>FP8 dynamic</td><td class="num">10.38 GiB</td><td class="num">2.66 s</td><td class="num q-good">338</td><td class="num q-good">87.5%（持平）</td></tr>
+          <tr><td>GPTQ W4A16</td><td class="num">7.27 GiB</td><td class="num">1.83 s</td><td class="num q-good">363</td><td class="num q-strike">81.8%（−5.7）</td></tr>
+          <tr><td>AWQ W4A16</td><td class="num">7.29 GiB</td><td class="num">1.84 s</td><td class="num q-good">363</td><td class="num q-strike">75.7% strict / 82.0% flexible</td></tr>
+          <tr><td><b>GGUF Q4_K_M</b>（llama.cpp）</td><td class="num">5.37 GiB</td><td class="num">pp 3254 / tg 81.6</td><td class="num">—</td><td class="num q-strike">84.8%（−2.7）</td></tr>
+          <tr><td>GGUF IQ4_XS</td><td class="num">4.95 GiB</td><td class="num">pp 3333 / tg 89.2</td><td class="num">—</td><td class="num q-strike">86.4%（−1.1）</td></tr>
+        </tbody>
+      </table>
+      <div class="tb-note" style="margin-top:8px"><b>读表要点：</b>FP8 显存 −38%、吞吐近 3 倍且质量持平——服务端甜点；INT4 再省 3 GiB 但 GSM8K 严格口径掉分明显（AWQ −11.8 分、GPTQ −5.7 分）；同引擎下 INT4 延迟 / 吞吐占优是省显存红利 + kernel 优化，但质量代价要把业务验收算进去。llama.cpp 单流 tg 数字不高，但 4-bit GGUF 省显存同时保住 84%+，是端侧价值区。</div>
+    </div>
+    <div class="test-box span2">
+      <div class="tb-head"><span class="tb-title">C · 同 4-bit 对决：Q4_K_M vs IQ4_XS（A10G）</span><span class="tb-sub">同卡同引擎逐项对比</span></div>
+      <div class="tb-note">A10G 24GB、llama.cpp 同批测试口径：IQ4_XS 文件更小、tg 更快、KLD 更低、GSM8K 更高，四项全胜 Q4_K_M。<b>结论：N 卡 4-bit 选 IQ4_XS；Q4_K_M 仍是 CPU / Mac 的默认</b>（I-quant 核心偏 N 卡，CPU/Mac 上反而慢）。</div>
+      <table class="miniq">
+        <thead>
+          <tr><th>指标</th><th class="num">Q4_K_M</th><th class="num">IQ4_XS</th><th>差值</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>体积</td><td class="num">5.37 GiB</td><td class="num">4.95 GiB</td><td class="num q-good">−7.8%</td></tr>
+          <tr><td>生成速度 tg128</td><td class="num">81.6 tok/s</td><td class="num">89.2 tok/s</td><td class="num q-good">+9.3%</td></tr>
+          <tr><td>GSM8K strict</td><td class="num">84.8%</td><td class="num">86.4%</td><td class="num q-good">+1.6 分</td></tr>
+          <tr><td>KLD vs BF16</td><td class="num">0.0340</td><td class="num">0.0264</td><td class="num q-good">−22%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="verdict" style="margin-top:14px">
+    <b>量化选型决策链：</b><br>
+    ① 服务端 + H100 / H200 / Blackwell → <b>FP8 权重 + FP8 KV</b>，一步到位；<br>
+    ② 服务端 + A100/A10G 老卡或显存卡死 → <b>AWQ INT4</b>（质量优先）或 GPTQ（生态 / 存量量化包优先）；<br>
+    ③ 端侧 / 单机 → 显存 16GB+ 选 <b>Q5_K_M / Q6_K</b>；8~12GB 选 <b>Q4_K_M</b>（Ollama 默认）；N 卡 4-bit 档选 <b>IQ4_XS</b>；<br>
+    ④ 上下文长、KV 吃显存 → 先把 <b>KV 降到 FP8</b>，比压权重性价比高且几乎无损；<br>
+    ⑤ 微调 → <b>QLoRA（NF4）</b>；对齐评测 / 蒸馏教师 → <b>BF16 / Q8 以上</b>；<br>
+    ⑥ 无论选谁，上线前拿 5 个真实业务 prompt × 候选量化档各跑一遍人工评审——困惑度和基准分不替代业务分布验证。
+  </div>
+</section>
+
+<!-- ============ ⑥ 来源与口径 ============ -->
+<section class="panel" id="sec7">
+  <h2>⑦ 资料来源与口径 <span class="sub">可追溯 · 量级参考</span></h2>
+  <ul class="src-list">
+    <li><b>PagedAttention 浪费 60~80% / 分页后 &lt;4%</b>：vLLM 论文《Efficient Memory Management for LLM Serving with PagedAttention》（SOSP 2023）。</li>
+    <li><b>DeepSeek-V3 部署口径</b>（prefill 4 节点 TP4+SP+DP8+EP32、32 个冗余专家；decode 40 节点 320 卡 TP4+SP+DP80+EP320、每卡 1 专家、IB 点对点直传 + IBGDA）：DeepSeek-V3 技术报告 §3.4（2024-12）。</li>
+    <li><b>SGLang DeepSeek 服务复现</b>（12 节点 × 8 H100、PD 分离 + DeepEP + EPLB + 两批重叠，2k 输入下每节点 52.3k 输入 / 22.3k 输出 token/s）：LMSYS / SGLang 团队公开博客（2025-05）。</li>
+    <li><b>PD 分离 goodput 收益 1.3~2.3×</b>：DistServe（OSDI'24）、Splitwise（ISCA'24）、Anyscale 等公开实验口径汇总；均为 SLO 约束下的有效吞吐，非裸吞吐。</li>
+    <li><b>vLLM V1 / PD 路线</b>：vLLM Roadmap Q2 2025（GitHub #15735）——V1 统一调度、PD 分离（1P1D / XPYD）、EP（DeepEP/EPLB）官方主线。</li>
+    <li><b>GGUF 各档体积 / 位宽 / 困惑度增量</b>：bartowski/Meta-Llama-3.1-8B-Instruct-GGUF 仓库 README（文件实测字节）；PPL 增量为 llama-quantize 输出口径（Llama-3-8B）；KLD 为 Artefact2 独立测量（Mistral-7B）；五基准均分（Q4_K_M 69.15 / Q5_K_M 69.36 / Q8_0 69.41 / FP16 69.47）：arXiv 2601.14277。</li>
+    <li><b>FP8 / INT4 服务端性能</b>：H100 / A100 / RTX 4090 三卡量化对比（FP8 吞吐 +26.7%、KV FP8 +1.6% 等）：GPUStack 性能实验室《The Impact of Quantization on vLLM Inference Performance》；A10G 24GB 双引擎横评（vLLM + llama.cpp，权重显存 / 延迟 / 吞吐 / GSM8K / KLD 全表）：ComputingForGeeks 2026 实测——两文均为特定硬件 / 模型 / 负载口径，仅供量级与排序参考。</li>
+    <li><b>Orca 迭代级调度 / 连续批处理吞吐 36.9×</b>：《Orca: A Distributed Serving System for Transformer-Based Generative Models》（OSDI 2022）——GPT-3 175B、同延迟级下对比 NVIDIA FasterTransformer 的论文口径；in-flight batching 为 TensorRT-LLM 对同一机制的产品术语。vLLM 论文（SOSP 2023）另报同延迟下 2~4× 吞吐（对比 FasterTransformer / Orca）。</li>
+    <li><b>Strata 端侧条目</b>：GitHub Niko1221/Strata（2026-09 开源，MIT）；94 tok/s（RTX 5070 · Q2_0 档）、投机解码 1.6~1.8×、动态专家缓存均为<b>项目官方口径</b>，0.2.1 起自带固定基准套件供独立复验。</li>
+    <li><b>DeepInfer 条目</b>：GitHub deepseek-ai/DeepInfer（2026-10-20 开源，Apache-2.0，开源 10 天社区口径约 2.2 万 star）；定位、特性与硬件支持为 README 原文口径；DSpark 单用户加速 60~85% 为 DeepSeek-V4 官方部署口径；「开源版仅离线推理、KV cache / PD 分离 / 负载均衡未包含」为 README 明示边界。</li>
+    <li><b>投机解码谱系与数字</b>：EAGLE-3（arXiv 2503.01840，最高 6.5×、Llama-3.3-70B 3.9~4.1×、SGLang H100 158→373 tok/s、batch 64 吞吐 1.38×）；EAGLE-2（arXiv 2406.16858，3.05~4.26×）；Medusa（arXiv 2401.10774，2.2~3.6×）；MTP（DeepSeek-V3 技术报告，SGLang 集成口径输出吞吐 +60%、第 2 token 接受率 85~90%）；高并发反噬（MagicDec：batch 32 可跌破 1×）与 batch 递减曲线（batch 1 约 1.8× → batch 32 约 1.05×）为公开论文 / 讲义口径汇总。</li>
+    <li><b>NVFP4 / MXFP4</b>：NVIDIA Model Optimizer 与 Blackwell FP4 文档（block-16 / block-32 结构、FP4 Tensor Core 依赖）；TRT-LLM / vLLM 支持矩阵（2026-10 检索）。</li>
+    <li><b>KV 压缩路线</b>：H2O（NeurIPS'23）、StreamingLLM（ICLR'24）、PyramidKV / PyramidInfer、YOCO / CLA 论文口径；均为研究路线，生产采用前按业务验收。</li>
+    <li><b>引擎特性与支持矩阵</b>：vllm.ai、docs.sglang.ai、NVIDIA TensorRT-LLM 官方文档（2026-10 检索）；特性演进快，选型前以各官方文档 current 版本复核。</li>
+  </ul>
+</section>
+
+<footer>
+  算力工具箱 · LLM 推理技术速查 v1.6 ｜ 性能数字为公开报告口径，仅作量级参考；选型与容量规划以压测和厂商书面确认为准 ｜ 页面零外部依赖，可离线双击使用
+</footer>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= PagedAttention 图示 ================= */
+/* 传统连续预留：48 格 = 2 条请求各占一整段预留（仅头部在用，其余空置） */
+(function(){
+  var box = document.getElementById("pa-cells-a");
+  if(!box) return;
+  var html = "";
+  for(var i = 0; i < 48; i++){
+    /* 前 24 格 = 请求 A 的整段预留（仅前 7 格真在用），后 24 格 = 请求 B 的预留（前 3 格在用） */
+    var used = (i < 24 && i < 7) || (i >= 24 && i < 27);
+    html += used ? '<i class="used"></i>' : '<i class="idle"></i>';
+  }
+  box.innerHTML = html;
+})();
+
+/* 分页：48 格 = 空闲池中散布的块（A 5 块 + B 4 块 + 共享前缀 3 块），用完回池复用 */
+(function(){
+  var box = document.getElementById("pa-cells-b");
+  if(!box) return;
+  var marks = { };
+  [3, 9, 20, 33, 44].forEach(function(i){ marks[i] = "used"; });   /* A */
+  [14, 22, 30, 41].forEach(function(i){ marks[i] = "rB"; });       /* B */
+  [6, 17, 27].forEach(function(i){ marks[i] = "share"; });         /* 共享前缀 */
+  var html = "";
+  for(var i = 0; i < 48; i++){
+    html += marks[i] ? '<i class="' + marks[i] + '"></i>' : '<i class="free"></i>';
+  }
+  box.innerHTML = html;
+})();
+
+/* ================= KV 显存速算 ================= */
+var MLA_LATENT = 576;   /* DeepSeek-MLA：512 latent + 64 rope */
+
+function $(id){ return document.getElementById(id); }
+function num(el){ var v = parseFloat(el.value); return isFinite(v) ? v : NaN; }
+
+function fmtBytes(b){
+  if(!isFinite(b) || b < 0) return "—";
+  if(b >= 1e9)  return (b / 1e9).toFixed(2)   + " GB";
+  if(b >= 1e6)  return (b / 1e6).toFixed(2)   + " MB";
+  if(b >= 1e3)  return (b / 1e3).toFixed(1)   + " KB";
+  return Math.round(b) + " B";
+}
+function trimNum(n){
+  if(!isFinite(n) || isNaN(n)) return "—";
+  return n.toLocaleString("zh-CN", { maximumFractionDigits:1 });
+}
+
+function calcKV(){
+  var kvh = num($("in-kvh")), hd = num($("in-hd")),
+      layers = num($("in-layers")), ctx = num($("in-ctx")),
+      conc = num($("in-conc"));
+  var bytes = parseFloat($("sel-bytes").value);
+  var isMLA = $("sel-model").value === "dsv3" && $("in-kvh").disabled;
+
+  var perTok;   /* B / token */
+  if(isMLA){
+    perTok = (isFinite(layers) && layers > 0) ? MLA_LATENT * layers * bytes : NaN;
+    $("f-kvtok").textContent = "MLA latent " + MLA_LATENT + "（512+64） × " +
+      (isFinite(layers) ? layers : "—") + " 层 × " + bytes + "B" +
+      (bytes === 1 ? "（FP8 KV）" : "");
+  } else {
+    perTok = (isFinite(kvh) && isFinite(hd) && isFinite(layers)) ? 2 * kvh * hd * layers * bytes : NaN;
+    $("f-kvtok").textContent = "2 × " + (isFinite(kvh) ? kvh : "—") + " 头 × " +
+      (isFinite(hd) ? hd : "—") + " 维 × " + (isFinite(layers) ? layers : "—") + " 层 × " + bytes + "B";
+  }
+  $("out-kvtok").innerHTML = isFinite(perTok) ? fmtBytes(perTok) : "—";
+
+  var perReq = (isFinite(perTok) && isFinite(ctx) && ctx > 0) ? perTok * ctx : NaN;
+  $("out-kvreq").innerHTML = isFinite(perReq) ? fmtBytes(perReq) : "—";
+  $("f-kvreq").textContent = isFinite(perReq)
+    ? fmtBytes(perTok) + " / token × " + trimNum(ctx) + " token"
+    : "请输入有效上下文长度";
+
+  var total = (isFinite(perReq) && isFinite(conc) && conc > 0) ? perReq * conc : NaN;
+  if(isFinite(total)){
+    var cards = total / 80e9;
+    $("out-kvtotal").innerHTML = fmtBytes(total) +
+      '<small style="font-size:13px;margin-left:8px">≈ ' + (cards < 0.1 ? cards.toFixed(2) : cards.toFixed(1)) + " 张 80GB 卡</small>";
+    $("f-kvtotal").textContent = fmtBytes(perReq) + " × 并发 " + trimNum(conc) +
+      "（仅 KV；权重另计）";
+  } else {
+    $("out-kvtotal").innerHTML = "—";
+    $("f-kvtotal").textContent = "请输入有效并发数";
+  }
+}
+
+/* ================= 预设 / chips / 事件绑定 ================= */
+
+  function applyPreset(id){
+    var map = {
+      llama70: { kvh:8,    hd:128, layers:80, bytes:"2",       ctx:32768, mla:false },
+      llama8:  { kvh:8,    hd:128, layers:32, bytes:"2",       ctx:8192,  mla:false },
+      qwen72:  { kvh:8,    hd:128, layers:80, bytes:"2",       ctx:32768, mla:false },
+      dsv3:    { kvh:"—",  hd:"—", layers:61, bytes:"1",       ctx:65536, mla:true  },
+      custom:  null
+    };
+    var p = map[id] || map.custom;
+    $("in-kvh").disabled  = !!(p && p.mla);
+    $("in-hd").disabled   = !!(p && p.mla);
+    $("mla-hint").textContent = (p && p.mla)
+      ? "MLA 模式：DeepSeek 系将 K/V 压进联合 latent（512 + 64 rope 维），无逐头 KV，故按 latent × 层数直接计算；FP8 KV 为官方部署口径。"
+      : "公式：KV/token = 2 × KV头数 × 头维 × 层数 × 每元素字节。MLA 模型（DeepSeek 系）无逐头 KV，直接按 latent 维度计算；以各模型 config.json 为准。";
+    if(!p){
+      /* 自定义：解除禁用，保留当前值供手动编辑 */
+      $("in-kvh").disabled = false;
+      $("in-hd").disabled  = false;
+      return;
+    }
+    $("in-kvh").value  = p.kvh;
+    $("in-hd").value   = p.hd;
+    $("in-layers").value = p.layers;
+    $("sel-bytes").value = p.bytes;
+    $("in-ctx").value  = p.ctx;
+    $("in-conc").value = 1;
+    syncChips();
+  }
+  function syncChips(){
+    var ctx = String($("in-ctx").value), conc = String($("in-conc").value);
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ctx]"), function(x){
+      x.classList.toggle("on", x.getAttribute("data-ctx") === ctx);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-conc]"), function(x){
+      x.classList.toggle("on", x.getAttribute("data-conc") === conc);
+    });
+  }
+
+  $("sel-model").addEventListener("change", function(){ applyPreset(this.value); calcKV(); });
+  ["in-kvh","in-hd","in-layers","in-ctx","in-conc"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      if(this.id === "in-ctx" || this.id === "in-conc") syncChips();
+      calcKV();
+    });
+  });
+  $("sel-bytes").addEventListener("change", calcKV);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ctx]"), function(ch){
+    ch.addEventListener("click", function(){
+      $("in-ctx").value = ch.getAttribute("data-ctx");
+      syncChips(); calcKV();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-conc]"), function(ch){
+    ch.addEventListener("click", function(){
+      $("in-conc").value = ch.getAttribute("data-conc");
+      syncChips(); calcKV();
+    });
+  });
+
+  syncChips();
+  calcKV();
+
+  /* ================= 页内目录：滚动高亮 ================= */
+  (function(){
+    var links = document.querySelectorAll("#toc a[data-sec]");
+    if(!links.length) return;
+    var secs = [];
+    Array.prototype.forEach.call(links, function(a){
+      var el = document.getElementById(a.getAttribute("data-sec"));
+      if(el) secs.push({ el: el, link: a });
+    });
+    if(!secs.length) return;
+
+    /* 头部与目录的自适应高度，用于锚点跳转偏移与高亮判定 */
+    function offsetTop(el){
+      var t = 0;
+      while(el){ t += el.offsetTop; el = el.offsetParent; }
+      return t;
+    }
+    function tocH(){
+      var toc = document.getElementById("toc");
+      return toc ? toc.offsetHeight + 12 : 20;
+    }
+
+    /* 点击跳转：补偿 sticky 目录遮挡 */
+    Array.prototype.forEach.call(links, function(a){
+      a.addEventListener("click", function(ev){
+        var sec = document.getElementById(a.getAttribute("data-sec"));
+        if(!sec) return;
+        ev.preventDefault();
+        window.scrollTo({ top: offsetTop(sec) - tocH(), behavior: "smooth" });
+        if(history.replaceState) history.replaceState(null, "", a.getAttribute("href"));
+      });
+    });
+
+    /* 滚动高亮：取「已越过的最后一节」为当前节 */
+    function highlight(){
+      var y = window.pageYOffset + tocH() + 4;
+      var cur = secs[0];
+      for(var i = 0; i < secs.length; i++){
+        if(offsetTop(secs[i].el) <= y) cur = secs[i];
+      }
+      Array.prototype.forEach.call(links, function(a){ a.classList.remove("cur"); });
+      if(cur) cur.link.classList.add("cur");
+    }
+    var tick = false;
+    window.addEventListener("scroll", function(){
+      if(tick) return;
+      tick = true;
+      requestAnimationFrame(function(){ highlight(); tick = false; });
+    }, { passive: true });
+    highlight();
+
+    /* ================= 每节自动注入「↑ 回目录」 ================= */
+    Array.prototype.forEach.call(secs, function(s){
+      var row = document.createElement("div");
+      row.className = "back-toc-row";
+      var a = document.createElement("a");
+      a.className = "back-toc";
+      a.href = "#toc";
+      a.textContent = "↑ 回目录";
+      a.title = "回到顶部目录";
+      /* 点击回顶（目录 sticky 在顶部），补偿锚点定位，平滑滚动 */
+      a.addEventListener("click", function(ev){
+        ev.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if(history.replaceState) history.replaceState(null, "", "#toc");
+      });
+      row.appendChild(a);
+      /* 插到 section 第一个子元素（h2）之前 */
+      s.el.insertBefore(row, s.el.firstChild);
+    });
+  })();
+})();
+</script>
+
+</body>
+</html>

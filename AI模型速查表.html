@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI模型速查表 · 语言 / 图片 / 视频生成 — 国内外主流模型全景</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --border:#e3e6ea; --border-strong:#cfd4da;
+  --text:#1f2328; --text-2:#5b6570; --text-3:#8b939c;
+  --accent:#1f6feb; --accent-soft:#eaf2fe;
+  --warn:#b45309; --warn-soft:#fef4e6;
+  --danger:#b3261e; --danger-soft:#fdecea;
+  --ok:#0a7d3b; --ok-soft:#e8f5ed;
+  --chip:#f0f2f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1380px;margin:0 auto;padding:22px 24px 60px}
+header.top{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:14px}
+h1{font-size:20px;margin:0 0 6px;letter-spacing:.3px}
+h1 span.tagline{font-size:13px;color:var(--text-3);font-weight:400;margin-left:8px}
+.meta-line{color:var(--text-2);font-size:12.5px;margin:0}
+.meta-line b{color:var(--text);font-weight:600}
+.disclaim{margin-top:10px;padding:9px 12px;background:var(--warn-soft);border-left:3px solid #e0a020;border-radius:4px;color:#7a4b06;font-size:12px;line-height:1.65}
+.disclaim.v2{background:var(--accent-soft);border-left-color:var(--accent);color:#1a3a6b}
+
+/* ---------- 页内目录 ---------- */
+#toc{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  margin:0 -24px 14px;padding:9px 24px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+}
+#toc .toc-t{font-size:12px;font-weight:700;color:var(--text-3);margin-right:2px;white-space:nowrap}
+#toc a{
+  font-size:12px;color:var(--text-2);text-decoration:none;white-space:nowrap;
+  padding:3px 11px;border-radius:20px;border:1px solid transparent;cursor:pointer;
+  transition:color .15s,background .15s,border-color .15s;
+}
+#toc a:hover{color:var(--accent);border-color:#a8c7f5;background:#eaf2fe}
+#toc a.cur{
+  background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;
+}
+@media(max-width:640px){
+  .wrap{padding:18px 14px 50px}
+  #toc{margin:0 -14px 12px;padding:8px 14px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  #toc::-webkit-scrollbar{display:none}
+}
+
+/* ---------- 回目录链接（每节自动注入） ---------- */
+.back-toc-row{display:flex;justify-content:flex-end;margin:-2px 0 2px}
+.back-toc{
+  font-size:11.5px;color:var(--text-3);text-decoration:none;white-space:nowrap;
+  padding:2px 10px;border-radius:20px;border:1px solid var(--border);background:#fff;
+  cursor:pointer;transition:color .15s,border-color .15s,background .15s;
+}
+.back-toc:hover{color:var(--accent);border-color:#a8c7f5;background:var(--accent-soft);text-decoration:none}
+
+/* ---------- toolbar ---------- */
+.toolbar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(16,24,40,.04)}
+.tb-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tb-row + .tb-row{margin-top:9px}
+.search-box{position:relative;flex:0 0 250px}
+.search-box input{width:100%;padding:7px 10px 7px 28px;border:1px solid var(--border-strong);border-radius:7px;font-size:13px;background:#fff;color:var(--text);outline:none;font-family:inherit}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search-box svg{position:absolute;left:8px;top:8px;opacity:.45}
+.seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden}
+.seg button{padding:6px 14px;border:none;background:#fff;color:var(--text-2);font-size:12.5px;cursor:pointer;font-family:inherit;border-right:1px solid var(--border)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:var(--chip);border:1px solid transparent;color:var(--text-2);font-size:12px;cursor:pointer;user-select:none;white-space:nowrap}
+.chip:hover{border-color:var(--border-strong)}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip .cnt{font-size:11px;opacity:.7}
+button.btn{padding:6px 10px;border:1px solid var(--border-strong);border-radius:7px;background:#fff;font-size:12.5px;color:var(--text);cursor:pointer;font-family:inherit}
+button.btn:hover{border-color:var(--accent);color:var(--accent)}
+.spacer{flex:1}
+.stat{font-size:12.5px;color:var(--text-2)}
+.stat b{color:var(--text)}
+
+/* ---------- sections & table ---------- */
+.section-head{display:flex;align-items:baseline;gap:10px;margin:20px 0 8px}
+.section-head h2{font-size:15.5px;margin:0;color:var(--text)}
+.section-head .sub{font-size:12px;color:var(--text-3)}
+.section-head .cnt{font-size:11.5px;color:var(--accent);background:var(--accent-soft);border-radius:10px;padding:1px 9px}
+.table-shell{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:none}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;min-width:1080px;table-layout:fixed}
+th.ctx,td.ctx{width:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+th.lic,td.lic{width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+thead th{position:sticky;top:0;z-index:10;background:#f8f9fb;color:var(--text-2);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--border-strong);white-space:nowrap;font-size:11.5px}
+th.col-sticky,td.col-sticky{position:sticky;left:0;z-index:6;background:#fff;white-space:nowrap}
+thead th.col-sticky{z-index:11;background:#f8f9fb}
+tbody tr.main{cursor:pointer}
+tbody tr.main:hover td{background:#f2f7fe}
+tbody tr.main:hover td.col-sticky{background:#eef5fe}
+tbody tr.row-open td{background:#f4f9ff}
+td{padding:6px 8px;border-bottom:1px solid #eef0f3;vertical-align:middle}
+td.model{font-weight:600;color:var(--text);min-width:120px;max-width:190px}
+td.model .sub{display:block;color:var(--text-3);font-size:10.5px;font-weight:400;margin-top:1px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.org-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.badge{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10.5px;line-height:1.5;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-gray{background:#eef0f3;color:var(--text-2)}
+.b-blue{background:var(--accent-soft);color:var(--accent)}
+.b-danger{background:var(--danger-soft);color:var(--danger)}
+.tc{display:block;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-sm{display:block;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.price b{font-weight:600;color:var(--text)}
+td.price .sub{display:block;color:var(--text-3);font-size:10.5px;margin-top:1px}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+.na{color:#c2c8cf}
+.q{color:var(--warn);font-weight:700;cursor:help}
+tr.detail td{background:#fafbfc;border-bottom:1px solid var(--border)}
+.detail-inner{padding:8px 12px 10px;font-size:12px;color:var(--text-2);line-height:1.7}
+.detail-inner b{color:var(--text);font-weight:600}
+.empty{padding:36px;text-align:center;color:var(--text-3)}
+
+/* ---------- panels ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:14px}
+.panel h2{font-size:14.5px;margin:0 0 10px}
+.panel ul{margin:0;padding-left:18px;color:var(--text-2);font-size:12.5px;line-height:1.75}
+.panel li{margin-bottom:3px}
+.kv{display:flex;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px dashed #eceff2;color:var(--text-2)}
+.kv:last-child{border-bottom:none}
+.kv b{flex:0 0 96px;color:var(--text)}
+table.mini{width:100%;font-size:12px;border-collapse:collapse;min-width:0}
+table.mini th,table.mini td{border-bottom:1px solid #eef0f3;padding:6px 8px;text-align:left;vertical-align:top}
+table.mini th{color:var(--text-2);font-weight:600;background:#f8f9fb;white-space:nowrap}
+footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;line-height:1.8}
+.src{font-size:11.5px;color:var(--text-3);word-break:break-all;line-height:1.7}
+@media print{
+  .toolbar{display:none}
+  body{background:#fff}
+  .table-shell{border:none}
+  #toc,.back-toc-row{display:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<script src="site-nav.js"></script>
+
+<header class="top">
+  <h1>AI模型速查表 <span class="tagline">语言 · 图片 · 视频生成 — 国内外主流模型 / 开源闭源 / MoE / 权重与量化 / 官网定价</span></h1>
+  <p class="meta-line">数据截至 <b>2026-10-29</b> ｜ 收录 <b id="cnt-all">0</b> 个模型（语言 <b id="cnt-llm">0</b> · 图片 <b id="cnt-img">0</b> · 视频 <b id="cnt-vid">0</b>）｜ <b id="cnt-open">0</b> 开源 / <b id="cnt-closed">0</b> 闭源 ｜ 点击行展开「许可 · 部署 · 定价细节」</p>
+  <div class="disclaim">
+    <b>口径说明</b>：
+    ① 「权重体积」= HuggingFace 仓库<b>官方发布格式的实测下载体积</b>——由<b>发布精度</b>决定，不等于参数量×2 字节（如 Kimi K3 2.8T 参数原生 MXFP4 仅 1.56TB，不存在 5.6TB 的 BF16 官方版）；
+    ② 「量化版本」区分官方发布格式（BF16 / FP8 / MXFP4 / NVFP4…）与社区量化（GGUF / AWQ / GPTQ），闭源模型均为 —；
+    ③ 语言模型定价单位为<b>每百万 token（输入/输出）</b>，视频为 <b>$/秒</b>（1080p 标准档），图片为 <b>$/张</b>或订阅，均取<b>官网原始币种</b>（国内 ¥ / 国外 $）；
+    ④ 标 <span class="q" title="第三方口径，待官网核实">?</span> = 第三方/聚合平台口径，采购与预算前须官网复核；
+    ⑤ 闭源模型架构与参数未公开，标「未公开」。
+  </div>
+  <div class="disclaim v2">
+    <b>横向对比注意</b>：MoE 模型「总参数-激活参数」决定推理成本与显存需求（部署显存按总参数×发布精度算，算力按激活参数算）；
+    长上下文定价普遍存在 &gt;200K/272K 分档翻倍、缓存命中 1-2 折、batch 5 折等口径，比较时须对齐同档位；视频 $/秒 为区间中位口径，实际受分辨率/参考帧/音频附加费影响 1.5-2×。
+  </div>
+</header>
+
+<nav id="toc" aria-label="页内目录">
+  <span class="toc-t">目录</span>
+  <a href="#sec-llm" data-sec="sec-llm">① 语言模型</a>
+  <a href="#sec-img" data-sec="sec-img">② 图片模型</a>
+  <a href="#sec-vid" data-sec="sec-vid">③ 视频模型</a>
+  <a href="#sec-rule" data-sec="sec-rule">④ 权重换算</a>
+  <a href="#sec-guide" data-sec="sec-guide">⑤ 速判与来源</a>
+</nav>
+
+<div class="toolbar">
+  <div class="tb-row">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="搜索模型 / 机构 / 许可证 / 关键词…" autocomplete="off">
+    </div>
+    <div class="seg" id="seg-type">
+      <button data-v="all" class="on">全部</button>
+      <button data-v="llm">语言模型</button>
+      <button data-v="img">图片模型</button>
+      <button data-v="vid">视频模型</button>
+    </div>
+    <span class="chip" data-g="region" data-v="cn">🇨🇳 国内</span>
+    <span class="chip" data-g="region" data-v="foreign">🌍 国外</span>
+    <span class="chip" data-g="open" data-v="1">开源</span>
+    <span class="chip" data-g="open" data-v="0">闭源</span>
+    <span class="chip" data-g="moe" data-v="1">MoE 架构</span>
+    <div class="spacer"></div>
+    <span class="stat">命中 <b id="cnt-hit">0</b> 个</span>
+    <button class="btn" id="btn-reset">重置</button>
+  </div>
+</div>
+
+<!-- ============ 语言模型 ============ -->
+<div class="section-head" id="sec-llm">
+  <h2>① 语言模型</h2>
+  <span class="sub">每百万 token 输入/输出 · MoE = 总参-激活 · 1M 上下文已成旗舰标配 · 2T 级开源旗舰已至（Kimi K3 / Qwen3.8-Max）</span>
+  <span class="cnt" id="c-llm"></span>
+</div>
+<div class="table-shell">
+<table>
+  <thead><tr>
+    <th class="col-sticky">模型</th>
+    <th>发布</th>
+    <th>架构（参数）</th>
+    <th class="ctx" title="上下文窗口">上下文</th>
+    <th class="lic" title="开源 / 许可证">开源 / 许可</th>
+    <th>权重体积（官方格式）</th>
+    <th>量化版本</th>
+    <th>官网定价（输入/输出）</th>
+  </tr></thead>
+  <tbody id="tbody-llm"></tbody>
+</table>
+</div>
+
+<!-- ============ 图片模型 ============ -->
+<div class="section-head" id="sec-img">
+  <h2>② 图片生成模型</h2>
+  <span class="sub">$/张 或订阅 · 自回归多模态 vs 扩散/Flow-matching · MoE 标签不适用</span>
+  <span class="cnt" id="c-img"></span>
+</div>
+<div class="table-shell">
+<table>
+  <thead><tr>
+    <th class="col-sticky">模型</th>
+    <th>发布</th>
+    <th>架构类型</th>
+    <th class="lic" title="开源 / 许可证">开源 / 许可</th>
+    <th>权重体积</th>
+    <th>官网定价</th>
+    <th>规格 / 能力</th>
+  </tr></thead>
+  <tbody id="tbody-img"></tbody>
+</table>
+</div>
+
+<!-- ============ 视频模型 ============ -->
+<div class="section-head" id="sec-vid">
+  <h2>③ 视频生成模型</h2>
+  <span class="sub">$/秒（1080p 标准档）· 单次 30 秒已成最新分水岭（Kling 4.0 / Seedance 2.5 / Wan 3.0）· Sora 已退场</span>
+  <span class="cnt" id="c-vid"></span>
+</div>
+<div class="table-shell">
+<table>
+  <thead><tr>
+    <th class="col-sticky">模型</th>
+    <th>发布</th>
+    <th class="lic" title="开源 / 许可证">开源 / 许可</th>
+    <th>权重体积</th>
+    <th>官网定价（$/秒）</th>
+    <th>时长 / 分辨率 / 音频</th>
+  </tr></thead>
+  <tbody id="tbody-vid"></tbody>
+</table>
+</div>
+
+<div class="panel" id="sec-rule">
+  <h2>权重体积换算规则（服务于算力配置：显存与存储规划）</h2>
+  <div class="kv"><b>实测规律</b><span>BF16 仓库 ≈ 2.00 字节/参数 · FP8 ≈ 1.00 · MXFP4/NVFP4 原生预量化 ≈ 0.55-0.67 · 「官方发布格式」决定下载体积与最低加载显存</span></div>
+  <div class="kv"><b>典型案例</b><span>GLM-5.2（753B）：BF16 1.507TB / FP8 755.6GB / NVFP4 ~465GB → FP8 版单台 8×H200(1,128GB) 可载入；Kimi K3（2.8T）：原生 MXFP4 1.56TB（≈4.5 bit/参数）→「2.8T×2 字节=5.6TB」是错误预算，按此规划会超配 3.5×存储</span></div>
+  <div class="kv"><b>部署推算</b><span>加载显存 ≈ 权重体积 + KV Cache + 运行时缓冲；KV 占比随上下文长度线性增长（MLA/GQA/DSA 架构显著降低 KV）；MoE 部署算力按激活参数算、显存按总参数算</span></div>
+  <div class="kv"><b>社区量化</b><span>主流开源模型均有 GGUF 全档（Q2-Q8，llama.cpp/Ollama 生态）与 AWQ/GPTQ INT4（vLLM/SGLang）；4-bit GGUF 的 GLM-5.2 约 376GB，4×H100 320GB 可跑</span></div>
+</div>
+
+<div class="grid2" id="sec-guide">
+  <div class="panel">
+    <h2>速判：按场景先看哪几列</h2>
+    <table class="mini">
+      <tr><th>场景</th><th>先看</th><th>再看</th></tr>
+      <tr><td>自部署 / 私有化</td><td>开源列、权重体积、量化版本</td><td>许可证商用条款（K3/Llama/SD 有限制）</td></tr>
+      <tr><td>API 成本对比</td><td>定价列（对齐同一折扣口径）</td><td>缓存命中价（国产 1-2 折）、长上下文分档</td></tr>
+      <tr><td>长文档 / Agent 长会话</td><td>上下文列、长上下文分档定价</td><td>KV 架构（MLA/DSA/KDA）与有效解码速度</td></tr>
+      <tr><td>图片量产（电商/UGC）</td><td>图片表 $/张（Seedream/Reve 低至 $0.02-0.04）</td><td>参考图一致性、批量并发</td></tr>
+      <tr><td>视频制作</td><td>$/秒（Seedance Fast $0.022 最便宜）</td><td>原生音频（Veo/Kling/O3 有、多数无）、时长上限</td></tr>
+      <tr><td>信创 / 国产化部署</td><td>国内 + 开源（DeepSeek/GLM 系，GLM-5 代以昇腾训练）</td><td>国产推理栈适配（vLLM-Ascend / MindIE）</td></tr>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>可信度图例与数据来源（核实于 2026-10-29）</h2>
+    <div class="kv"><b><span class="badge b-ok">官网</span></b><span>厂商官网定价页 / 官方公告 / HuggingFace 官方仓库实测，可直接引用。</span></div>
+    <div class="kv"><b><span class="badge b-blue">聚合</span></b><span>llmpricing.dev（10-26 同步）、modelpricing.ai、aivideogenerationapi.com、AtlasCloud 等聚合站，与官网主口径一致时收录。</span></div>
+    <div class="kv"><b><span class="badge b-warn">第三方</span></b><span>媒体 / 评测机构口径，带 <span class="q">?</span> 标记，预算决策前须官网复核。</span></div>
+    <div class="kv"><b>定价来源</b><span class="src">openai.com/api ｜ anthropic.com/pricing（5.5 代，10-21 核验） ｜ ai.google.dev/gemini-api/pricing ｜ deepseek.com/pricing（峰谷自 08-16 起） ｜ api.z.ai ｜ platform.moonshot.ai ｜ tencent.com（Hy4，08-28） ｜ 火山引擎 / 阿里云百炼 / 腾讯云 TokenHub（¥ 口径）</span></div>
+    <div class="kv"><b>权重实测</b><span class="src">HuggingFace 仓库 blobs 实测（akash.network 自部署指南 2026-10 ｜ computingforgeeks 开源模型对照表：BF16=2.00B/参数、FP8=1.00、预量化≈0.55）</span></div>
+    <div class="kv"><b>免责</b><span>模型与价格迭代极快（本表收录期间 OpenAI 连发 GPT-6.1 Terra），本表用于选型前期速查与比选，正式采购与预算以厂商官网实时口径为准。</span></div>
+  </div>
+</div>
+
+<footer>
+  算力工具箱 · AI 模型速查表 ｜ 数据截至 2026-10-29 ｜ 定价与版本随时浮动，以官网为准<br>
+  与《AI芯片参数速查表》《LLM推理技术速查》配套使用：权重体积×发布精度 → 显存规划 → 芯片选型 → 推理引擎
+</footer>
+</div>
+
+<script>
+"use strict";
+/* ============================ 数据 ============================
+   字段: n=名称 org=机构 oc=机构色 cn=1国内/0国外 type=llm/img/vid
+   rel=发布日期(带?的为第三方口径) arch=架构(参数/激活) ctx=上下文
+   open=1开源/0闭源 lic=许可证 ws=权重体积(官方发布格式) quant=量化版本
+   price=定价主行 priceSub=定价副行(折扣/分档/备注) spec=规格(图片/视频)
+   note=展开详情(许可·部署·定价细节) moe=1为MoE(仅语言模型) dnum=排序锚(发布) */
+const OC = {
+  "深度求索":"#4D6BFE","阿里":"#FF6A00","智谱 Z.ai":"#00B4A0","月之暗面":"#16191E","腾讯":"#0052D9",
+  "百度":"#2932E1","MiniMax":"#7C3AED","字节跳动":"#325AB4","快手":"#FF7300","生数科技":"#7C3AED",
+  "爱诗科技":"#0F9CD6","OpenAI":"#10A37F","Anthropic":"#D97757","Google":"#4285F4","xAI":"#1D1D1F",
+  "Meta":"#0668E1","Mistral":"#FA500F","Black Forest Labs":"#1A1A2E","Stability AI":"#8A5CF6",
+  "Midjourney":"#2B2B2B","Ideogram":"#5B5BD6","Reve":"#0A7D3B","Runway":"#1B1B1B","Luma AI":"#5763FF",
+  "智象未来":"#C2410C"
+};
+const LLM = [
+/* ---------- 国内 · 开源 ---------- */
+{n:"DeepSeek-V4-Pro",org:"深度求索",cn:1,rel:"2026-04-24 预览 / 08-13 GA",arch:"MoE 1.6T-49B",ctx:"1M",open:1,lic:"MIT",moe:1,
+ ws:"MXFP4 预量化 ~893GB",quant:"官方 MXFP4（96%权重）+FP8/BF16 仓 · 社区 GGUF 全档",
+ price:"¥9 / ¥27",priceSub:"高峰 · 空闲 ¥4.5/¥13.5 · 缓存命中 ¥0.27",
+ note:"<b>架构</b>：Token-wise compression + DSA 稀疏注意力，1M 上下文下单 token 成本≈V3.2 的 27%（官方技术报告）。<b>部署</b>：约 10 台 8×H200 级（媒体口径）；API 并发上限 500。<b>注意</b>：2026-09-14 起 API 端 deepseek-v4-pro 请求已路由至 V4.1-Flash（直至 V4.1 Pro 发布），模型名不变底层已换；权重仍开放下载（MIT 无商用限制）。<b>定价</b>：2026-08-16 起峰谷分时（高峰 00:00-04:00 / 06:00-10:00 UTC 之外为空闲，周末与法定节假日全空闲）。<b>要点</b>：V 系与 R 系合并，按任务自动决定思考深度，无独立 R2/R4。"},
+{n:"DeepSeek-V4.1-Flash-1017",org:"深度求索",cn:1,rel:"2026-10-17",arch:"MoE 552B-16B decode/8B prefill",ctx:"1M",open:1,lic:"MIT",moe:1,
+ ws:"FP8 + FP4 experts ~510GB",quant:"官方 FP8+FP4 · 社区 GGUF（Unsloth 无损 repack ~162GB）",
+ price:"≈¥2 / ¥8",priceSub:"高峰 · 空闲 ¥1/¥4 · $0.30/$1.20 峰值口径",
+ note:"<b>当前 API 名 deepseek-flash 即此模型</b>（V4-Flash-0731 已退役并路由至此）。2026-09-10 发布（552B MoE，prefill 8B / decode 16B 激活，原生视觉输入，MIT）+ 10-17 升级（任务耗时与输出更短）。官方口径性能反超 V4-Pro（ benchmarks 领先），9 月两轮降价。并发上限 2,500。注：09-14 起 deepseek-v4-pro 请求亦路由至 V4.1-Flash，直至 V4.1 Pro 发布——API 名不变但底层模型已换，计费与质量口径需注意。"},
+{n:"GLM-5.2",org:"智谱 Z.ai",cn:1,rel:"2026-06-13 推送 / 06-16 开源",arch:"MoE 753B-40B",ctx:"1M",open:1,lic:"MIT",moe:1,
+ ws:"官方 FP8 755.6GB（默认）/ BF16 1.507TB / NVFP4 ~465GB",quant:"官方 BF16/FP8/NVFP4 · 社区 GGUF 4-bit ~376GB（4×H100 可跑）",
+ price:"¥8 / ¥28",priceSub:"缓存命中 ¥2 · 定价约为同档闭源 1/6（官方口径）",
+ note:"<b>架构</b>：MTP 多 token 预测头（投机解码可用）、MLA，1M 为架构上限，实际可用受 KV 预算约束。<b>部署</b>：FP8 版单台 8×H200（1,128GB）可载入；BF16 版需 8×B300 或 16×B200。<b>要点</b>：Terminal-Bench 2.1 81.0 超部分闭源旗舰；网络安全漏洞检测专项首次正面超越 Claude（39% vs 32%）；GLM-5 代训练以华为昇腾为主（信创适配友好）。"},
+{n:"GLM-5.3",org:"智谱 Z.ai",cn:1,rel:"2026-08-14",arch:"MoE 753B-40B（与 5.2 同底座）",ctx:"1M",open:1,lic:"MIT?",moe:1,
+ ws:"官方 FP8 ~756GB（默认仓）",quant:"官方 FP8（另有 BF16 仓 1.507TB）· 社区 GGUF",
+ price:"¥9.34 / ¥29.35",priceSub:"缓存命中 ¥4（聚合站 10-26 口径?）",
+ note:"<b>与 GLM-5.2 完全同底座</b>：config 逐项一致（层数/隐层/专家数/词表/上下文），全部增益来自后训练，主打编码与智能体。官方默认仓库从 BF16 改为 FP8（同参数下载体积减半）——「发布精度决定体积」的最佳例证。<b>许可注意</b>：多数口径称 MIT（Z.ai 自 2025-07 全线 MIT），亦有第三方称 5.3 主模型改用自定义许可、营收门槛以上需安全审查——商用前以 HuggingFace 仓库许可证原文为准；GLM-5.3-Flash（320B，FP8 328GB）为 MIT。定价取 llmpricing.dev 10-26 官方列<span class=\"q\">?</span>，以 api.z.ai 实时为准。"},
+{n:"Kimi K3",org:"月之暗面",cn:1,rel:"2026-07 发布 / 07-27 开放权重",arch:"MoE 2.8T-104B?",ctx:"1M",open:1,lic:"Kimi K3 License（自定义）",moe:1,
+ ws:"原生 MXFP4 1.56TB（QAT，无 BF16 官方版）",quant:"官方 MXFP4（4.5 bit/参数）· 社区 GGUF",
+ price:"¥20 / ¥100",priceSub:"缓存命中 ¥2 · 输出价为国产旗舰最高",
+ note:"<b>架构</b>：KDA（Kimi Delta Attention），长上下文解码 6.3×；原生多模态（图/视频输入）。<b>许可</b>：商用与微调允许，MaaS 年收入超 $20M 需单独协议，>1 亿月活需署名。<b>部署</b>：官方建议 64+ 卡超节点（16×H200 或 8×B300 级起）；权重 96 分片 1.56TB。<b>要点</b>：BrowseComp 91.2 第一、前端代码 Arena 第一；发布后因算力瓶颈曾暂停 C 端新订阅（07-19 声明）。自部署门槛高者可退而选 K2 系（1T-32B，FP8 ~1TB）。激活参数为第三方口径<span class=\"q\">?</span>。"},
+{n:"Qwen3.8-Max",org:"阿里",cn:1,rel:"2026-08-03 API / 08-13 开放权重",arch:"MoE 2.4T-A95B",ctx:"262K / 1M",open:1,lic:"自定义（Qwen3.8-Max License）",moe:1,
+ ws:"BF16 4,892GB（实测）/ 官方 FP8 副本 ~2.4TB?",quant:"官方 BF16/FP8 · 社区 GGUF（2.4T 体量需集群）",
+ price:"$2.00 / $6.00",priceSub:"Implicit Cache 读 $0.25 · 百炼 ¥ 口径以官网为准",
+ note:"<b>Max 系首次开放权重</b>（Qwen/Qwen3.8-2.4T-A95B）。注意开源版与 API 版差异：开源 checkpoint 为 <b>纯文本、262K 原生上下文、思考不可关</b>；API 版默认 1M 上下文 + 视觉输入 + 非思考模式。<b>许可</b>：免费商用可修改，但月活超 1 亿或月收入超 $20M 须署名模型名；MaaS / 编码办公助手类业务年收入超 $50M 需单独授权。<b>要点</b>：PaperBench 93.0 / GPQA 92.6 / Terminal-Bench 86.6；16 天自主开发 oh-my-cli（265 commits）与天池赛超 458/526 人类队长程 demo。家族：Qwen3.8-27B（稠密视觉语言，Apache 2.0，单卡可跑）、Flash-Next（125B-A6B，Gated DeltaNet + Qwen 稀疏注意力，Qwen4 架构预览）、Omni-Flash / LiveTranslate（API only）。前代 Qwen3.5（397B-A17B，Apache 2.0）与 Qwen3.7-Max（闭源 API）并存。"},
+{n:"混元 Hy4 preview",org:"腾讯",cn:1,rel:"2026-08-28",arch:"MoE 770B-49B",ctx:"1M",open:1,lic:"Apache 2.0",moe:1,
+ ws:"BF16 ~1.54TB（估算?）/ 官方 FP8 版",quant:"官方 BF16/FP8 双仓 · 社区 GGUF",
+ price:"¥6 / ¥18",priceSub:"缓存命中 ¥0.3 · 国际 $0.834/$2.50（TokenHub）· OpenRouter $0.75/$2.25",
+ note:"<b>架构</b>：78 层主干（1 层 FFN + 77 层 MoE，每层 256 路由专家 + 1 共享专家，top-8 + 共享）；Gated DSA + IndexCache、iHC 残差流、原生 MTP 投机解码（HuggingFace 卡口径）。<b>要点</b>：腾讯内部 163 专家 / 203 工程任务盲测 2.99/4，略优于 GLM-5.3（2.92）与 Kimi K3（2.94）；配合 Hyra 将 Blaschke–Lebesgue 几何难题体积下界推进至 0.41104（距 Meissner 猜想证明剩 2%）；首次参与自身训练与推理优化（端到端吞吐 +31.8%）。定位「为生产力而生」，WorkBuddy/CodeBuddy/元宝/ima 同步上线，TokenHub + OpenRouter 双通道。Hy4 系列后续批次将陆续推出；前代 Hy3（295B-21B，2026-07，Apache 2.0）仍可用。"},
+{n:"ERNIE 4.5",org:"百度",cn:1,rel:"2025-06",arch:"MoE 424B-47B",ctx:"128K?",open:1,lic:"Apache 2.0",moe:1,
+ ws:"BF16 ~848GB（估算?）",quant:"官方 BF16/FP8 + P0 半精度 / P1 伪量化多仓 · 社区 GGUF",
+ price:"—",priceSub:"千帆渠道计费，以官网为准",
+ note:"百度开源转向之作：多尺寸家族（3B-A3B 至 424B-A47B）+ 多模态变体，Apache 2.0。中文语料与企业生态（千帆）是主要场景。上下文与权重口径未完整公开，估算值标注<span class=\"q\">?</span>。"},
+{n:"MiniMax-M1",org:"MiniMax",cn:1,rel:"2025-06",arch:"MoE 456B-45B（闪电注意力）",ctx:"1M",open:1,lic:"Apache 2.0",moe:1,
+ ws:"BF16 ~912GB（估算?）",quant:"官方 BF16/FP8 · 社区 GGUF",
+ price:"M1 $0.40 / $2.10?",priceSub:"新闭源旗舰 M3：¥2.10/¥8.40（≤512K）",
+ note:"开源长上下文推理代表作（闪电注意力线性复杂度）。M1 后 MiniMax 主力转闭源：M3 旗舰 ¥2.10/¥8.40（≤512K，聚合站 9 月口径）。同系 Hailuo 视频模型见视频分组。"},
+/* ---------- 国内 · 闭源 ---------- */
+{n:"Doubao Seed 2.1",org:"字节跳动",cn:1,rel:"2026-06",arch:"闭源未公开",ctx:"256K?",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"—",priceSub:"火山引擎计费 · Seed 1.6 Flash ¥0.075/¥0.75",
+ note:"字节整体走闭源 API 路线（仅小尺寸 Seed-OSS 开源）。Seed 2.1 主打可靠通用 agent；家族成本标杆为 Seed 1.6 Flash：输入 ¥0.075 / 输出 ¥0.75（百万 token），国内超低成本高并发首选口径。豆包为国内调用量第一梯队（企业微信/抖音生态）。"},
+{n:"Qwen3.7-Max",org:"阿里",cn:1,rel:"2026-Q2?",arch:"闭源未公开（万亿级?）",ctx:"1M?",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"¥6 / ¥18",priceSub:"限时 5 折后（标准 ¥12/¥36）",
+ note:"阿里「Max」档闭源 API（百炼渠道）。<b>注意</b>：继任 Qwen3.8-Max 已于 2026-08 开放权重（见国内开源分组，自定义许可），Max 不再闭源是 Qwen 战略转向标志；3.7-Max API 仍在售，与开源 Qwen3.5/3.6/3.8 形成多轨。定价取聚合站 9 月口径（限时 5 折）<span class=\"q\">?</span>，以百炼实时价为准。"},
+/* ---------- 国外 · 开源 ---------- */
+{n:"Llama 4 Scout / Maverick",org:"Meta",cn:0,rel:"2025-04",arch:"MoE 109B-17B / 400B-17B",ctx:"10M / 1M",open:1,lic:"Llama Community License",moe:1,
+ ws:"BF16 ~218GB / ~800GB（估算?）",quant:"官方 BF16/FP8 · 社区 GGUF/AWQ/GPTQ 全档",
+ price:"—",priceSub:"多渠道分发（Meta 无自营标准 API）",
+ note:"Scout 宣称 10M 上下文、Maverick 1M。社区许可带条件：>7 亿月活企业需单独授权、欧盟使用限制、品牌条款。<b>现状</b>：Meta 已放弃 Llama 迭代主线，转向 Muse 家族（闭源 Muse Spark 线 + 开源 Muse Spark Open，见下一行）；Llama 生态存量 12 亿+ 下载（日均约百万），企业既有部署与工具链惯性仍是最大。Scout 的 10M 上下文为 iRoPE 技术口径，有效长上下文质量存争议。"},
+{n:"Muse Spark Open",org:"Meta",cn:0,rel:"2026-10-15",arch:"MoE 816B-A42B",ctx:"1M",open:1,lic:"Muse Model License",moe:1,
+ ws:"BF16 1,644GB（实测）/ NVFP4 ~533GB",quant:"官方 BF16/NVFP4（另 AMD FP8/MXFP4、Intel INT4、社区 GGUF）",
+ price:"$1.25 / $4.25",priceSub:"缓存读 $0.15（Together/OpenRouter 托管）",
+ note:"<b>Llama 后 Meta 首个开源权重旗舰</b>（与闭源 Muse Spark 同源基础权重）。62 层 / 256 专家 / top-8，GQA 128Q-16KV，词表 202,048，原生多模态输入（文/图/视频/音频，Perception Encoder 1.8B），MTP 投机解码（DFlash2/DSpark 草稿模型）。<b>部署</b>：NVFP4 需 ≥700GB 显存（8 卡级）、BF16 需 2TB；双 Mac Studio M5 Ultra 512GB（MLX）可跑。<b>许可</b>：须展示「Built with Muse Spark Open」署名；MaaS 年收入超 $20M 需单独协议。<b>定位</b>：工具调用（MCP-Atlas 89.2）与 JobBench 61.8 领先，但 AA Intelligence Index 39 仍落后 GLM-5.3（45）/ Kimi K3（44）——「美国最强开源权重」相对中国旗舰仍差一代。闭源线 Muse Spark 1.3（2026-09-02）为主力。"},
+{n:"gpt-oss-120b",org:"OpenAI",cn:0,rel:"2025-08",arch:"MoE 117B-5B?",ctx:"128K",open:1,lic:"Apache 2.0",moe:1,
+ ws:"MXFP4 ~65GB",quant:"官方 MXFP4（原生）· 社区 GGUF 全档",
+ price:"—",priceSub:"免费自部署 · 无自营托管",
+ note:"OpenAI 首次开源权重（配 Harmony 推理栈，双难度档位）。原生 MXFP4 单卡（80GB 级）可跑，社区广泛量化。激活参数为第三方口径<span class=\"q\">?</span>。此后 OpenAI 未再发新版开源权重，开源侧声音集中于闭源 GPT-5/6 系。"},
+{n:"Mistral Large 4",org:"Mistral",cn:0,rel:"2026-10-06（preview）",arch:"MoE ~1.05T-49B",ctx:"—",open:1,lic:"承诺开源（10 月底发布权重?）",moe:1,
+ ws:"权重 10-27 前后发布（承诺?）",quant:"官方格式以发布为准 · 社区量化预期跟进",
+ price:"$1.36 / $4.18",priceSub:"preview 价 · 权重发布后可自托管",
+ note:"外号「Le Chonk」：约 1 万亿总参（1.05T）-49B 激活，原生多模态 MoE，DeepSWE v1.1 61.7%。10-06 公开 preview，官方承诺 10 月底开放权重（口径 10-27 前后<span class=\"q\">?</span>，以 Mistral 官宣为准）——欧洲首个万亿级开源旗舰候补。旧 Small 系（3.2，稠密 24B，Apache 2.0，BF16 ~48GB 单卡可跑）仍为本地/边缘部署友好选项。"},
+/* ---------- 国外 · 闭源 ---------- */
+{n:"GPT-6 Astra",org:"OpenAI",cn:0,rel:"2026?",arch:"闭源未公开",ctx:"—",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$10 / $50",priceSub:"缓存读 $1 · 同系 Sol $2/$10、Luna $0.10/$0.50",
+ note:"OpenAI 当前旗舰。家族分档：Astra（旗舰）/ Sol / Terra / Luna。GPT-6.1 Sol $2/$10（ECI 评分超 5.6 Sol 而价格减半）、GPT-6.1 Terra 10-26 新发 $1/$5（缓存 $0.05）。Batch/Flex 5 折；Ultrafast 档 6×。"},
+{n:"GPT-5.6 Sol",org:"OpenAI",cn:0,rel:"2026-07?",arch:"闭源未公开",ctx:"1.05M（输出 130K）",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$4 / $20",priceSub:"promo 至 2026-11-21 · Terra $2/$12 · Luna $0.20/$1.20",
+ note:"官网 API 页口径（10 月）：上下文 105 万、最大输出 13 万、知识截止 2026-02-16。>272K 输入 2×/输出 1.5×；缓存读 $0.40、缓存写 1.25×输入价；fast 模式（原 Priority）2×；Batch 5 折。上代 GPT-5.5 $5/$30 并存，GPT-5 $1.25/$10 仍列（nano $0.05/$0.40，12-11 退役）。"},
+{n:"Claude Fable 5.1 / Mythos 5.1",org:"Anthropic",cn:0,rel:"2026-09-01",arch:"闭源未公开",ctx:"1M",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$10 / $50",priceSub:"缓存读 $0.25 · Mythos 需审核 · Batch 5 折",
+ note:"Anthropic 能力顶档「下一代智能」（长时程 agent / 前沿研究）。Fable 5.1 公开可用；Mythos 5.1 同价但仅限通过验证计划的机构（受美商务部出口管制事件影响，2026-06 一度全线下架、07-01 起 Fable 恢复）。较 Fable 5：典型 token 账单省约 25%、agent 负载省约 45%（官方口径）。谱系：Fable 5 / Mythos 5（06-09）→ 5.1（09-01）。"},
+{n:"Claude Opus 5.5",org:"Anthropic",cn:0,rel:"2026-09-22",arch:"闭源未公开",ctx:"1M",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$4 / $20",priceSub:"缓存读 $0.20 · fast $8/$40 · Batch $2/$10",
+ note:"官方建议多数工作负载的默认起点。agentic coding 与知识工作主力，较 Opus 5（07-24，$5/$25）典型负载成本约低 40%，较 Opus 4.7（$5/$25）输入输出各低 20%。4.7 起新 tokenizer 同文本 token 量约 +30%，跨厂比价注意口径。谱系：Opus 4.8（05-28）→ Opus 5（07-24）→ Opus 5.5（09-22）。"},
+{n:"Claude Sonnet 5.5",org:"Anthropic",cn:0,rel:"2026-09-28",arch:"闭源未公开",ctx:"1M",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$2 / $10",priceSub:"缓存读 $0.10 · Batch $1/$5 · 快 30%+",
+ note:"编码 / agent 甜点位：较 Sonnet 5（06-30）提速 30%+，多数任务成本低至 30%（官方口径）。与 GPT-6.1 Sol 同价档。Sonnet 5 介绍价 $2/$10 已于 09-01 转永久标准价（原定涨价取消）。"},
+{n:"Claude Haiku 5.5",org:"Anthropic",cn:0,rel:"2026-10-07",arch:"闭源未公开",ctx:"1M",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$0.10 / $0.50",priceSub:"提示词 ≤100K · >100K 全请求按 $0.50/$2.50",
+ note:"最快最便宜档（客服 / 子 agent / 浏览器操作），上下文已到 1M。<b>分档规则特殊</b>：单请求提示词超 100K token（含缓存读写）整单按高档计费（$0.50/$2.50），而非仅超档部分——长提示场景成本跳 5×。前代 Haiku 4.5（2025-10，$1/$5，200K）仍在售。"},
+{n:"Gemini 4 Argon",org:"Google",cn:0,rel:"2026-Q3?",arch:"闭源未公开",ctx:"—",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$4 / $20",priceSub:"intro $2/$10 至 2026-11-30 · 缓存读 $0.10",
+ note:"Google 新旗舰（官方价 10-13 核实）。Gemini 系上下文普遍 1M（3.x Pro 起），Batch/Flex 5 折，长上下文 >200K 分档翻倍（2.5 Pro/3.1 Pro 口径）。"},
+{n:"Gemini 3.1 Pro",org:"Google",cn:0,rel:"2026-H1?",arch:"闭源未公开",ctx:"1M",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$2 / $12",priceSub:"≤200K · >200K 为 $4/$18 · 缓存读 $0.20",
+ note:"稳定 Pro 档主力（Preview 转 GA 口径）。长上下文 >200K 输入翻倍——300K 请求时 Gemini 每 token 计费已高于 Claude 平价口径，长文档场景须按实际分档比价。多模态输入（图/视频/PDF）原生。"},
+{n:"Gemini 3.8 Flash",org:"Google",cn:0,rel:"2026-09-02",arch:"闭源未公开",ctx:"1M",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$0.75 / $3.75",priceSub:"intro 至 2026-12-31 · 标准价 $1.50/$7.50 · Flash-Lite $0.25/$1.50",
+ note:"高性价比主力（3.6/3.7/3.8 Flash 同价系）。Google 的「小模型前沿化」策略：$0.75 档在多数生产任务已越过质量线。图片生成变体 3.1 Flash Image（=Nano Banana 2）见图片分组。"},
+{n:"Grok 4.7",org:"xAI",cn:0,rel:"2026-H2?",arch:"闭源未公开",ctx:"500K",open:0,lic:"闭源（API）",moe:null,
+ ws:"—",quant:"—",
+ price:"$2 / $6",priceSub:"缓存读 $0.50 · 4.5/4.6 同价",
+ note:"输出价为四大闭源厂最低（$6），实时信息（X 数据）与推理是差异化点。4.5 于 2026-07 接替 Grok 4，4.6/4.7 顺次迭代同价。第三方聚合渠道（luno 等）另给 5-7 折价。"}
+];
+const IMG = [
+/* ---------- 国内 ---------- */
+{n:"Qwen-Image 20B",org:"阿里",cn:1,rel:"2025-08",arch:"MMDiT（扩散）",open:1,lic:"Apache 2.0",
+ ws:"~40GB BF16",quant:"官方 BF16/FP8/AWQ/GPTQ",
+ price:"免费（自部署）",priceSub:"闭源升级版 Qwen Image 2.0 Pro ~$0.075/张",
+ spec:"2K · 中文文字渲染标杆（250+ 像素级）",
+ note:"国产开源图片旗舰：中文海报/排版能力第一梯队，AGI-Bench 编辑类开源第一。生态配套 Qwen-Image-Edit-2509。付费走 Qwen Image 2.0 Pro（闭源 API，百炼渠道）。"},
+{n:"HiDream-O1",org:"智象未来",cn:1,rel:"2025-10?",arch:"自研 17B 编辑模型",open:1,lic:"开源（组件许可待核?）",
+ ws:"~34GB",quant:"官方 BF16 · 社区量化",
+ price:"免费（自部署）",priceSub:"E1/I1 17B 全家开源（MIT）",
+ spec:"图像编辑（指令驱动）开源最强口径",
+ note:"HiDream 系（E1/I1 17B，MIT）+ O1 编辑旗舰：开源自托管编辑流水线首选。国内团队，面向企业本地化修图/素材再生成。发布与许可细节以 HuggingFace 仓库为准<span class=\"q\">?</span>。"},
+{n:"Seedream 4.5 / 5",org:"字节跳动",cn:1,rel:"5：2026-Q4?",arch:"DiT（扩散）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"~$0.04 / 张",priceSub:"第三方聚合口径 · 火山引擎另计 ¥",
+ spec:"4.5：4K · 14 参考图 / 5：2K · 多语种文字",
+ note:"量产成本王：电商/社媒批量素材首选（同代比 Nano Banana Pro 便宜 ~3×）。BytePlus 与聚合渠道分发。Seedream 5（2K · 多语种文字渲染）已进入第三方 10 月现役清单，官方计费以火山引擎为准<span class=\"q\">?</span>；4.0（2025-06）即登顶中文语义与文字渲染榜。"},
+{n:"Hunyuan Image 3.0",org:"腾讯",cn:1,rel:"2025-06?",arch:"DiT · 动态生图",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"腾讯云 usage 计费",priceSub:"以云官网为准",
+ spec:"动态海报/商品展示图（可动）",
+ note:"混元多模态矩阵一环：静态图 + 动态图（Image 3.0 动态版）。中文场景（电商海报、公众号配图）与腾讯生态（元器/混元助手）绑定。"},
+/* ---------- 国外 · 开源 ---------- */
+{n:"FLUX.2 [klein / dev]",org:"Black Forest Labs",cn:0,rel:"2025-11",arch:"Flow-matching DiT",open:1,lic:"Klein Apache 2.0 · dev 非商用",
+ ws:"klein 4B/9B ~8/18GB · dev 更大",quant:"官方多精度仓 · 社区 GGUF 全档",
+ price:"免费自托管 · API 另计",priceSub:"[pro]/[max] API $0.014-0.07/张 · klein $0.03/MP 起",
+ spec:"4MP · 10 参考图 · Kontext 编辑系",
+ note:"半开源策略：klein（4B/9B，Apache 2.0）全开放可商用；dev 权重开放但非商用；[pro]/[max] 走 API。Kontext 编辑跨 6 次连续编辑一致性 0.92+，品牌级 hex 配色。ELO 站开源侧最高档。"},
+{n:"Stable Diffusion 3.5",org:"Stability AI",cn:0,rel:"2024-10",arch:"MMDiT 8B/2.5B",open:1,lic:"Community License（<$1M 营收免费）",
+ ws:"Large 8B ~16GB",quant:"官方多仓 · 社区 LoRA/ControlNet 生态最大",
+ price:"免费（自托管）",priceSub:"云 API $0.003-0.035/张",
+ spec:"本地部署基线 · 消费级 GPU（8GB+）",
+ note:"开源生态之王：CivitAI 海量 LoRA/微调模型仍以 SDXL/SD1.5 为主。3.5 Large 质量对齐闭源中档，但迭代慢于 FLUX.2。许可：年营收超 $1M 企业需付费授权。"},
+/* ---------- 国外 · 闭源 ---------- */
+{n:"Midjourney V7 / V8.1",org:"Midjourney",cn:0,rel:"V7 2025-04 · V8.1 最新",arch:"闭源未公开",open:0,lic:"闭源（订阅）",
+ ws:"—",quant:"—",
+ price:"订阅 $10-120 / 月",priceSub:"无 API · 无免费版",
+ spec:"美学/编辑风基准 · Omni-Ref 参考系 · 5-21s 视频内测",
+ note:"艺术/电影感人类口碑第一，但无 API（纯 Discord/Web 产品），生产管线集成需人工或非官方桥接。V7 为默认版本，V8.1 为最新版本（2025-12 起）。不参与第三方 ELO（无 API 无法盲测）。"},
+{n:"GPT Image 2",org:"OpenAI",cn:0,rel:"2026（现行）",arch:"自回归多模态（LLM 底座）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"~$0.21 / 张",priceSub:"token 计费（图像 token 折算）· ChatGPT Plus $20/月含",
+ spec:"指令遵循与图内文字第一档 · 6 参考图 · 4K（第三方 10 月口径）",
+ note:"ELO 榜首档（GPT Image 1.5 ~1268）：复杂多要素 prompt 命中率与图内段落文字最强，第三方 10 月口径已支持 4K 与接近完美的文字渲染；代价是最慢（~181s/张）。自回归路线（LLM 直接生成图像 token）与扩散路线的分野代表。"},
+{n:"Nano Banana Pro / 2",org:"Google",cn:0,rel:"Pro 2025-11 · NB2 2026-H1?",arch:"自回归多模态（Gemini 3 系）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"Pro ~$0.134 / 张 · NB2 ~$0.067",priceSub:"AI Pro $19.99/月含 · API 按张",
+ spec:"4K · 14 参考图 · 95%+ 角色一致性 · 思考后画",
+ note:"「先推理再生成」：借 Gemini 底座理解世界知识再落笔，信息图/图表/长文字类第一梯队，多语言文字（含中文）可靠。NB2（=Gemini 3.1 Flash Image）为速度/成本主力，Pro 为质量档。免费档在 Gemini App 内。"},
+{n:"Imagen 4 / Ultra",org:"Google",cn:0,rel:"2025-05",arch:"DiT（扩散）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"Vertex usage 计费",priceSub:"快/慢档分层（~$0.02-0.04/张 口径）",
+ spec:"2K-4K · photoreal 产品/人像标杆",
+ note:"Google 扩散路线旗舰：产品摄影材质/反射/布光最稳（与 Nano Banana 自回归路线互补）。Vertex AI 与 Gemini API 双通道。"},
+{n:"Ideogram 4.0",org:"Ideogram",cn:0,rel:"2026?",arch:"DiT（扩散）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"$0.03-0.10 / 张",priceSub:"订阅 $8-48/月 · 免费慢档 10 张/日",
+ spec:"图内文字/排版最强 · 海报 logo 包装",
+ note:"文字渲染与版式设计专用强项（Magic Prompt 自动改写）。设计作业流（Edit/Reframe/Remix）齐全。无角色参考是其短板。发布时间为第三方口径<span class=\"q\">?</span>。"},
+{n:"Reve 2.0",org:"Reve",cn:0,rel:"2026?",arch:"版式规划先行（规划后渲染）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"~$0.024 / 张",priceSub:"第三方实测口径 · API beta",
+ spec:"招牌/包装/菜单文字排版准确 · 布局先行",
+ note:"性价比黑马：独立盲测评分 99/100（近榜首、价 1/9），布局规划先行使图内多行文字摆放可靠。小公司新产品，稳定性与 SLA 待验证<span class=\"q\">?</span>。"}
+];
+const VID = [
+/* ---------- 国内 · 开源 ---------- */
+{n:"Wan 3.0",org:"阿里",cn:1,rel:"2026-08-24 GA",arch:"DiT · T2V/I2V",open:1,lic:"Apache 2.0（开源线）",
+ ws:"以 HuggingFace 官方仓为准",quant:"官方多精度 · 社区 GGUF 生态最大",
+ price:"自托管免费 · API $0.02-0.10/s",priceSub:"2.6/2.7 API 口径延续",
+ spec:"1080p · 单次最长 30s · 原生音频",
+ note:"<b>开源视频旗手</b>：Wan 2.1 全系开源起家，3.0 于 2026-08-24 在阿里云 GA——与 Kling 4.0 / Seedance 2.5 同批进入「单次 30 秒」俱乐部（三家唯三）。官方 API 与自部署双轨（「闭源 API 价 + 开源权重」混合模式代表），社区微调生态最大。前代 2.6/2.7 API 定价 $0.02-0.10/s 口径延续。"},
+{n:"HunyuanVideo",org:"腾讯",cn:1,rel:"2024-12",arch:"DiT 13B",open:1,lic:"Tencent 社区许可",
+ ws:"~26GB BF16",quant:"官方 BF16/FP8 · 社区 GGUF",
+ price:"免费（自部署）",priceSub:"算力成本自担（开源双件套之一）",
+ spec:"720p · ~5s · 无音频",
+ note:"开源视频双件套之一（另一为 Wan）。13B 是当时最大开源视频模型，但 720p/5s 已落后 2026 闭源旗舰一代以上；腾讯闭源视频走混元线上版。适合本地实验与微调基底。"},
+/* ---------- 国内 · 闭源 ---------- */
+{n:"Kling 4.0",org:"快手",cn:1,rel:"2026-10-15 全量（09-28 内测/Flash 先行）",arch:"3D VAE + DiT",open:0,lic:"闭源（API，10-21 起分批开放）",
+ ws:"—",quant:"—",
+ price:"1080p 30s 约 450 积分（实测口径?）",priceSub:"Flash 720p 低成本打样 · API 分批开放中",
+ spec:"1080p（4K/10-bit HDR 宣贯中）· 单次最长 30s · 15 项参考 · 10 关键帧",
+ note:"<b>当前最新一代</b>：单次原生 30 秒长镜头 + 高速运动稳定性是主攻方向；全能参考单任务最多 15 项素材（10 图 + 5 视频 + 7 主体），提示词最长 8,000 tokens；续拍将支持延展至 2 分钟。MCP + CLI 已开放（agent 工作流），API 于 10-21 首发分批开放。<b>注意</b>：10-bit 4K HDR 规格尚未正式上线，当前可用以 1080P 为主（实测创作者口径）。前代 Kling 3.0 / O3（$0.07-0.153/s，原生音频）仍是 API 生产主力。"},
+{n:"Seedance 2.5 / 2.0",org:"字节跳动",cn:1,rel:"2026-08（2.5）",arch:"DiT（扩散）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"2.0 Fast $0.022 / s · Pro $0.247",priceSub:"2.5 定价以火山引擎为准 · 2 Fast 半价 / 2 Mini 60% off",
+ spec:"1080p · 2.5 最长 30s + 原生音频 · 多镜头一致性",
+ note:"即梦产品线 API 化。2.5 为当前一代：720p 起步、8 月中升 1080p、单次最长 30 秒 + 原生音频，追平 Kling 4.0 的长片档位；新增 2 Fast（720p 半价快出）与 2 Mini（60% off）压低量产成本。2.0 系 Fast 档 $0.022/s 仍是全市场最低（量产成本王），Pro 档 $0.247/s 为最高——同门 11× 价差，80% Fast + 20% Pro 路由策略可省 60-70% 账单（第三方实测）。BytePlus 与火山引擎双通道。"},
+{n:"Vidu Q4 Preview / Q3",org:"生数科技",cn:1,rel:"Q4：2026-Q4 预览",arch:"U-ViT（扩散+Transformer）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"Q3 口径 $0.03-0.07 / s",priceSub:"Turbo $0.03/s · Q4 计费以官方为准",
+ spec:"1080p · 16s · 参考一致性",
+ note:"Q4 Preview 为 2026-10 现役预览版（10 月评测一致列入现役清单），Q3 为 API 生产主力。参考一致性（主体/多参照）是其长板，广告电商批量出片常用。订阅 credit 包 5 折活动常见，海外 platform.vidu.com 直连。"},
+{n:"MiniMax H3（海螺）",org:"MiniMax",cn:1,rel:"2026-Q3?",arch:"DiT（扩散）",open:1,lic:"开源（权重开放）",
+ ws:"以 MiniMax 官方仓为准?",quant:"官方多精度 · 社区跟进",
+ price:"Hailuo 2.3 口径 $0.05-0.10/s?",priceSub:"H3 计费以 MiniMax 开放平台为准",
+ spec:"2K · 多模态视频 · 双通道立体声",
+ note:"2026 年视频开源侧的标志性事件：H3 成为继 Wan 之后<b>第二家开放权重的国产视频旗舰</b>（第三方 10 月口径），2K 分辨率 + 立体声超过多数闭源同行的 1080p/单声道档。驱动海螺产品线；社媒节奏感（大运动/镜头语言）延续 2.3 优势。发布时间与许可细节以官方公告为准<span class=\"q\">?</span>。与 MiniMax-M3 语言 API 同账号体系。"},
+{n:"PixVerse V6",org:"爱诗科技",cn:1,rel:"2026?",arch:"DiT（扩散）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"$0.04-0.08 / s",priceSub:"模板/特效溢价另计",
+ spec:"1080p · 8s · 无音频 · 特效模板库",
+ note:"模板化（漫画/特效/转场）批量产能路线，海外模板创作者生态活跃。V6 相比 V4.5 质量升档。"},
+/* ---------- 国外 · 闭源 ---------- */
+{n:"Sora 2",org:"OpenAI",cn:0,rel:"2025-09-30",arch:"时空补丁 DiT + 对白生成",open:0,lic:"闭源（产品订阅）",
+ ws:"—",quant:"—",
+ price:"产品内订阅 · API 已关闭",priceSub:"API 曾 $0.10/s · 2026-09-24 关停",
+ spec:"1080p · 20s（可延 120s）· 原生音频/对白",
+ note:"<b>已整体退场</b>：Sora App/Web 于 2026-04-26 停止服务，Sora 2 模型与 Videos API 于 2026-09-24 从 OpenAI API 移除。生产管线官方建议迁移 Veo 3.1 / Gemini Omni 1.1 Flash（质量+音频最接近）或 Kling 3.0/4.0（更便宜更快），或走聚合层。电影级物理一致与对白曾是口碑长板。留档供迁移参考。"},
+{n:"Veo 3.1",org:"Google",cn:0,rel:"2025-10",arch:"闭源未公开",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"$0.05-0.20 / s",priceSub:"Fast $0.03-0.10/s · 标准 $0.20/s · 音频默认含",
+ spec:"1080p/4K · 8s（可扩展）· 原生音频",
+ note:"带音频场景的最佳性价比（第三方口径）：音频原生不另计（Kling 音频附费 15-25%）。Fast→标准档价差 2×（实为质量档）。<b>换代注意</b>：Gemini API 通道的 Veo 3.1 已于 2026-10-22 下线，接替者为 Gemini Omni 1.1 Flash（~$0.10/s @720p 口径，支持对话式视频编辑）；Vertex AI 通道口径以 Google 官网为准。4K 渲染溢价显著。"},
+{n:"Runway Gen-4.5",org:"Runway",cn:0,rel:"2026?",arch:"DiT（扩散）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"$0.20-0.25 / s",priceSub:"最贵一档 · 无音频",
+ spec:"1080p · 10s（+扩展）· 无音频",
+ note:"影视工作流最全（Act-One 表演迁移、相机控制、运动画笔），专业管线粘性高于绝对质量。价格显著高于国内同行 2-4×。发布时间为第三方口径<span class=\"q\">?</span>。"},
+{n:"Luma Ray 3.2 / 3",org:"Luma AI",cn:0,rel:"3.2：2026（现行）",arch:"DiT（扩散）",open:0,lic:"闭源（API）",
+ ws:"—",quant:"—",
+ price:"$0.06-0.12 / s",priceSub:"HDR 档溢价",
+ spec:"1080p · 5s（+扩展）· 16-bit EXR 输出",
+ note:"HDR 独有 + 3.2 起支持 16-bit EXR 专业交付（影视调色管线友好）；关键帧交互（首尾帧）友好。发布时间为第三方口径<span class=\"q\">?</span>。"},
+{n:"Grok Imagine Video 1.5",org:"xAI",cn:0,rel:"2026-H2?",arch:"闭源未公开",open:0,lic:"闭源（API/聚合）",
+ ws:"—",quant:"—",
+ price:"Lite $0.02 / s",priceSub:"480p Lite 为全市场最低 $/s · 高档另计",
+ spec:"1-15s · 原生声音",
+ note:"价格屠夫档：480p Lite $0.02/s 为视频生成全场最低价（超过 Seedance Fast 的 $0.022/s），1-15 秒带声音，已上架 Higgsfield / Runway / Artlist 等聚合平台。质量属快出片档位，非旗舰画质。"}
+];
+
+/* ============================ 渲染与筛选 ============================ */
+var state = { type:"all", region:"", open:"", moe:"", q:"" };
+var openRows = {};   /* 展开态：n -> 1 */
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function badge(d){
+  if(d.open===1){
+    if(d.lic==="MIT"||d.lic==="Apache 2.0")return '<span class="badge b-ok">开源 '+esc(d.lic)+'</span>';
+    return '<span class="badge b-warn">限制开源</span>';
+  }
+  return '<span class="badge b-gray">闭源</span>';
+}
+function detailRow(d,cols){
+  return '<tr class="detail" data-n="'+esc(d.n)+'"><td colspan="'+cols+'"><div class="detail-inner">'+
+    (d.note||"")+
+    '</div></td></tr>';
+}
+function rowLLM(d){
+  var moeB = d.moe===1 ? ' <span class="badge b-blue">MoE</span>' : (d.moe===0?' <span class="badge b-gray">稠密</span>':'');
+  return '<tr class="main" data-n="'+esc(d.n)+'">'+
+    '<td class="col-sticky model"><span class="org-dot" style="background:'+OC[d.org]+'"></span>'+esc(d.n)+'<span class="sub">'+esc(d.org)+' · '+(d.cn?"国内":"国外")+'</span></td>'+
+    '<td class="num">'+esc(d.rel)+'</td>'+
+    '<td><span class="tc" title="'+esc(d.arch)+'">'+esc(d.arch)+'</span>'+moeB+'</td>'+
+    '<td class="num ctx">'+esc(d.ctx||"—")+'</td>'+
+    '<td class="lic">'+badge(d)+'</td>'+
+    '<td><span class="tc" title="'+esc(d.ws||"—")+'">'+esc(d.ws||'<span class="na">—</span>')+'</span></td>'+
+    '<td><span class="tc" title="'+esc(d.quant||"—")+'">'+(d.quant?esc(d.quant):'<span class="na">—</span>')+'</span></td>'+
+    '<td class="price"><b>'+esc(d.price)+'</b><span class="sub">'+esc(d.priceSub||"")+'</span></td>'+
+    '</tr>'+detailRow(d,8);
+}
+function rowIMG(d){
+  return '<tr class="main" data-n="'+esc(d.n)+'">'+
+    '<td class="col-sticky model"><span class="org-dot" style="background:'+OC[d.org]+'"></span>'+esc(d.n)+'<span class="sub">'+esc(d.org)+' · '+(d.cn?"国内":"国外")+'</span></td>'+
+    '<td class="num">'+esc(d.rel)+'</td>'+
+    '<td><span class="tc-sm" title="'+esc(d.arch)+'">'+esc(d.arch)+'</span></td>'+
+    '<td class="lic">'+badge(d)+'</td>'+
+    '<td><span class="tc" title="'+esc(d.ws||"—")+'">'+esc(d.ws||'<span class="na">—</span>')+'</span></td>'+
+    '<td class="price"><b>'+esc(d.price)+'</b><span class="sub">'+esc(d.priceSub||"")+'</span></td>'+
+    '<td><span class="tc" title="'+esc(d.spec||"")+'">'+esc(d.spec||"")+'</span></td>'+
+    '</tr>'+detailRow(d,7);
+}
+function rowVID(d){
+  return '<tr class="main" data-n="'+esc(d.n)+'">'+
+    '<td class="col-sticky model"><span class="org-dot" style="background:'+OC[d.org]+'"></span>'+esc(d.n)+'<span class="sub">'+esc(d.org)+' · '+(d.cn?"国内":"国外")+'</span></td>'+
+    '<td class="num">'+esc(d.rel)+'</td>'+
+    '<td class="lic">'+badge(d)+'</td>'+
+    '<td><span class="tc" title="'+esc(d.ws||"—")+'">'+esc(d.ws||'<span class="na">—</span>')+'</span></td>'+
+    '<td class="price"><b>'+esc(d.price)+'</b><span class="sub">'+esc(d.priceSub||"")+'</span></td>'+
+    '<td><span class="tc" title="'+esc(d.spec||"")+'">'+esc(d.spec||"")+'</span></td>'+
+    '</tr>'+detailRow(d,6);
+}
+function hit(d){
+  if(state.type!=="all" && d.type!==state.type) return false;
+  if(state.region==="cn" && d.cn!==1) return false;
+  if(state.region==="foreign" && d.cn!==0) return false;
+  if(state.open!=="" && String(d.open)!==state.open) return false;
+  if(state.moe==="1"){ if(d.type!=="llm" || d.moe!==1) return false; }
+  if(state.q){
+    var s=(d.n+" "+d.org+" "+d.arch+" "+(d.lic||"")+" "+(d.note||"")+" "+(d.quant||"")+" "+(d.spec||"")+" "+d.price+" "+(d.priceSub||"")+" "+(d.ws||"")).toLowerCase();
+    if(s.indexOf(state.q.toLowerCase())<0) return false;
+  }
+  return true;
+}
+function render(){
+  var tbls={llm:[],img:[],vid:[]};
+  LLM.forEach(function(d){d.type="llm"; if(hit(d)) tbls.llm.push(d)});
+  IMG.forEach(function(d){d.type="img"; if(hit(d)) tbls.img.push(d)});
+  VID.forEach(function(d){d.type="vid"; if(hit(d)) tbls.vid.push(d)});
+  var mk=function(arr,fn,empty){
+    if(!arr.length) return '<tr><td colspan="8" class="empty">'+empty+'</td></tr>';
+    return arr.map(function(d){return fn(d)}).join("");
+  };
+  document.getElementById("tbody-llm").innerHTML=mk(tbls.llm,rowLLM,"无命中模型 · 调整筛选");
+  document.getElementById("tbody-img").innerHTML=mk(tbls.img,rowIMG,"无命中模型 · 调整筛选");
+  document.getElementById("tbody-vid").innerHTML=mk(tbls.vid,rowVID,"无命中模型 · 调整筛选");
+  ["llm","img","vid"].forEach(function(t){
+    var sec=document.getElementById("sec-"+t), c=tbls[t].length;
+    document.getElementById("c-"+t).textContent=c+" 个";
+    sec.style.display=c?"":"none";
+    sec.nextElementSibling.style.display=c?"":"none";
+  });
+  document.getElementById("cnt-hit").textContent=tbls.llm.length+tbls.img.length+tbls.vid.length;
+  bindRows();
+}
+function bindRows(){
+  Array.prototype.forEach.call(document.querySelectorAll("tr.main"),function(tr){
+    tr.addEventListener("click",function(){
+      var n=tr.getAttribute("data-n"), det=tr.nextElementSibling;
+      if(!det||det.className.indexOf("detail")<0)return;
+      var on=det.style.display!=="none";
+      det.style.display=on?"none":"";
+      tr.className=on?"main":"main row-open";
+    });
+  });
+}
+/* ---------- 事件 ---------- */
+document.getElementById("q").addEventListener("input",function(){state.q=this.value.trim();render()});
+Array.prototype.forEach.call(document.querySelectorAll("#seg-type button"),function(b){
+  b.addEventListener("click",function(){
+    state.type=b.getAttribute("data-v");
+    Array.prototype.forEach.call(b.parentNode.children,function(x){x.className=""});
+    b.className="on";
+    render();
+  });
+});
+Array.prototype.forEach.call(document.querySelectorAll(".chip[data-g]"),function(c){
+  c.addEventListener("click",function(){
+    var g=c.getAttribute("data-g"), v=c.getAttribute("data-v");
+    if(state[g]===v){state[g]="";c.className="chip"}
+    else{
+      state[g]=v;
+      Array.prototype.forEach.call(document.querySelectorAll('.chip[data-g="'+g+'"]'),function(x){x.className="chip"});
+      c.className="chip on";
+    }
+    render();
+  });
+});
+document.getElementById("btn-reset").addEventListener("click",function(){
+  state={type:"all",region:"",open:"",moe:"",q:""};
+  document.getElementById("q").value="";
+  Array.prototype.forEach.call(document.querySelectorAll("#seg-type button"),function(x,i){x.className=i?"":"on"});
+  Array.prototype.forEach.call(document.querySelectorAll(".chip[data-g]"),function(x){x.className="chip"});
+  render();
+});
+/* ---------- 统计 ---------- */
+(function(){
+  document.getElementById("cnt-all").textContent=LLM.length+IMG.length+VID.length;
+  document.getElementById("cnt-llm").textContent=LLM.length;
+  document.getElementById("cnt-img").textContent=IMG.length;
+  document.getElementById("cnt-vid").textContent=VID.length;
+  var oc=0,cl=0;
+  LLM.concat(IMG,VID).forEach(function(d){d.open===1?oc++:cl++});
+  document.getElementById("cnt-open").textContent=oc;
+  document.getElementById("cnt-closed").textContent=cl;
+})();
+render();
+
+/* ================= 页内目录：滚动高亮 / 锚点补偿 / 回目录注入 ================= */
+(function(){
+  var links = document.querySelectorAll("#toc a[data-sec]");
+  if(!links.length) return;
+  var secs = [];
+  Array.prototype.forEach.call(links, function(a){
+    var el = document.getElementById(a.getAttribute("data-sec"));
+    if(el) secs.push({ el: el, link: a });
+  });
+  if(!secs.length) return;
+
+  /* 目录栏的自适应高度，用于锚点跳转偏移与高亮判定（toolbar 非 sticky，不需计入） */
+  function offsetTop(el){
+    var t = 0;
+    while(el){ t += el.offsetTop; el = el.offsetParent; }
+    return t;
+  }
+  function tocH(){
+    var toc = document.getElementById("toc");
+    return toc ? toc.offsetHeight + 12 : 20;
+  }
+
+  /* 点击跳转：补偿 sticky 目录遮挡 */
+  Array.prototype.forEach.call(links, function(a){
+    a.addEventListener("click", function(ev){
+      var sec = document.getElementById(a.getAttribute("data-sec"));
+      if(!sec) return;
+      ev.preventDefault();
+      /* 若目标节被筛选隐藏，先重置筛选 */
+      if(sec.style.display === "none"){
+        state = {type:"all",region:"",open:"",moe:"",q:""};
+        var qi=document.getElementById("q"); if(qi) qi.value="";
+        Array.prototype.forEach.call(document.querySelectorAll("#seg-type button"),function(x,i){x.className=i?"":"on"});
+        Array.prototype.forEach.call(document.querySelectorAll(".chip[data-g]"),function(x){x.className="chip"});
+        render();
+      }
+      window.scrollTo({ top: offsetTop(sec) - tocH(), behavior: "smooth" });
+      if(history.replaceState) history.replaceState(null, "", a.getAttribute("href"));
+    });
+  });
+
+  /* 滚动高亮：取「已越过的最后一节」为当前节；被筛选隐藏的节跳过 */
+  function highlight(){
+    var y = window.pageYOffset + tocH() + 4;
+    var cur = null;
+    for(var i = 0; i < secs.length; i++){
+      if(secs[i].el.style.display === "none") continue;
+      if(offsetTop(secs[i].el) <= y) cur = secs[i];
+    }
+    Array.prototype.forEach.call(links, function(a){ a.classList.remove("cur"); });
+    if(cur) cur.link.classList.add("cur");
+  }
+  var tick = false;
+  window.addEventListener("scroll", function(){
+    if(tick) return;
+    tick = true;
+    requestAnimationFrame(function(){ highlight(); tick = false; });
+  }, { passive: true });
+
+  /* 每节自动注入「↑ 回目录」 */
+  Array.prototype.forEach.call(secs, function(s){
+    var row = document.createElement("div");
+    row.className = "back-toc-row";
+    var a = document.createElement("a");
+    a.className = "back-toc";
+    a.href = "#toc";
+    a.textContent = "↑ 回目录";
+    a.title = "回到顶部目录";
+    a.addEventListener("click", function(ev){
+      ev.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if(history.replaceState) history.replaceState(null, "", "#toc");
+    });
+    row.appendChild(a);
+    s.el.insertBefore(row, s.el.firstChild);
+  });
+
+  /* render() 隐藏/显示节后同步一次高亮 */
+  if(window.MutationObserver){
+    var mo = new MutationObserver(function(){ highlight(); });
+    secs.forEach(function(s){ mo.observe(s.el, { attributes:true, attributeFilter:["style"] }); });
+  }
+})();
+</script>
+</body>
+</html>

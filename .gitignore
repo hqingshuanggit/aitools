@@ -1,3 +1,5 @@
 # 本地工作配置与系统文件，不部署
 .workbuddy/
 .DS_Store
+# WorkBuddy 应用发布系统的内部标记文件
+.wbapp_*.genie

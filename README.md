@@ -10,6 +10,9 @@
 | `chips.js` | 芯片参数库（唯一数据源）：47 款卡型 / 24 款服务器机型 / 5 档交换机 / 全部假设参数 |
 | `算力配置模型.html` | v1 旧版，仅作对照保留 |
 | `AI算力硬件速查表.html` | 芯片数据原始整理表（chips.js 卡型数据的主来源） |
+| `算力电力速查.html` | 电力功率指标与万卡电力需求速查：1 万卡方案横向对比（含单卡 TDP 与综合功耗双口径）、电力估算器（单卡功耗 × 卡数 × PUE × 冗余）、功率单位换算、PUE/DCIE 互算与能效指标 |
+| `LLM推理技术速查.html` | LLM 推理工程速查：主流推理引擎对比与选型速判（vLLM / SGLang / TensorRT-LLM / DeepInfer / llama.cpp / Strata / LMDeploy 与 MindIE 等）、TP/PP/DP/EP 四大并行原理与组合策略、PD 分离架构与 KV 迁移通道、KV 显存与批调度三机制（PagedAttention / RadixAttention / 连续批处理，含 FlashAttention 辨析与 KV 压缩三路线）+ KV 显存速算计算器、投机解码（变体谱系与适用边界）、量化技术对比（GGUF/FP8/AWQ/GPTQ/NVFP4/bitsandbytes）与 Llama-3.1-8B 各量化版本实测 |
+| `AI模型速查表.html` | AI 模型速查表：语言（25）/ 图片（12）/ 视频（12）三类共 49 个主流模型，区分国内外×开源闭源×MoE，含权重体积（官方发布格式实测）、量化版本、官网定价（¥/$ 原始币种）与发布日期；筛选 + 搜索 + 行展开详情 |
 
 > `chips.js` 必须与 HTML 同目录。双击 HTML 打开即自动加载；若浏览器阻止本地脚本，可点「导入配置」载入 JSON，或将目录用本地静态服务器打开。
 
