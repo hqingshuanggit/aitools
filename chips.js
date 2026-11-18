@@ -1,7 +1,7 @@
 window.CHIP_DB = {
   "meta": {
     "schema": "2.0",
-    "updated": "2026-10-01",
+    "updated": "2026-11-03",
     "units": {
       "perf": "TFLOPS（10^12 FLOP/s）；int8 记 TOPS 数值，展示为 TOPS",
       "bw": "GB/s（显存带宽与卡间互联）；网卡速率为 Gbps",
@@ -547,11 +547,11 @@ window.CHIP_DB = {
         "type": null,
         "note": null
       },
-      "status": "路线图",
+      "status": "量产出货",
       "supply": "境外",
       "confidence": "thirdparty",
       "perfNote": null,
-      "notes": "厂商发布会口径，不同来源对单卡 HBM 容量（144 或 288GB）与 FP4 峰值（25 或 50 PFLOPS）存在冲突，且暂未获第三方实测验证。采购排期按 2027 年规模化供应做基准更稳妥。",
+      "notes": "2026-10-21 柏林 GTC 已宣布进入全面量产（full production），OCI 10-27 GA、Google Cloud A5X 实例 11 月上线，2026Q4 起商业出货；但单卡 HBM 容量（144 或 288GB）与 FP4 峰值（25 或 50 PFLOPS，即含稀疏与否）仍存在口径冲突、暂未获第三方实测锁定，商用排期按 2026Q4 起逐步放量做基准。",
       "techNote": "NVLink6 3.6 TB/s/卡；NVL144 机架标称 3.6 EFLOPS FP4 推理、约 20.7TB HBM4、260 TB/s NVLink 聚合。同代 Rubin CPX（128GB GDDR7）主打长上下文。",
       "risks": [
         "参数口径待核"
@@ -717,7 +717,7 @@ window.CHIP_DB = {
       "supply": "境外",
       "confidence": "thirdparty",
       "perfNote": null,
-      "notes": "厂商发布值，尚未第三方实机验证；Helios 机架 72×MI455X + 18×EPYC Venice，号称 2.9 EF FP4 推理 / 1.4 EF FP8 训练。Oracle/OpenAI/Anthropic/Meta 已签部署意向。",
+      "notes": "厂商发布值，尚未第三方实机验证；Helios 机架 72×MI455X + 18×EPYC Venice，号称 2.9 EF FP4 推理 / 1.4 EF FP8 训练。已获 OpenAI（2026Q4 上线）/Meta/Anthropic（至 2GW）/Microsoft Azure 等 gigawatt 级部署订单，2026H2 起量产爬坡。",
       "techNote": "同系列另有 MI440X（企业级风冷 8 卡机箱）与 MI430X（HPC/主权 AI，原生 FP64）。",
       "risks": [],
       "srcIds": []
@@ -918,11 +918,11 @@ window.CHIP_DB = {
         "type": null,
         "note": null
       },
-      "status": "路线图",
+      "status": "量产出货",
       "supply": "国产",
       "confidence": "vendor",
       "perfNote": null,
-      "notes": "训练+推理融合型号，首次采用自研 HiZQ 2.0 内存。新建设施按其口径做设计时应预留延期/改版缓冲；据称可互联 8192 卡，1024 卡版本已落地。",
+      "notes": "训练+推理融合型号，首次采用自研 HiZQ 2.0 内存。灵衢昇腾 950 智算集群云服务已于 2026-09-30 国内商用、11-30 全球商用。新建设施按其口径做设计时应预留延期/改版缓冲；据称可互联 8192 卡，1024 卡版本已落地。",
       "techNote": "1024 卡规模理论 FP8 总算力约 1 EFLOPS。",
       "risks": [
         "参数口径待核"
@@ -964,7 +964,7 @@ window.CHIP_DB = {
       "supply": "国产",
       "confidence": "vendor",
       "perfNote": null,
-      "notes": "路线图值，发布会口径；新增自研 HiF4（4bit）。仅可作为 2027 年立项参考，不可写入交付承诺。",
+      "notes": "路线图值，发布会口径；新增自研 HiF4（4bit）。仅可作为 2027 年立项参考，不可写入交付承诺。第三方调研（2026-09）提示：960 系列 2026 年内不交付，样品最早 2027Q1、大规模放量或拖至 Q3，受 HBM 供给与大 die 良率（约 27–28%）约束、功耗约 1500–1600 W。",
       "techNote": "Atlas 960 超节点：业界首个 NPO 近封装光互连，单节点 4096 卡。",
       "risks": [
         "供应尚未落地",
@@ -1917,7 +1917,7 @@ window.CHIP_DB = {
       "supply": "国产",
       "confidence": "thirdparty",
       "perfNote": "FP16 有 148/400 TFLOPS 口径冲突，取保守下界；功耗未公开",
-      "notes": "对标 H20 的第四代训推一体产品，原生 FP8。截至 2026.09 已回片但未大规模量产交付，建议列入观察名单而非当期采购名单；公司已于 2026 年启动科创板 IPO（募资 60 亿元）。",
+      "notes": "对标 H20 的第四代训推一体产品，原生 FP8。截至 2026.09 已回片但未大规模量产交付，建议列入观察名单而非当期采购名单；公司已于 2026-09-11 正式登陆科创板（688801.SH，募资 61.19 亿元）。据董事长路演，2026 年完成小规模交付、大批量落地在 2027。",
       "techNote": "OGX400 单机八卡 OAM 全互联：1152GB 显存 / 28.8 TB/s 带宽；ESL 超节点支持 64 卡全带宽互联。",
       "risks": [
         "供应尚未落地"

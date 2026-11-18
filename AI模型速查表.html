@@ -153,7 +153,7 @@ footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;li
 
 <header class="top">
   <h1>AI模型速查表 <span class="tagline">语言 · 图片 · 视频生成 — 国内外主流模型 / 开源闭源 / MoE / 权重与量化 / 官网定价</span></h1>
-  <p class="meta-line">数据截至 <b>2026-10-29</b> ｜ 收录 <b id="cnt-all">0</b> 个模型（语言 <b id="cnt-llm">0</b> · 图片 <b id="cnt-img">0</b> · 视频 <b id="cnt-vid">0</b>）｜ <b id="cnt-open">0</b> 开源 / <b id="cnt-closed">0</b> 闭源 ｜ 点击行展开「许可 · 部署 · 定价细节」</p>
+  <p class="meta-line">数据截至 <b>2026-11-18</b> ｜ 收录 <b id="cnt-all">0</b> 个模型（语言 <b id="cnt-llm">0</b> · 图片 <b id="cnt-img">0</b> · 视频 <b id="cnt-vid">0</b>）｜ <b id="cnt-open">0</b> 开源 / <b id="cnt-closed">0</b> 闭源 ｜ 点击行展开「许可 · 部署 · 定价细节」</p>
   <div class="disclaim">
     <b>口径说明</b>：
     ① 「权重体积」= HuggingFace 仓库<b>官方发布格式的实测下载体积</b>——由<b>发布精度</b>决定，不等于参数量×2 字节（如 Kimi K3 2.8T 参数原生 MXFP4 仅 1.56TB，不存在 5.6TB 的 BF16 官方版）；
@@ -289,14 +289,14 @@ footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;li
     <div class="kv"><b><span class="badge b-ok">官网</span></b><span>厂商官网定价页 / 官方公告 / HuggingFace 官方仓库实测，可直接引用。</span></div>
     <div class="kv"><b><span class="badge b-blue">聚合</span></b><span>llmpricing.dev（10-26 同步）、modelpricing.ai、aivideogenerationapi.com、AtlasCloud 等聚合站，与官网主口径一致时收录。</span></div>
     <div class="kv"><b><span class="badge b-warn">第三方</span></b><span>媒体 / 评测机构口径，带 <span class="q">?</span> 标记，预算决策前须官网复核。</span></div>
-    <div class="kv"><b>定价来源</b><span class="src">openai.com/api ｜ anthropic.com/pricing（5.5 代，10-21 核验） ｜ ai.google.dev/gemini-api/pricing ｜ deepseek.com/pricing（峰谷自 08-16 起） ｜ api.z.ai ｜ platform.moonshot.ai ｜ tencent.com（Hy4，08-28） ｜ 火山引擎 / 阿里云百炼 / 腾讯云 TokenHub（¥ 口径）</span></div>
+    <div class="kv"><b>定价来源</b><span class="src">openai.com/api ｜ anthropic.com/pricing（5.5 代，10-21 核验） ｜ ai.google.dev/gemini-api/pricing ｜ deepseek.com/pricing（峰谷自 08-16 起） ｜ api.z.ai ｜ platform.moonshot.ai ｜ hunyuan.tencent.com/research/hy4 与腾讯云 ADP/TokenHub（Hy4 正式版 11-04、Hy4 flash 11-16/18 核验） ｜ 火山引擎 / 阿里云百炼 / 腾讯云 TokenHub（¥ 口径）</span></div>
     <div class="kv"><b>权重实测</b><span class="src">HuggingFace 仓库 blobs 实测（akash.network 自部署指南 2026-10 ｜ computingforgeeks 开源模型对照表：BF16=2.00B/参数、FP8=1.00、预量化≈0.55）</span></div>
     <div class="kv"><b>免责</b><span>模型与价格迭代极快（本表收录期间 OpenAI 连发 GPT-6.1 Terra），本表用于选型前期速查与比选，正式采购与预算以厂商官网实时口径为准。</span></div>
   </div>
 </div>
 
 <footer>
-  算力工具箱 · AI 模型速查表 ｜ 数据截至 2026-10-29 ｜ 定价与版本随时浮动，以官网为准<br>
+  算力工具箱 · AI 模型速查表 ｜ 数据截至 2026-11-18 ｜ 定价与版本随时浮动，以官网为准<br>
   与《AI芯片参数速查表》《LLM推理技术速查》配套使用：权重体积×发布精度 → 显存规划 → 芯片选型 → 推理引擎
 </footer>
 </div>
@@ -343,10 +343,14 @@ const LLM = [
  ws:"BF16 4,892GB（实测）/ 官方 FP8 副本 ~2.4TB?",quant:"官方 BF16/FP8 · 社区 GGUF（2.4T 体量需集群）",
  price:"$2.00 / $6.00",priceSub:"Implicit Cache 读 $0.25 · 百炼 ¥ 口径以官网为准",
  note:"<b>Max 系首次开放权重</b>（Qwen/Qwen3.8-2.4T-A95B）。注意开源版与 API 版差异：开源 checkpoint 为 <b>纯文本、262K 原生上下文、思考不可关</b>；API 版默认 1M 上下文 + 视觉输入 + 非思考模式。<b>许可</b>：免费商用可修改，但月活超 1 亿或月收入超 $20M 须署名模型名；MaaS / 编码办公助手类业务年收入超 $50M 需单独授权。<b>要点</b>：PaperBench 93.0 / GPQA 92.6 / Terminal-Bench 86.6；16 天自主开发 oh-my-cli（265 commits）与天池赛超 458/526 人类队长程 demo。家族：Qwen3.8-27B（稠密视觉语言，Apache 2.0，单卡可跑）、Flash-Next（125B-A6B，Gated DeltaNet + Qwen 稀疏注意力，Qwen4 架构预览）、Omni-Flash / LiveTranslate（API only）。前代 Qwen3.5（397B-A17B，Apache 2.0）与 Qwen3.7-Max（闭源 API）并存。"},
-{n:"混元 Hy4 preview",org:"腾讯",cn:1,rel:"2026-08-28",arch:"MoE 770B-49B",ctx:"1M",open:1,lic:"Apache 2.0",moe:1,
- ws:"BF16 ~1.54TB（估算?）/ 官方 FP8 版",quant:"官方 BF16/FP8 双仓 · 社区 GGUF",
- price:"¥6 / ¥18",priceSub:"缓存命中 ¥0.3 · 国际 $0.834/$2.50（TokenHub）· OpenRouter $0.75/$2.25",
- note:"<b>架构</b>：78 层主干（1 层 FFN + 77 层 MoE，每层 256 路由专家 + 1 共享专家，top-8 + 共享）；Gated DSA + IndexCache、iHC 残差流、原生 MTP 投机解码（HuggingFace 卡口径）。<b>要点</b>：腾讯内部 163 专家 / 203 工程任务盲测 2.99/4，略优于 GLM-5.3（2.92）与 Kimi K3（2.94）；配合 Hyra 将 Blaschke–Lebesgue 几何难题体积下界推进至 0.41104（距 Meissner 猜想证明剩 2%）；首次参与自身训练与推理优化（端到端吞吐 +31.8%）。定位「为生产力而生」，WorkBuddy/CodeBuddy/元宝/ima 同步上线，TokenHub + OpenRouter 双通道。Hy4 系列后续批次将陆续推出；前代 Hy3（295B-21B，2026-07，Apache 2.0）仍可用。"},
+{n:"混元 Hy4（正式版）",org:"腾讯",cn:1,rel:"2026-08-28 preview / 11-04 正式",arch:"MoE 770B-49B",ctx:"1M（服务 105 万）",open:1,lic:"Apache 2.0（preview 口径）",moe:1,
+ ws:"权重未放出（官方称加速开源中?）",quant:"—（权重发布后跟进）",
+ price:"¥6 / ¥18",priceSub:"缓存命中 ¥0.3 · 国际 $0.834/$2.50（TokenHub）· OpenRouter $0.42/$1.25 低价路由",
+ note:"<b>11-04 转正要点</b>：预/后训练规模显著扩展；<b>首次引入视觉理解</b>（细粒度图像处理、复杂图表分析）与 <b>Computer Use</b>（CLI + GUI，Blender/CAD 等专业软件专项）；GameDev/GameLogic 较 preview +19.1%/+9.8%；金融 FiT 众测 3.04/4 列开源模型首位；专项搜索幻觉率 15.76%→5.45%。官方服务上下文约 105 万 token、单次输出上限 65,536。<b>架构</b>（preview 口径）：78 层主干（1 FFN + 77 MoE，256 路由专家 + 1 共享专家，top-8）；Gated DSA + IndexCache、原生 MTP。<b>权重状态</b>：人民网 11-04 称「近期开源」，11-18 Hy4 flash 开源时官方仍称旗舰 770B 权重「加速推进、时间未定」；OpenRouter 目录（11-17 核验）已列 tencent/Hy4 权重页——两口径矛盾，以 HuggingFace 实际为准<span class=\"q\">?</span>。定位「为生产力而生」，WorkBuddy/CodeBuddy/元宝/ima 同步上线。前代 Hy3（295B-21B，2026-07）仍可用；性价比档 Hy4 flash 见下一行。"},
+{n:"混元 Hy4 flash",org:"腾讯",cn:1,rel:"2026-11-16 API / 11-18 开源",arch:"MoE 224B（64B Engram）-12B",ctx:"1M",open:1,lic:"Tencent Hy License（非标准开源协议）",moe:1,
+ ws:"官方三版本：flash / flash-FP8 / flash Base（体积以 HF 仓库为准；BF16 估算 ~450GB?）",quant:"官方 FP8 版 · GGUF（AngelSlim）已有",
+ price:"¥0.5 / ¥2",priceSub:"缓存命中 ¥0.02 · TokenHub 限时 5 折至 11-30 · OpenRouter $0.04/$0.14",
+ note:"<b>迄今性价比最高的混元模型</b>（官方口径）：综合效果略优于 Hy4 preview（770B-49B）——激活 49B→12B 效果不退、成本降一个量级。WorkIndex 内部评测单任务成本仅 Hy4 preview 的 1/13、Hy4 的 1/20、DeepSeek-V4.1-Flash 峰时价的 1/8；85 人 259 任务盲测满意度 2.79/4（Claude Haiku 5.5 为 2.81）。<b>架构</b>：混合注意力 + LatentMoE + Engram，42 层主干（1 稠密 FFN + 41 MoE），视觉编码器基于 SigLIP2-So400m，0.85B DFly2 草稿模块（投机解码）；KV Cache 仅为 Hy4 的 1/6、Hy3 的 1/24；megakernel + 4bit 量化解码超 150 token/s；后训练以 Hy4 自蒸馏 + RL 缩短输出（端到端输出长度 −50%）。<b>部署</b>：官方推荐 vLLM FP8 镜像 TP8（FLASHMLA_SPARSE 后端），SGLang 镜像同配方。<b>许可注意</b>：Tencent Hy License（HF 标 other），比 DeepSeek 的 MIT 严格，商用前读 LICENSE 原文。Base 版：U-MATH 69.8（DeepSeek-V4-flash-Base 57.4）。"},
 {n:"ERNIE 4.5",org:"百度",cn:1,rel:"2025-06",arch:"MoE 424B-47B",ctx:"128K?",open:1,lic:"Apache 2.0",moe:1,
  ws:"BF16 ~848GB（估算?）",quant:"官方 BF16/FP8 + P0 半精度 / P1 伪量化多仓 · 社区 GGUF",
  price:"—",priceSub:"千帆渠道计费，以官网为准",

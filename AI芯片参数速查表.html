@@ -321,8 +321,8 @@ const DATA = [
 {v:"NVIDIA",m:"GB300 NVL72（机架）",cls:"GPU",node:"Grace + Blackwell Ultra",f4:"15",f8:"5",i8:"未正式公布",i8n:null,f16:"2500",mem:"288GB/卡 ×72 ≈20.7TB（+ Grace 18TB）",memn:288,bw:"8.0",bwn:8.0,inter:"NVLink5 域内 130 TB/s；CX-8 800 Gb/s/卡",intern:1800,tdp:"≈1.2–1.4 kW/卡（机架约 130 kW+）",tdpn:1400,tdpq:1,status:"量产出货",time:"2025.03 发布 / 2026 爬坡",yn:2026.1,region:"境外",conf:"blue",
  note:"机架 = 72×B300 + 36×Grace，全液冷。融资租赁与整机托管形态更易落地（规避自有机房改造）。",
  note2:"官方机架口径：<b>FP4 推理 1.4|1.1 ExaFLOPS（稀疏|稠密）；FP8/FP6 720 PFLOPS（含稀疏，稠密 360）；FP16/BF16 360 PFLOPS（含稀疏，稠密 180）</b>；NVLink 域 130 TB/s；CPU 内存 18TB SOCAMM LPDDR5X @14.3 TB/s。对比 Hopper：每 MW token 吞吐 5×。"},
-{v:"NVIDIA",m:"Rubin R200 / Vera Rubin NVL144",cls:"GPU",node:"Rubin / TSMC 3nm 双die+I/O die",f4:"25–50",f4n:25,f4q:1,f8:"8.3–12.5",f8n:8.3,f8q:1,i8:"—",i8n:null,f16:"—",f16n:null,f16q:1,mem:"144–288GB HBM4",memn:288,memq:1,bw:"20.5–22",bwn:20.5,bwq:1,inter:"NVLink6 3.6 TB/s",intern:3600,interq:1,tdp:"≈1.8–2.3 kW（估）",tdpn:1800,tdpq:1,status:"路线图",time:"H2 2026 起爬坡",yn:2026.6,region:"境外",conf:"warn",
- note:"<b>厂商发布会口径，不同来源对单卡 HBM 容量（144 或 288GB）与 FP4 峰值（25 或 50 PFLOPS，即含稀疏与否）存在冲突</b>，且暂未获第三方实测验证。采购排期按 2027 年规模化供应做基准更稳妥。",
+{v:"NVIDIA",m:"Rubin R200 / Vera Rubin NVL144",cls:"GPU",node:"Rubin / TSMC 3nm 双die+I/O die",f4:"25–50",f4n:25,f4q:1,f8:"8.3–12.5",f8n:8.3,f8q:1,i8:"—",i8n:null,f16:"—",f16n:null,f16q:1,mem:"144–288GB HBM4",memn:288,memq:1,bw:"20.5–22",bwn:20.5,bwq:1,inter:"NVLink6 3.6 TB/s",intern:3600,interq:1,tdp:"≈1.8–2.3 kW（估）",tdpn:1800,tdpq:1,status:"量产出货",time:"2026.10 全面量产 / 2026Q4 商业出货",yn:2026.6,region:"境外",conf:"warn",
+ note:"<b>2026-10-21 柏林 GTC 已宣布进入全面量产（full production）</b>，OCI 已于 10-27 GA、Google Cloud A5X 实例 11 月上线；但单卡 HBM 容量（144 或 288GB）与 FP4 峰值（25 或 50 PFLOPS，即含稀疏与否）仍存在口径冲突、暂未获第三方实测锁定。商用排期按 2026Q4 起逐步放量做基准。",
  note2:"NVLink6 3.6 TB/s/卡；NVL144 机架标称 FP4 推理约 3.6 ExaFLOPS（<b>该值是否含稀疏未见官方统一说明</b>，按 144 卡反推为每卡 25P）。同代另有 Rubin CPX（128GB GDDR7）主打长上下文。"},
 {v:"NVIDIA",m:"RTX PRO 5500 Blackwell（工作站版）",cls:"GPU",node:"Blackwell GB202 / TSMC 4N",f4:null,f8:null,f16:null,i8:null,mem:"84GB GDDR7 ECC",memn:84,bw:"1.398",bwn:1.398,inter:"无 NVLink，PCIe Gen5 x16 (128 GB/s)",intern:128,tdp:"600 W",tdpn:600,status:"量产出货",time:"2026.09 官网列名",yn:2026.7,region:"境外",conf:"warn",
  note:"<b>机架式工作站定位</b>（非数据中心 SXM 形态）。规格表标注 Preliminary、未发布算力值，CUDA 21,760（=RTX 5090 规模）与 416-bit 位宽来自 PNY 官方参数页。<b>下单前须向渠道索取正式 datasheet。</b>",
@@ -343,7 +343,7 @@ const DATA = [
  note:"2026 年出货主力：288GB HBM3E 是当前少数可放超大 MoE 的单卡方案；<b>液冷必选</b>。Oracle 等已部署大规模集群。",
  note2:"<b>口径陷阱：</b>AMD 官方博客表格脚注明确 “All Matrix Core dense numbers” → <b>FP16 2.5P / FP8 5P / FP6-FP4 10.1P</b>（本表采用）；AMD 另有公开材料用<b>含结构稀疏</b>口径 → FP16 5.03P / FP8 10.15P / FP6-FP4 20.1P。<b>两者差 2 倍，引用务必注明。</b>FP128 SB 双源 HBM（三星 + 美光）。"},
 {v:"AMD",m:"MI455X / MI400 系列（Helios）",cls:"GPU",node:"CDNA5 / TSMC 2nm",f4:"40",f8:"20",i8:"—",i8n:null,i8q:1,f16:"—",f16n:null,f16q:1,mem:"432GB HBM4",memn:432,bw:"19.6–23.3",bwn:19.6,bwq:1,inter:"UALink + Infinity Fabric；scale-out 300 GB/s",intern:300,interq:1,tdp:"1.6–2.5 kW（估）",tdpn:1600,tdpq:1,status:"小批量/爬坡",time:"2026H2 量产爬坡",yn:2026.5,region:"境外",conf:"warn",
- note:"<b>厂商发布值，尚未第三方实机验证</b>；Helios 机架 72×MI455X + EPYC Venice。Oracle/OpenAI 等已签部署意向。",
+ note:"<b>厂商发布值，尚未第三方实机验证</b>；Helios 机架 72×MI455X + EPYC Venice。已获 OpenAI（2026Q4 上线）/Meta/Anthropic（至 2GW）/Microsoft Azure 等 gigawatt 级部署订单，2026H2 起量产爬坡。",
  note2:"同系列另有 MI440X（企业级风冷 8 卡机箱）与 MI430X（HPC/主权 AI，原生 FP64）。AMD 宣称液冷机架可达 1.3 ExaFLOPS MXFP4/MXFP6。"},
 /* ---------- 华为昇腾（官方发布会口径：HC2025 三年路线图 + HC2026 更新） ---------- */
 {v:"华为昇腾",m:"Ascend 910（初代）",cls:"NPU/ASIC",node:"达芬奇 / TSMC 7nm",f4:null,f8:null,f16:"256",i8:"512",mem:"32GB HBM2",memn:32,bw:"0.4",bwn:0.4,inter:"HCCS / PCIe 4.0 / RoCE",intern:240,tdp:"310 W",tdpn:310,status:"受限/EOL",time:"2019",yn:2019,region:"国产",conf:"blue",
@@ -359,10 +359,10 @@ const DATA = [
  note:"推理优先（Prefill）型号，官方称单卡达 H20 的 ~2.87×。<b>首次采用全新自研内存（HiBL 1.0），需评估长期备件与内存供应稳定性</b>。",
  note2:"支持 FP32/HF32/FP16/BF16/FP8/MXFP8/<b>HiF8</b>/MXFP4；<b>HiF8 为自研精度，不等价于标准 FP8</b>。"},
 {v:"华为昇腾",m:"Ascend 950DT",cls:"NPU/ASIC",node:"SIMD+SIMT / 自研 HiZQ 2.0",f4:"2",f8:"1",i8:"—",i8n:null,i8q:1,f16:"—",f16n:null,f16q:1,mem:"144GB HiZQ 2.0",memn:144,bw:"4.0",bwn:4.0,inter:"2.0 TB/s",intern:2000,tdp:"未公开",tdpn:null,tdpq:1,status:"量产出货",time:"原定 2026Q4，已提前至 2026.08 云上可用",yn:2026.6,region:"国产",conf:"blue",
- note:"训练+推理融合（Train/Decode）型号。<b>据澎湃/百度百科等公开信息，950DT 已由 2026Q4 提前至 2026 年 8 月在华为云上线</b>——新建设施可按此排程做 POC，但仍建议以华为云配额通知为准。",
+ note:"训练+推理融合（Train/Decode）型号。<b>据公开信息，950DT 已由 2026Q4 提前至 2026 年 8 月在华为云上线</b>；灵衢昇腾 950 智算集群云服务已于 2026-09-30 国内商用、11-30 全球商用——新建设施可按此排程做 POC，但仍建议以华为云配额通知为准。",
  note2:"“一芯双构” 策略：与 950PR 同源衍生。采用自研 HiZQ 2.0 内存，官方称可互联 8192 卡；1024 卡版本 FP8 理论总算力约 1 EFLOPS。"},
 {v:"华为昇腾",m:"Ascend 960DT",cls:"NPU/ASIC",node:"SIMD+SIMT（未公开工艺）",f4:"4",f8:"2",i8:"—",i8n:null,i8q:1,f16:"—",f16n:null,f16q:1,mem:"288GB",memn:288,bw:"9.6",bwn:9.6,inter:"2.2 TB/s",intern:2200,tdp:"未公开",tdpn:null,tdpq:1,status:"路线图",time:"2027Q1（较原 2027Q4 提前 3 季）",yn:2027.1,region:"国产",conf:"blue",
- note:"路线图值。<b>仅可作为 2027 年立项参考，不可写入交付承诺</b>。",
+ note:"路线图值。<b>仅可作为 2027 年立项参考，不可写入交付承诺</b>。第三方调研（2026-09）提示：960 系列 2026 年内不交付，样品最早 2027Q1、大规模放量或拖至 Q3，受 HBM 供给与大 die 良率（约 27–28%）约束、功耗约 1500–1600 W。",
  note2:"华为全联接 2026（2026-09-17）确认节奏提前；新增自研 <b>HiF4</b>（4bit）。Atlas 960 超节点为业内首个 NPO 近封装光互连，单超节点 4096 卡、RTT 2μs。"},
 {v:"华为昇腾",m:"Ascend 960PR",cls:"NPU/ASIC",node:"SIMD+SIMT（未公开工艺）",f4:"8",f8:"2",i8:"—",i8n:null,i8q:1,f16:"—",f16n:null,f16q:1,mem:"192GB",memn:192,bw:"2.4",bwn:2.4,inter:"2.2 TB/s",intern:2200,tdp:"未公开",tdpn:null,tdpq:1,status:"路线图",time:"2027Q3",yn:2027.3,region:"国产",conf:"blue",
  note:"推理型号。华为全联接 2026 口径：<b>960PR 的 FP4 由原计划 4 PFLOPS 翻倍到 8 PFLOPS</b>，主打推理单位成本。Atlas 960 液冷超节点同期（2027Q3）推出。",
@@ -433,7 +433,7 @@ const DATA = [
 {v:"燧原",m:"S60",cls:"NPU/ASIC",node:"邃思系列（未公开）",f4:null,f8:null,i8:"—",i8n:null,i8q:1,f16:"392（第三方）",f16n:392,f16q:1,mem:"48GB",memn:48,memq:1,bw:"0.672",bwn:0.672,bwq:1,inter:"未公布",intern:null,interq:1,tdp:"未公开",tdpn:null,tdpq:1,status:"小批量/爬坡",time:"2023–2024",yn:2023.5,region:"国产",conf:"warn",
  note:"上一代训推一体产品，<b>公开资料有限</b>，2025 年 AI 加速卡出货约 6.6 万张（份额约 1.7%，据其招股书）。",note2:""},
 {v:"燧原",m:"L600（云燧阡衷）",cls:"NPU/ASIC",node:"邃思400 / SMIC 7nm + CoWoS（长电）",f4:null,f8:"原生 FP8（数值未公开）",f8n:null,f8q:1,i8:"—",i8n:null,i8q:1,f16:"约 148–400（口径冲突）",f16n:148,f16q:1,mem:"144GB（HBM2e/HBM3e 说法不一）",memn:144,memq:1,bw:"3.6",bwn:3.6,bwq:1,inter:"800 GB/s",intern:800,interq:1,tdp:"未公开",tdpn:null,tdpq:1,status:"样片/未量产",time:"2025.07 发布 / 2026 已回片未大规模量产",yn:2025.5,region:"国产",conf:"warn",
- note:"对标 H20 的第四代训推一体产品，原生 FP8。<b>截至 2026.09 已回片但未大规模量产交付，建议列入观察名单而非当期采购名单</b>；公司已于 2026 年启动科创板 IPO（募资 60 亿元）。",
+ note:"对标 H20 的第四代训推一体产品，原生 FP8。<b>截至 2026.09 已回片但未大规模量产交付，建议列入观察名单而非当期采购名单</b>；公司已于 2026-09-11 正式登陆科创板（688801.SH，募资 61.19 亿元）。据董事长路演，2026 年完成小规模交付、大批量落地在 2027。",
  note2:"OGX400 单机八卡 OAM 全互联：1152GB 显存 / 28.8 TB/s 带宽；ESL 超节点支持 64 卡全带宽互联。"}
 ];
 

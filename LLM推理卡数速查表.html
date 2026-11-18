@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>推理卡数速查表 · 先给结论，再给推导 — 模型 × 精度 × 卡型 × 上下文</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --border:#e3e6ea; --border-strong:#cfd4da;
+  --text:#1f2328; --text-2:#5b6570; --text-3:#8b939c;
+  --accent:#1f6feb; --accent-soft:#eaf2fe;
+  --warn:#b45309; --warn-soft:#fef4e6;
+  --danger:#b3261e; --danger-soft:#fdecea;
+  --ok:#0a7d3b; --ok-soft:#e8f5ed;
+  --blue-1:#e6f1fb; --blue-2:#b5d4f4; --blue-3:#185fa5;
+  --teal-1:#e1f5ee; --teal-2:#9fe1cb; --teal-3:#0f6e56;
+  --amber-1:#faeeda; --amber-2:#fac775; --amber-3:#854f0b;
+  --red-1:#fcebeb; --red-2:#f7c1c1; --red-3:#a32d2d;
+  --lime-1:#eaf3de; --lime-2:#c0dd97; --lime-3:#3b6d11;
+  --gray-1:#f1efe8; --gray-2:#d3d1c7;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1460px;margin:0 auto;padding:22px 24px 60px}
+header.top{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 22px;margin-bottom:14px}
+h1{font-size:20px;margin:0 0 5px;letter-spacing:.3px}
+h1 span.tagline{font-size:13px;color:var(--text-3);font-weight:400;margin-left:8px}
+.meta-line{color:var(--text-2);font-size:12.5px;margin:0}
+.meta-line b{color:var(--text);font-weight:600}
+.disclaim{margin-top:10px;padding:8px 12px;background:var(--warn-soft);border-left:3px solid #e0a020;border-radius:4px;color:#7a4b06;font-size:12px;line-height:1.6}
+#toc{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  margin:0 -24px 14px;padding:9px 24px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+}
+#toc .toc-t{font-size:12px;font-weight:700;color:var(--text-3);margin-right:2px;white-space:nowrap}
+#toc a{
+  font-size:12px;color:var(--text-2);text-decoration:none;white-space:nowrap;
+  padding:3px 11px;border-radius:20px;border:1px solid transparent;cursor:pointer;
+  transition:color .15s,background .15s,border-color .15s;
+}
+#toc a:hover{color:var(--accent);border-color:#a8c7f5;background:#eaf2fe}
+#toc a.cur{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.sec{margin-top:20px}
+.section-head{display:flex;align-items:baseline;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+.section-head h2{font-size:16px;margin:0;color:var(--text)}
+.section-head .sub{font-size:12px;color:var(--text-3)}
+.section-head .sub b{color:var(--text-2)}
+
+/* ---------- A 区：反推选型 ---------- */
+.answer-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.ctrl-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;padding-bottom:14px;border-bottom:1px dashed var(--border-strong);margin-bottom:14px}
+.ctrl-bar label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--text-3);font-weight:600}
+.ctrl-bar select{
+  font-size:13px;color:var(--text);background:#fff;border:1px solid var(--border-strong);
+  border-radius:7px;padding:6px 9px;min-width:150px;max-width:250px;height:34px;
+}
+.ctrl-bar select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.ctrl-hint{font-size:11.5px;color:var(--text-3);margin-left:auto;padding-bottom:8px}
+.ans-hero{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.ans-num{display:block;flex:0 0 auto;min-width:230px;white-space:nowrap}
+.ans-num .lab{display:block;font-size:12px;color:var(--text-3);margin-bottom:2px}
+.ans-num b{font-size:56px;line-height:1;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.ans-num .unit{font-size:16px;color:var(--text-2);margin-left:8px}
+.ans-detail{flex:1 1 420px;min-width:280px}
+.ans-line1{font-size:16px;font-weight:600;margin-bottom:3px}
+.ans-line2{font-size:12px;color:var(--text-2);margin-bottom:8px}
+.ans-bt{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11.5px;font-weight:600;margin-bottom:7px}
+.ans-bt.bt-C{background:var(--blue-1);color:var(--blue-3)}
+.ans-bt.bt-B{background:var(--amber-1);color:var(--amber-3)}
+.ans-bt.bt-X{background:var(--red-1);color:var(--red-3)}
+.ans-why{font-size:12px;color:var(--text-2);line-height:1.6}
+.alts-title{font-size:12px;color:var(--text-3);margin:16px 0 7px}
+.alts{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:7px}
+.alt{
+  text-align:left;background:var(--gray-1);border:1px solid transparent;border-radius:8px;
+  padding:7px 9px;cursor:pointer;font-family:inherit;line-height:1.4;transition:border-color .15s,background .15s;
+}
+.alt:hover{border-color:var(--accent)}
+.alt.cur{border:2px solid var(--accent);padding:6px 8px;background:#fff}
+.alt.t-c{background:var(--teal-1)} .alt.t-b{background:var(--amber-1)} .alt.t-x{background:var(--red-1)}
+.alt-name{display:block;font-size:11px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alt-num{display:block;font-size:19px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.alt-sub{display:block;font-size:10.5px;color:var(--text-3)}
+.answer-foot{font-size:11.5px;color:var(--text-3);margin:10px 0 0;line-height:1.6}
+
+/* ---------- B 区：模型卡片 ---------- */
+.mcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;margin-bottom:9px}
+.mcard .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mcard .name{font-size:14.5px;font-weight:700}
+.mcard .name .badge{margin-left:7px;vertical-align:2px}
+.mcard .spec{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.mcard .loadbig{font-size:12px;color:var(--text-3);text-align:right;white-space:nowrap}
+.mcard .loadbig b{display:block;font-size:23px;line-height:1.15;color:var(--text);font-variant-numeric:tabular-nums}
+.stack{display:flex;height:16px;border-radius:5px;overflow:hidden;margin:10px 0 5px;background:var(--gray-1)}
+.stack span{display:block;height:100%}
+.sw-w{background:var(--blue-2)} .sw-p{background:var(--teal-2)} .sw-s{background:var(--gray-2)}
+.stack-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-2)}
+.stack-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.ctxrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:11px}
+.ctxbox{border-radius:8px;padding:8px 10px;border:1px solid transparent;min-height:76px}
+.ctx-t{font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:2px}
+.ctx-n{font-size:21px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.ctx-n span{font-size:11px;font-weight:400;color:var(--text-2)}
+.ctx-s{font-size:11px;color:var(--text-2);margin-top:2px}
+.t-green{background:var(--teal-1);border-color:var(--teal-2)} .t-green .ctx-n{color:var(--teal-3)}
+.t-lime{background:var(--lime-1);border-color:var(--lime-2)} .t-lime .ctx-n{color:var(--lime-3)}
+.t-amber{background:var(--amber-1);border-color:var(--amber-2)} .t-amber .ctx-n{color:var(--amber-3)}
+.t-red{background:var(--red-1);border-color:var(--red-2)} .t-red .ctx-n{color:var(--red-3)}
+.t-na{background:var(--gray-1);border-color:var(--gray-2)} .t-na .ctx-n{color:var(--text-3)}
+.mfoot{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text-2);margin-top:9px;padding-top:8px;border-top:1px dashed var(--border)}
+.mfoot b{color:var(--text);font-variant-numeric:tabular-nums}
+.mfoot .why{flex:1 1 320px;color:var(--text-3)}
+@media(max-width:640px){.ctxrow{grid-template-columns:1fr}.ans-num b{font-size:44px}}
+
+/* ---------- 图例 ---------- */
+.legend{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11.5px;color:var(--text-2)}
+.legend .lg{display:flex;align-items:center;gap:6px}
+.legend .sym{min-width:26px;text-align:center;padding:1px 5px;border-radius:4px;font-weight:700;font-size:11px}
+.s-x{background:var(--red-1);color:var(--red-3)} .s-ov{background:var(--gray-1);color:var(--text-2)}
+.s-na{background:var(--gray-1);color:var(--text-3)} .s-c{background:var(--blue-1);color:var(--blue-3)}
+.s-b{background:var(--amber-1);color:var(--amber-3)} .s-g{background:var(--teal-1);color:var(--teal-3)}
+
+/* ---------- 附录 ---------- */
+details.appendix{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+details.appendix>summary{cursor:pointer;padding:11px 16px;font-size:13.5px;font-weight:600;list-style:none;display:flex;align-items:center;gap:9px}
+details.appendix>summary::-webkit-details-marker{display:none}
+details.appendix>summary::before{content:"▸";color:var(--text-3);font-size:13px;transition:transform .15s}
+details.appendix[open]>summary::before{transform:rotate(90deg)}
+details.appendix>summary .sm-sub{font-size:11.5px;font-weight:400;color:var(--text-3);margin-left:auto}
+details.appendix .inner{padding:0 14px 14px}
+.table-shell{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:auto;max-height:76vh;margin-bottom:6px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;table-layout:fixed}
+thead th{background:#f8f9fb;color:var(--text-2);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--border-strong);white-space:nowrap;font-size:11.5px;position:sticky;top:0;z-index:12}
+table>thead:first-of-type:not(:last-of-type) th{position:static;z-index:auto}
+th.col-sticky,td.col-sticky{position:sticky;left:0;z-index:6;background:#fff;white-space:nowrap}
+thead th.col-sticky{z-index:20;top:0;background:#f8f9fb}
+td{padding:6px 8px;border-bottom:1px solid #eef0f3;vertical-align:middle}
+tbody tr:hover td{background:#f2f7fe}
+tbody tr:hover td.col-sticky{background:#eef5fe}
+td.model{font-weight:600;color:var(--text)}
+td.model .sub{display:block;color:var(--text-3);font-size:10.5px;font-weight:400;margin-top:1px}
+td.num{white-space:normal;font-variant-numeric:tabular-nums}
+td.num b{white-space:nowrap}
+.note-tok{color:var(--text-3);font-size:10.5px;display:block;margin-top:2px;font-weight:400;line-height:1.35;white-space:normal;overflow:hidden;text-overflow:ellipsis}
+td .mrow{display:block;white-space:nowrap}
+.ws-nw{white-space:nowrap}
+.badge{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10.5px;line-height:1.5;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)} .b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-gray{background:#eef0f3;color:var(--text-2)} .b-blue{background:var(--accent-soft);color:var(--accent)}
+.b-danger{background:var(--danger-soft);color:var(--danger)}
+.na{color:#c2c8cf} .q{color:var(--warn);font-weight:700}
+.fail{background:var(--danger-soft);color:var(--danger);font-weight:600;text-align:center}
+.bt-C{color:#0a5fa8;font-weight:700} .bt-B{color:var(--warn);font-weight:700}
+tbody tr.grp td{background:#eef3fb;font-weight:700;color:var(--text);font-size:11.5px;padding:4px 8px}
+tbody tr.grp td .gsub{font-weight:400;color:var(--text-3);font-size:10.5px;margin-left:6px}
+.panel{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.panel h3{font-size:13.5px;margin:0 0 10px}
+.kv{display:flex;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px dashed #eceff2;color:var(--text-2)}
+.kv:last-child{border-bottom:none}
+.kv b{flex:0 0 96px;color:var(--text)}
+table.mini{width:100%;font-size:12px;border-collapse:collapse;min-width:0;table-layout:auto}
+table.mini th,table.mini td{border-bottom:1px solid #eef0f3;padding:6px 8px;text-align:left;vertical-align:top}
+table.mini th{color:var(--text-2);font-weight:600;background:#f8f9fb;white-space:nowrap}
+.pass{color:var(--ok);font-weight:700} .dpass{color:var(--warn);font-weight:700}
+.grid2{display:grid;grid-template-columns:1.15fr 1fr;gap:14px}
+@media(max-width:1050px){.grid2{grid-template-columns:1fr}}
+footer{margin-top:18px;color:var(--text-3);font-size:11.5px;text-align:center;line-height:1.8}
+
+@media print{
+  @page{size:A3 landscape;margin:10mm}
+  body{background:#fff;font-size:11px}
+  .wrap{max-width:none;padding:0}
+  #toc,.ctrl-bar,.ctrl-hint{display:none!important}
+  .answer-panel,.mcard,details.appendix,.legend{break-inside:avoid;box-shadow:none}
+  details.appendix>summary::before{display:none}
+  .table-shell{max-height:none;overflow:visible;border:none}
+  table{min-width:0!important;font-size:9px}
+  .note-tok{font-size:8px}
+  .sec{margin-top:10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<script src="site-nav.js"></script>
+
+<header class="top">
+  <h1>推理卡数速查表 <span class="tagline">先给结论，再给推导 · 模型 × 精度 × 卡型 × 上下文 → 几张卡</span></h1>
+  <p class="meta-line">测算框架：AI算力局《141GB、288GB、128GB：H200、B300、昇腾 910C 的大显存，到底能换多少并发》四层漏斗（权重账 → KV 账 → 并发账 → 瓶颈判定）｜ v2.0 改造于 <b>2026-11-04</b> ｜ 理论屋顶线，实际达成率通常<b>六至八折</b></p>
+  <div class="disclaim"><b>红线：能加载 ≠ 能服务。</b>下方 ⓪ 给的「几张卡」= 满足目标并发与单流速度后的部署卡数；「装卡数」只是容量下限。单卡可用显存 = 标称 × 0.9 − 6GB；并发按 floor 保守取整。所有公式与逐格数字在 ③ 附录，页面加载即自检。</div>
+</header>
+
+<nav id="toc" aria-label="页内目录">
+  <span class="toc-t">目录</span>
+  <a href="#sec-answer">⓪ 反推选型 · 直接给答案</a>
+  <a href="#sec-models">① 模型卡片 · 一模型一版面</a>
+  <a href="#sec-legend">② 符号图例</a>
+  <a href="#sec-appendix">③ 附录 · 静态矩阵与口径</a>
+</nav>
+
+<!-- CALC-CORE-START -->
+<script id="calc-core">
+"use strict";
+/* ============ 推理卡数速查表 · 计算核心（纯函数 · 无 DOM · node 可提取） ============
+   单位约定：GB/MB 一律十进制（1GB=1e9B），与 HBM 标称及口径文章一致。
+   口径：可用显存 = 标称×0.9 − 6GB；KV 为 bf16 元素（2B）；并发 floor 取整。        */
+var CALC = {};
+(function (C) {
+  var USABLE = 0.9;     /* 框架预分配可用系数（vLLM 默认 0.9 水位） */
+  var RESERVE = 6;      /* 运行时工作区 GB（CUDA Graph/激活/通信/碎片） */
+  var MOE_MIX = 0.30;   /* MoE 解码权重等效读取混合系数（激活占比 a，
+                           等效读取占比 = a + MOE_MIX×(1−a)） */
+
+  C.CONST = { USABLE: USABLE, RESERVE: RESERVE, MOE_MIX: MOE_MIX };
+
+  /* 每参数字节数 */
+  function bpp(q) {
+    if (q === "BF16" || q === "FP16") return 2;
+    if (q === "FP8" || q === "INT8" || q === "W8A8") return 1;
+    if (q === "INT4" || q === "FP4" || q === "NVFP4" || q === "MXFP4" || q === "AWQ" || q === "GPTQ") return 0.5;
+    if (q === "QAT-MXFP4") return 0.5625; /* 4.5 bit/参数 + scale（Kimi K3 原生） */
+    return null;
+  }
+  C.bpp = bpp;
+
+  /* 单卡可用显存 GB */
+  function usable(card) { return card.mem * USABLE - RESERVE; }
+  C.usable = usable;
+
+  /* 权重体积 GB（m.wsB[q] 实测值优先；否则按参数量推算） */
+  function weightGB(m, q) {
+    if (m.wsB && m.wsB[q] != null) return m.wsB[q];
+    var b = bpp(q);
+    if (b == null || !m.totalB) return null;
+    var v = m.totalB * b;
+    return (m.wsB && m.wsB.scale) ? v * m.wsB.scale : v;
+  }
+  C.weightGB = weightGB;
+
+  /* KV：每序列每 token 字节数（bf16 元素），及每路固定状态 MB（线性注意力等） */
+  function kvOf(m) {
+    if (!m.kv) return null;
+    if (m.kv.type === "GQA") {
+      /* 2×层数×KV头数×head_dim×2B */
+      return { perTok: 2 * m.kv.L * m.kv.kvH * m.kv.hd * 2, fixedMB: m.kv.fixedMB || 0 };
+    }
+    if (m.kv.type === "MLA") {
+      /* 层数×(kv_lora_rank + qk_rope_head_dim)×2B —— latent 与 rope 单份存储 */
+      return { perTok: m.kv.L * (m.kv.lat + m.kv.rope) * 2, fixedMB: m.kv.fixedMB || 0 };
+    }
+    if (m.kv.type === "HYB") {
+      /* 混合架构：m.kv.perTokByte 直接给出（由 config 折算），fixedMB = 每路固定状态 */
+      return { perTok: m.kv.perTokByte, fixedMB: m.kv.fixedMB || 0 };
+    }
+    return null;
+  }
+  C.kvOf = kvOf;
+
+  /* MoE 解码每步权重等效读取 GB：激活占比 a → a + MIX×(1−a) */
+  function readGB(m, q) {
+    var w = weightGB(m, q);
+    if (w == null) return null;
+    if (m.type !== "moe" || !m.actB) return w;             /* 稠密：全量读 */
+    var a = m.actB / m.totalB;
+    return w * (a + MOE_MIX * (1 - a));
+  }
+  C.readGB = readGB;
+
+  /* 装卡数：ceil(权重 ÷ 单卡可用)；null 权重 → −1 */
+  function loadCards(m, q, card) {
+    var w = weightGB(m, q);
+    if (w == null || w <= 0) return -1;
+    return Math.ceil(w / usable(card));
+  }
+  C.loadCards = loadCards;
+
+  /* 单卡单流理论 tok/s（权重屋顶线：带宽 ÷ 等效读取） */
+  function singleTps(m, q, card) { return card.bw / readGB(m, q); }
+  C.singleTps = singleTps;
+
+  /* 核心：装卡数 + 双上限并发。
+     返回 {load, capN(内存上限), latN(时延上限), eff(min), bottleneck("C"/"B"), tps30, tps60, ...}
+     status: "ok" | "w" 权重超口径(null)           */
+  function solveN(m, q, card, ctxK, n) {
+    var w = weightGB(m, q);
+    if (w == null) return { status: "w" };
+    var u = usable(card), pool = n * u - w;                 /* KV 池 GB */
+    if (pool <= 0) return { status: "w", load: n, reason: "权重已吃满可用显存" };
+    var K = kvOf(m);
+    if (!K) return { status: "kv" };                        /* KV 结构未知 → 表B不参 */
+    var ctxTok = ctxK * 1024;
+    var seqKVGB = ctxTok * K.perTok / 1e9 + K.fixedMB / 1e3; /* 单序列 KV + 固定状态 */
+    var N_mem = pool / seqKVGB;                             /* 内存上限 */
+    var r = readGB(m, q);
+    var tps1 = (card.bw * n) / r;                           /* 单流理论上限 tok/s */
+    var N30 = (card.bw * n / 30 - r) / seqKVGB;
+    var N60 = (card.bw * n / 60 - r) / seqKVGB;
+    var e30 = Math.min(N_mem, N30), e60 = Math.min(N_mem, N60);
+    return {
+      status: "ok", load: n, pool: pool, seqKVGB: seqKVGB,
+      capN: N_mem, latN: N30,
+      n30: e30, n60: e60,
+      bt30: (e30 === N30) ? "B" : "C",
+      bt60: (e60 === N60) ? "B" : "C",
+      tps1: tps1
+    };
+  }
+  C.solveN = solveN;
+
+  function solve(m, q, card, ctxK) {
+    return solveN(m, q, card, ctxK, loadCards(m, q, card));
+  }
+  C.solve = solve;
+
+  /* 目标 targetN 路并发（@30 tok/s）所需最小总卡数。
+     组合搜索：组内 TP/EP（候选度 = 最小装载 ∪ 2/4/8/16 的常规度，≥ 装载下限），
+     组间 DP 复制（k = ceil(目标 ÷ 组级并发)）→ 取总卡数最小方案。
+     未计跨卡通信开销（见 ⑦），大 MoE 的组即 EP 域。                       */
+  function minCardsFor(m, q, card, ctxK, targetN) {
+    targetN = targetN || 100;
+    var load = loadCards(m, q, card);
+    if (load === -1) return null;
+    var cand = {}, list = [load, 2, 4, 8, 16, load * 2, load * 4];
+    list.forEach(function (g) { if (g >= load && g <= 64) cand[g] = 1; });
+    var gs = Object.keys(cand).map(Number).sort(function (a, b) { return a - b; });
+    var best = null;
+    for (var i = 0; i < gs.length; i++) {
+      var g = gs[i];
+      var s = solveN(m, q, card, ctxK, g);
+      if (s.status !== "ok" || !(s.n30 > 0)) continue;
+      var k = (s.n30 >= targetN) ? 1 : Math.ceil(targetN / s.n30);
+      var total = g * k;
+      if (!best || total < best.total) best = { total: total, group: g, groups: k, perGroup: s.n30, s: s };
+    }
+    return best;
+  }
+  C.minCardsFor = minCardsFor;
+
+  /* ============ 数据 ============ */
+  var CARDS = [
+    { id: "A100",   label: "A100 80G",    full: "A100 80GB SXM4",       mem: 80,  bw: 2039, link: "NVLink3 · 600GB/s",  q1: "INT8",  q4: "AWQ/GPTQ", note: "Ampere 无 FP8，1B 量化走 W8A8/INT8" },
+    { id: "H100",   label: "H100 80G",    full: "H100 SXM5 80GB",       mem: 80,  bw: 3350, link: "NVLink4 · 900GB/s",  q1: "FP8",   q4: "AWQ",      note: "算力标杆；对华管制" },
+    { id: "H20",    label: "H20 96G",     full: "H20（中国版）",         mem: 96,  bw: 4000, link: "NVLink4 · 900GB/s",  q1: "FP8",   q4: "AWQ",      note: "算力削减、显存带宽保留" },
+    { id: "910C",   label: "910C 128G",   full: "昇腾 910C 128GB",      mem: 128, bw: 3200, link: "HCCS · 784GB/s",     q1: "W8A8",  q4: "—",        note: "无 FP8，量化走 W8A8/INT8；互联带宽是跨卡短板" },
+    { id: "950PR",  label: "950PR 128G",  full: "昇腾 950PR 128GB",     mem: 128, bw: 1600, link: "灵衢2.0 · 2TB/s",    q1: "FP8",   q4: "MXFP4",    note: "推理型；带宽 1.6TB/s 是短板" },
+    { id: "H200",   label: "H200 141G",   full: "H200 SXM 141GB",       mem: 141, bw: 4800, link: "NVLink4 · 900GB/s",  q1: "FP8",   q4: "AWQ",      note: "推理性价比甜点位（文章主对标）" },
+    { id: "950DT",  label: "950DT 144G",  full: "昇腾 950DT 144GB",     mem: 144, bw: 4000, link: "灵衢2.0 · 2TB/s",    q1: "FP8",   q4: "MXFP4",    note: "910C 接棒：容量 +16G、带宽 +0.8TB/s、补 FP8" },
+    { id: "B200",   label: "B200 192G",   full: "B200 192GB",           mem: 192, bw: 8000, link: "NVLink5 · 1.8TB/s",  q1: "FP8",   q4: "NVFP4",    note: "Blackwell；NVFP4 原生（管制）" },
+    { id: "MI325X", label: "MI325X 256G", full: "AMD MI325X 256GB",    mem: 256, bw: 6000, link: "IFabric · 1TB/s",    q1: "FP8",   q4: "AWQ",      note: "国际第二货源；ROCm 生态门槛" },
+    { id: "B300",   label: "B300 288G",   full: "B300（Blackwell Ultra）", mem: 288, bw: 8000, link: "NVLink5 · 1.8TB/s", q1: "FP8",  q4: "NVFP4",    note: "大显存标杆（文章主对标）" }
+  ];
+  C.CARDS = CARDS;
+
+  /* 模型字典：kv.type GQA(L,kvH,hd) / MLA(L,lat,rope) / HYB(perTokByte,fixedMB)
+     wsB：官方/实测权重 GB（十亿参数 × bpp 为理论值时的 scale 默认 1）
+     q行表A顺序 quants 数组；mainQ = 表B/C 主精度                          */
+  var MODELS = [
+    /* ---------- 稠密 ---------- */
+    { id: "llama70", name: "Llama-3.3-70B", org: "Meta", fam: "dense",
+      totalB: 70, actB: null, ctxN: 128,
+      kv: { type: "GQA", L: 80, kvH: 8, hd: 128 },
+      wsB: { BF16: 140, FP8: 70, INT8: 70, INT4: 35 },
+      quants: ["BF16", "FP8", "INT4"], mainQ: "FP8",
+      note: "文章全过程锚点模型：FP8 权重 70GB、KV 0.328MB/token（80层×8KV头×128），实测权重按参数量×bpp 口径" },
+    { id: "qwen32", name: "Qwen3-32B", org: "阿里", fam: "dense",
+      totalB: 32, actB: null, ctxN: 40, ctxNote: "原生 32K，YaRN 至 128K",
+      kv: { type: "GQA", L: 64, kvH: 8, hd: 128 },
+      wsB: { BF16: 64, FP8: 32, INT8: 32, INT4: 16 },
+      quants: ["BF16", "FP8", "INT4"], mainQ: "FP8",
+      note: "中端稠密主力；64 层 × 8 KV 头" },
+    { id: "qwen8", name: "Qwen3-8B", org: "阿里", fam: "dense",
+      totalB: 8, actB: null, ctxN: 32, ctxNote: "原生 32K",
+      kv: { type: "GQA", L: 36, kvH: 8, hd: 128 },
+      wsB: { BF16: 16, FP8: 8, INT8: 8, INT4: 4 },
+      quants: ["BF16", "FP8", "INT4"], mainQ: "FP8",
+      note: "入门稠密基准；36 层 × 8 KV 头" },
+    /* ---------- MoE 经典 ---------- */
+    { id: "qwen235", name: "Qwen3-235B-A22B", org: "阿里", fam: "moe",
+      totalB: 235, actB: 22, ctxN: 256, ctxNote: "原生 32K，YaRN 至 256K",
+      kv: { type: "GQA", L: 94, kvH: 4, hd: 128 },
+      wsB: { BF16: 470, FP8: 235, INT8: 235, NVFP4: 118, INT4: 118 },
+      quants: ["BF16", "FP8", "NVFP4"], mainQ: "FP8",
+      note: "文章锚点：GQA 4 KV 头 → 0.193MB/token（比 70B 稠密还小）；权重 FP8 单卡仅 B300 装得下，NVFP4 后 32K 并发 ×10" },
+    { id: "dsv41f", name: "DeepSeek-V4.1-Flash", org: "深度求索", fam: "moe",
+      totalB: 552, actB: 16, ctxN: 1024, ctxNote: "原生 64K，YaRN 至 1M",
+      kv: { type: "HYB", perTokByte: 890, fixedMB: 0, src: "官方技术报告：全局 KV cache 890 B/token（CED 编码器-解码器共享 + CSA2 压缩）" },
+      wsB: { "FP8+FP4": 510 },
+      quants: ["FP8+FP4"], mainQ: "FP8+FP4",
+      note: "当前 API 主力（deepseek-flash 即此模型）：CED 新架构 40 层=20 编码+20 解码，prefill 8B / decode 16B 激活；KV 890B/token ≈ V4-Pro 的 1/11、上一代 MLA 的 1/79 — 本代显存最省的开源旗舰" },
+    { id: "dsv4", name: "DeepSeek-V4-Pro", org: "深度求索", fam: "moe",
+      totalB: 1600, actB: 49, ctxN: 1024, ctxNote: "原生 1M（YaRN×16）",
+      kv: { type: "HYB", perTokByte: 9842, fixedMB: 0, src: "vLLM 实测 9.62GiB/1M（bf16，含 c4a/c128a 压缩 + 滑窗）" },
+      wsB: { "QAT-MXFP4": 893 },
+      quants: ["QAT-MXFP4"], mainQ: "QAT-MXFP4",
+      note: "仍在售，但 2026-09-14 起 API 已路由至 V4.1-Flash（V4.1 Pro 发布前）；DSA→CSA/HCA 压缩：1M 单序列 KV 仅 9.6GiB ≈ 上一代 MLA 的 1/8.7；原生 QAT MXFP4 无 BF16 官方版" },
+    { id: "k3", name: "Kimi K3", org: "月之暗面", fam: "moe",
+      totalB: 2800, actB: 104, ctxN: 1024, ctxNote: "1M",
+      kv: { type: "HYB", perTokByte: 27648, fixedMB: 429, src: "24 MLA 层×576×2B + 69 KDA 层每路固定状态 ≈429MB（bf16/fp32 混合）" },
+      wsB: { "QAT-MXFP4": 1561 },
+      quants: ["QAT-MXFP4"], mainQ: "QAT-MXFP4",
+      note: "KDA 线性注意力：上下文基本不涨 KV（93 层仅 24 层有 KV），但每路固定状态 429MB — 上下文便宜、并发贵；官方建议 16×H200 起步（40-45 路 @1M 实测口径）" },
+    { id: "glm53", name: "GLM-5.3", org: "智谱 Z.ai", fam: "moe",
+      totalB: 753, actB: 40, ctxN: 1024, ctxNote: "1M",
+      kv: { type: "MLA", L: 78, lat: 512, rope: 64, src: "config：kv_lora_rank 512 + qk_rope 64；DSA 稀疏读未折算（保守）" },
+      wsB: { BF16: 1507, FP8: 755.6, NVFP4: 465, INT8: 755.6 },
+      quants: ["BF16", "FP8", "NVFP4"], mainQ: "FP8",
+      note: "与前代同底座（config 逐项一致，全部增益来自后训练），官方默认仓库已改 FP8；MLA + DSA（IndexShare 4 层共用索引）→ 存储口径偏保守；另有 GLM-5.3-Flash（320B，FP8 328GB）轻量档" },
+    /* ---------- 表A 参照行（KV 结构未充分公开或线性注意力 → 表B 不参） ---------- */
+    { id: "qwen38max", name: "Qwen3.8-Max", org: "阿里", fam: "moe",
+      totalB: 2400, actB: 95, ctxN: 262, kvNoB: true,
+      wsB: { BF16: 4892, FP8: 2400 },
+      quants: ["BF16", "FP8"], mainQ: null,
+      note: "开源版 262K 纯文本（API 版 1M）；BF16 4,892GB 为 HuggingFace 实测；KV 结构未公开 → 表B 不参" },
+    { id: "muse", name: "Muse Spark Open", org: "Meta", fam: "moe",
+      totalB: 816, actB: 42, ctxN: 1024, kvNoB: true,
+      wsB: { BF16: 1644, NVFP4: 533 },
+      quants: ["BF16", "NVFP4"], mainQ: null,
+      note: "62 层/256 专家/top-8，GQA 128Q-16KV（head_dim 未公开）；官方口径 NVFP4 需 ≥700GB 显存（8 卡级）" },
+    { id: "ernie45", name: "ERNIE 4.5 424B", org: "百度", fam: "moe",
+      totalB: 424, actB: 47, ctxN: 128, kvNoB: true,
+      wsB: { BF16: 848, FP8: 424 },
+      quants: ["BF16", "FP8"], mainQ: null,
+      note: "权重为估算口径（标<span class='q'>?</span>）；千帆生态；KV 结构未公开 → 表B 不参" },
+    { id: "m1", name: "MiniMax-M1", org: "MiniMax", fam: "moe",
+      totalB: 456, actB: 45, ctxN: 1024, kvNoB: true,
+      wsB: { BF16: 912 },
+      quants: ["BF16"], mainQ: null,
+      note: "闪电注意力（线性复杂度）：KV 随上下文增速远低于标准 GQA/MLA，具体系数未公开 → 表B 不参" },
+    { id: "llama4mv", name: "Llama-4 Maverick", org: "Meta", fam: "moe",
+      totalB: 400, actB: 17, ctxN: 1024, kvNoB: true,
+      kvNote: "iRoPE，10M 宣称口径",
+      wsB: { BF16: 800 },
+      quants: ["BF16"], mainQ: null,
+      note: "权重为估算口径（标<span class='q'>?</span>）；17B 激活 → 解码算力账极友好" },
+    { id: "gptoss", name: "gpt-oss-120b", org: "OpenAI", fam: "moe",
+      totalB: 117, actB: 5.1, ctxN: 128, kvNoB: true,
+      wsB: { "QAT-MXFP4": 65 },
+      quants: ["QAT-MXFP4"], mainQ: null,
+      note: "MoE 117B-5.1B；原生 MXFP4 65GB — 单卡 80GB 级可跑的开源权重代表；sliding window 混合注意力 → 表B 不参" }
+  ];
+  C.MODELS = MODELS;
+
+  /* 表B/C 上下文档位 */
+  C.CTXS = [4, 32, 128];
+  /* 表B 参与模型（有可靠 KV） */
+  C.B_MODELS = ["llama70", "qwen32", "qwen8", "qwen235", "dsv41f", "dsv4", "k3", "glm53"];
+  /* 表C 展示卡列 */
+  C.C_CARDS = ["H200", "B200", "B300", "910C", "MI325X"];
+})(CALC);
+if (typeof module !== "undefined" && module.exports) { module.exports = CALC; }
+</script>
+<!-- CALC-CORE-END -->
+
+<!-- ============ ⓪ A 区：反推选型 ============ -->
+<section class="sec" id="sec-answer">
+  <div class="section-head">
+    <h2>⓪ 我要部署这套配置 → 需要几张卡</h2>
+    <span class="sub">改条件即时重算 ｜ 结论按<b>总卡数最少</b>排序 ｜ 点下方卡型可切换 ① 区的显存账基准</span>
+  </div>
+  <div class="answer-panel">
+    <div class="ctrl-bar" id="ctrl-bar">
+      <label>模型<select id="sel-model"></select></label>
+      <label>上下文<select id="sel-ctx"><option value="4">4K</option><option value="32" selected>32K</option><option value="128">128K</option></select></label>
+      <label>目标并发<select id="sel-n"><option value="10">10 路</option><option value="50">50 路</option><option value="100" selected>100 路</option><option value="300">300 路</option><option value="1000">1000 路</option></select></label>
+      <label>单流速度<select id="sel-tps"><option value="30" selected>≥30 tok/s</option><option value="60">≥60 tok/s</option></select></label>
+      <label>显存账基准卡<select id="sel-card"></select></label>
+      <span class="ctrl-hint">① 区显存账随「基准卡」联动 · 打印时按当前选择输出</span>
+    </div>
+    <div id="answer-main"></div>
+    <div class="alts-title">全部卡型对比（按所需总卡数升序 · 点击切换基准卡）</div>
+    <div class="alts" id="answer-alts"></div>
+    <p class="answer-foot" id="answer-foot"></p>
+  </div>
+</section>
+
+<!-- ============ ① B 区：模型卡片 ============ -->
+<section class="sec" id="sec-models">
+  <div class="section-head">
+    <h2>① 模型卡片 · 一个模型一版面</h2>
+    <span class="sub">显存三段账按基准卡 <b id="cards-base">—</b> ｜ 三档上下文并排 ｜ 色块越绿 = 并发越充裕 ｜ 全部为理论屋顶线口径</span>
+  </div>
+  <div id="model-cards"></div>
+</section>
+
+<!-- ============ ② 统一图例 ============ -->
+<section class="sec" id="sec-legend">
+  <div class="section-head"><h2>② 符号图例</h2><span class="sub">全页通用，附录表格里出现任一符号都按此读</span></div>
+  <div class="legend">
+    <span class="lg"><span class="sym s-x">×</span>该速度目标不可达（单流速度天花板低于目标）</span>
+    <span class="lg"><span class="sym s-ov">超出</span>上下文超过该模型原生上限</span>
+    <span class="lg"><span class="sym s-na">— / &lt;1</span>KV 结构未公开，或并发不足一路</span>
+    <span class="lg"><span class="sym s-na">&gt;999</span>屋顶线超出引擎调度上限（容量与带宽均不构成瓶颈）</span>
+    <span class="lg"><span class="sym s-c">C</span>容量受限：加显存 / 降精度有效</span>
+    <span class="lg"><span class="sym s-b">B</span>带宽受限：加显存无效，降权重字节 / 换高带宽卡有效</span>
+    <span class="lg"><span class="sym s-g">绿→红</span>并发充裕 → 紧张</span>
+  </div>
+</section>
+
+<!-- ============ ③ 附录 ============ -->
+<section class="sec" id="sec-appendix">
+  <div class="section-head"><h2>③ 附录 · 完整静态矩阵、校验与口径</h2><span class="sub">默认折叠，点开即展开 ｜ 打印时自动全部展开并按 A3 横向排版</span></div>
+
+  <details class="appendix" id="sec-dict"><summary>模型字典 · 权重与 KV 账（14 款 · 2026-11 现役清单）<span class="sm-sub">KV 结构 = 并发上限的核心差异</span></summary><div class="inner"><div class="table-shell">
+  <table style="min-width:1180px"><thead><tr>
+    <th class="col-sticky" style="width:150px">模型</th><th style="width:105px">总参-激活</th><th style="width:80px">注意力/KV</th>
+    <th style="width:145px">KV 结构</th><th style="width:100px">每 token KV</th><th style="width:85px">32K 单序列</th>
+    <th style="width:60px">上下文</th><th>权重体积（官方格式实测/理论）· 备注</th>
+  </tr></thead><tbody id="tbody-dict"></tbody></table></div></div></details>
+
+  <details class="appendix" id="sec-cards"><summary>卡型显存账 + 量化支持矩阵（10 款）<span class="sm-sub">容量决定装卡数与 KV 池，带宽决定单流速度天花板</span></summary><div class="inner"><div class="table-shell">
+  <table style="min-width:1080px"><thead><tr>
+    <th class="col-sticky" style="width:130px">卡型</th><th style="width:70px">标称容量</th><th style="width:85px">可用显存</th>
+    <th style="width:85px">带宽</th><th style="width:120px">1B/参 量化</th><th style="width:100px">4bit 量化</th>
+    <th style="width:130px">卡间互联</th><th>备注（支持红线）</th>
+  </tr></thead><tbody id="tbody-cards"></tbody></table></div></div></details>
+
+  <details class="appendix" id="sec-a"><summary>表A · 装卡数矩阵（能加载的最低配置）<span class="sm-sub">行 = 模型 × 精度，列 = 卡型</span></summary><div class="inner"><div class="table-shell">
+  <table style="min-width:1230px"><thead><tr>
+    <th class="col-sticky" style="width:200px">模型 · 权重精度</th><th>权重<br>GB</th>
+    <th class="ca"></th><th class="ca"></th><th class="ca"></th><th class="ca"></th><th class="ca"></th><th class="ca"></th><th class="ca"></th><th class="ca"></th><th class="ca"></th><th class="ca"></th>
+  </tr></thead><tbody id="tbody-a"></tbody></table></div></div></details>
+
+  <details class="appendix" id="sec-b"><summary>表B · 有效并发三档上下文（4K / 32K / 128K）<span class="sm-sub">cell = min(内存上限, 时延上限)，格式「@30 路 / @60 路」</span></summary><div class="inner">
+    <div class="table-shell"><table style="min-width:1230px">
+      <thead><tr><th colspan="11" style="text-align:center;background:#eaf2fe;color:#1a3a6b">上下文 <b style="font-size:13px">4K</b> ｜ 单流目标 ≥30 / ≥60 tokens/s</th></tr></thead>
+      <thead><tr><th class="col-sticky" style="width:200px">模型 · 主精度 · 组成</th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th></tr></thead>
+      <tbody id="tbody-b4"></tbody></table></div>
+    <div class="table-shell"><table style="min-width:1230px">
+      <thead><tr><th colspan="11" style="text-align:center;background:#eaf2fe;color:#1a3a6b">上下文 <b style="font-size:13px">32K</b> ｜ 单流目标 ≥30 / ≥60 tokens/s</th></tr></thead>
+      <thead><tr><th class="col-sticky" style="width:200px">模型 · 主精度 · 组成</th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th></tr></thead>
+      <tbody id="tbody-b32"></tbody></table></div>
+    <div class="table-shell"><table style="min-width:1230px">
+      <thead><tr><th colspan="11" style="text-align:center;background:#eaf2fe;color:#1a3a6b">上下文 <b style="font-size:13px">128K</b> ｜ 单流目标 ≥30 / ≥60 tokens/s ｜ 超出模型原生上下文的格显示「超出」</th></tr></thead>
+      <thead><tr><th class="col-sticky" style="width:200px">模型 · 主精度 · 组成</th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th><th class="b-th"></th></tr></thead>
+      <tbody id="tbody-b128"></tbody></table></div>
+  </div></details>
+
+  <details class="appendix" id="sec-c"><summary>表C · 集群吞吐放大（目标 100 路并发要几卡）<span class="sm-sub">组内 TP/EP × 组间 DP 组合搜索</span></summary><div class="inner"><div class="table-shell">
+  <table style="min-width:1080px"><thead><tr>
+    <th class="col-sticky" style="width:190px">模型 · 主精度</th><th class="cc"></th><th class="cc"></th><th class="cc"></th><th class="cc"></th><th class="cc"></th>
+  </tr></thead><tbody id="tbody-c"></tbody></table></div></div></details>
+
+  <details class="appendix" id="sec-fix"><summary>校验锚点 · 文章数字逐项复算（页面加载即自检）<span class="sm-sub">10 项全部达标才说明公式没被改坏</span></summary><div class="inner"><div class="panel">
+    <h3>⑥ 口径文章数字回归</h3>
+    <table class="mini">
+      <tr><th style="width:44%">锚点</th><th style="width:13%">文章值</th><th style="width:13%">本表复算</th><th>判定</th></tr>
+      <tr><td>H200 · 70B FP8 @8K（@30/@60 路）</td><td>19 / 4</td><td id="fx1">—</td><td id="fx1r">—</td></tr>
+      <tr><td>H200 · 70B FP8 @32K（@30/@60 路）</td><td>5 / 1</td><td id="fx2">—</td><td id="fx2r">—</td></tr>
+      <tr><td>B300 · 70B FP8 @8K（@30/@60 路）</td><td>68 / 24</td><td id="fx3">—</td><td id="fx3r">—</td></tr>
+      <tr><td>B300 · 70B FP8 @32K（@30/@60 路）</td><td>17 / 6</td><td id="fx4">—</td><td id="fx4r">—</td></tr>
+      <tr><td>910C · 70B W8A8 @8K（@30 路）</td><td>14</td><td id="fx5">—</td><td id="fx5r">—</td></tr>
+      <tr><td>910C · 70B W8A8 @32K（@30 路）</td><td>3</td><td id="fx6">—</td><td id="fx6r">—</td></tr>
+      <tr><td>910C · 70B 单流理论上限</td><td>≈46 tok/s</td><td id="fx7">—</td><td id="fx7r">—</td></tr>
+      <tr><td>Qwen3-235B NVFP4 · B300 单卡 @32K</td><td>≈21 路</td><td id="fx8">—</td><td id="fx8r">—</td></tr>
+      <tr><td>历史 MLA 61 层结构回归 · B300×3 组级并发 @32K</td><td>36 路（KV 池 83GB）</td><td id="fx9">—</td><td id="fx9r">—</td></tr>
+      <tr><td>70B FP8 单流 · H200 屋顶线</td><td>≈69 tok/s</td><td id="fx10">—</td><td id="fx10r">—</td></tr>
+    </table>
+    <p style="margin:8px 0 0;font-size:11.5px;color:var(--text-3)">
+      判定规则：本表并发 floor 取整，文章多为四舍五入 → 「±1 达标」；MLA 结构回归行文章按 83GB KV 池（含建词开销口径），
+      本表按 config 参数精确推 88.6GB → 差 5% 内达标。所有公式在页面源码 <code>calc-core</code> 块内，可整体提取复算。
+    </p>
+  </div></div></details>
+
+  <details class="appendix" id="sec-src"><summary>局限、口径与数据来源<span class="sm-sub">正式部署必读</span></summary><div class="inner"><div class="panel">
+    <h3>⑦ 口径声明</h3>
+    <div class="kv"><b>未计入</b><span>TP/PP/EP 跨卡通信开销（910C HCCS 784GB/s vs B300 NVLink5 1.8TB/s，跨卡度数越高折扣越大）；prefill 计算瓶颈与 chunked prefill 混排；PD 分离与 KV 迁移；投机解码（MTP）加速 — 前两项使本表偏乐观，最后一项使本表偏保守</span></div>
+    <div class="kv"><b>「&gt;999」截断</b><span>V4.1-Flash 这类 KV 极省（890B/token）的新架构，屋顶线上限远超真实调度能力（vLLM max_num_seqs 常设 ≤1024、prefill 混排挤占带宽），故超出 999 路直接显示「&gt;999」并标注截断 — 视为「该卡型容量与带宽均不构成瓶颈」，实际按引擎调度上限配置</span></div>
+    <div class="kv"><b>MoE 口径</b><span>显存与 KV 池按总参数计；<b>表内 MoE 模型的解码权重读取按全量权重计（保守口径）</b>。计算核心中保留的专家命中混合系数 0.30 仅在显式标注 <code>type:"moe"</code> 的历史结构回归参照对象上生效，不作用于主清单 —— 这是为了与文章锚点（Qwen3-235B NVFP4 ≈21 路）保持同口径。若要按激活参数折算，需单独改口径并重跑全部锚点</span></div>
+    <div class="kv"><b>取整口径</b><span>装卡数 ceil；并发 floor（保守可部署）；文章部分格取四舍五入 → 全表 ±1 差异属口径不同而非错误</span></div>
+    <div class="kv"><b>KV 来源</b><span class="src">Llama-3.3 / Qwen3 系：官方 config.json（GQA 头数）｜ DeepSeek-V4.1-Flash：官方技术报告 890B/token（CED 编码器-解码器 KV 共享 + CSA2 Full/Reindex/Reuse 分层压缩，YaRN 64K→1M）｜ DeepSeek-V4-Pro：vLLM 实测 9.62GiB@1M → 9.8KB/token（CSA/HCA c4a+c128a 压缩 + 128 滑窗）｜ Kimi K3：24 MLA 层×576×2B=27.6KB + 69 KDA 层固定状态 429MB/路（技术报告 Table 1 + SGLang 实现）｜ GLM-5.3：config 78 层 MLA 512+64，DSA 读侧未折算（保守）</span></div>
+    <div class="kv"><b>权重来源</b><span class="src">AI模型速查表.html 实测口径：GLM-5.3 FP8 755.6GB / BF16 1.507TB / NVFP4 465GB；Kimi K3 QAT-MXFP4 1,561GB（4.5bit/参，不存在 5.6TB BF16）；DeepSeek-V4.1-Flash FP8+FP4 510GB（Unsloth repack ~162GB）；DeepSeek-V4 MXFP4 893GB；Qwen3.8-Max BF16 4,892GB；Muse Spark Open BF16 1,644GB。稠密理论行 = 参数量 × bpp（2/1/0.5/0.5625）</span></div>
+    <div class="kv"><b>卡型来源</b><span class="src">chips.js（2026-11-03）：MI325X 256GB/6.0TB/s；950DT 144GB/4.0TB/s；950PR 128GB/1.6TB/s；910C 128GB/3.2TB/s、无 FP8 官方格式（FP32/FP16/BF16/INT8）</span></div>
+    <div class="kv"><b>参照校准</b><span>Kimi K3 官方口径 16×H200 承载 40-45 路 @1M：本表 16×H200 @32K 主精度算得 ≈63 路（短上下文应更高，量级一致偏保守）；GLM-5.3 FP8 官方口径单台 8×H200 可载入：本表 ceil(755.6/120.9)=7 卡（7 非常规 TP 度，实际取 8）✓；DeepSeek-V4.1-Flash 官方 repack ~162GB：本表 FP8+FP4 权重 510GB 装载下限按官方全量仓计，Unsloth repack 后单卡级可跑</span></div>
+    <div class="kv"><b>免责</b><span>理论屋顶线估算，用于选型前期速查与比选（配 LLM推理技术速查.html 的 TP/EP/PD 分离与 KV 压缩章节使用）；正式部署必须实测 — 上线前盯 vllm:kv_cache_usage_perc、num_preemptions、num_requests_waiting 三个指标，稳态抢占应为 0</span></div>
+  </div></div></details>
+</section>
+
+<footer>
+  算力工具箱 · 推理卡数速查表 v2.0 ｜ 测算框架：AI算力局 2026-09-16《H200、B300、910C 大显存能换多少并发》｜ 卡型参数源自 chips.js ｜ 模型 KV 参数源自官方 config.json / 技术报告 / vLLM·SGLang 实现口径<br>
+  理论屋顶线估算 · 实际达成率六至八折 ｜ 正式选型与采购以厂商 datasheet 及自行实测为准 ｜ 数据截至 2026-11-04
+</footer>
+
+</div>
+
+<script>
+/* ============================ 渲染层 v2.0 ============================ */
+"use strict";
+(function () {
+  var C = CALC, fmt = function (n, d) {
+    if (n == null || isFinite(n) === false) return "—";
+    return n.toLocaleString("zh-CN", { maximumFractionDigits: d == null ? 0 : d });
+  };
+  var $ = function (id) { return document.getElementById(id); };
+  function byId(arr, id) { for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i]; return null; }
+  var CARDS = C.CARDS, MODELS = C.MODELS;
+  var PO2 = [1, 2, 4, 8, 16];
+  function tpSuggest(load) {
+    if (PO2.indexOf(load) >= 0) return null;
+    for (var i = 0; i < PO2.length; i++) if (PO2[i] > load) return PO2[i];
+    return null;
+  }
+
+  /* ---------- 通用：目标并发所需最小总卡数（支持 30 / 60 tok/s） ----------
+     组内 TP/EP 候选度 = 装载下限 ∪ 2/4/8/16 常规度，组间 DP 复制，取总卡数最小。
+     直接复用 calc-core 的 solveN，公式口径与附录表完全一致。                */
+  function plan(m, q, card, ctxK, targetN, tps) {
+    if (!q) return null;
+    var load = C.loadCards(m, q, card);
+    if (load < 1) return null;
+    var cand = {}, list = [load, 2, 4, 8, 16, load * 2, load * 4];
+    list.forEach(function (g) { if (g >= load && g <= 64) cand[g] = 1; });
+    var gs = Object.keys(cand).map(Number).sort(function (a, b) { return a - b; });
+    var best = null;
+    for (var i = 0; i < gs.length; i++) {
+      var g = gs[i], s = C.solveN(m, q, card, ctxK, g);
+      if (s.status !== "ok") continue;
+      var eff, bt;
+      if (tps >= 60) { if (s.tps1 < 60) continue; eff = s.n60; bt = s.bt60; }
+      else { eff = s.n30; bt = s.bt30; }
+      if (!(eff > 0)) continue;
+      var k = eff >= targetN ? 1 : Math.ceil(targetN / eff);
+      var total = g * k;
+      if (!best || total < best.total) best = { total: total, group: g, groups: k, perGroup: eff, bt: bt, s: s, load: load };
+    }
+    return best;
+  }
+  function btText(bt) {
+    return bt === "B" ? "带宽受限：加显存无效，降权重字节或换更高带宽卡才有效"
+                      : "容量受限：加卡 / 降权重精度可以直接减少卡数";
+  }
+  function fmtN(e, cap) {
+    if (e == null) return "—";
+    if (!cap || e < 0.5) return "×";
+    if (e < 1) return "<1";
+    if (e > 999) return ">999";
+    return fmt(e, 0);
+  }
+  function tone(n) {
+    if (n == null || n < 0.5) return "t-red";
+    if (n < 5) return "t-amber";
+    if (n < 20) return "t-lime";
+    return "t-green";
+  }
+
+  /* ---------- 下拉初始化 ---------- */
+  var selModel = $("sel-model"), selCtx = $("sel-ctx"), selN = $("sel-n"), selTps = $("sel-tps"), selCard = $("sel-card");
+  var mh = "<optgroup label='可测算并发（KV 结构已公开）'>";
+  C.B_MODELS.forEach(function (id) { var m = byId(MODELS, id); mh += "<option value='" + id + "'>" + m.name + " · " + m.mainQ + "</option>"; });
+  mh += "</optgroup><optgroup label='仅能算装卡数（KV 未公开）'>";
+  MODELS.forEach(function (m) { if (C.B_MODELS.indexOf(m.id) < 0) mh += "<option value='" + m.id + "'>" + m.name + " · 仅容量口径</option>"; });
+  mh += "</optgroup>";
+  selModel.innerHTML = mh;
+  selCard.innerHTML = CARDS.map(function (c) { return "<option value='" + c.id + "'>" + c.label + " · " + c.mem + "GB</option>"; }).join("");
+  selModel.value = "llama70"; selCard.value = "H200";
+  var cardTouched = false;   /* 用户是否手动选过基准卡；未选过时自动跟随结论推荐卡型 */
+
+  /* ---------- ⓪ A 区：反推选型 ---------- */
+  function renderAnswer() {
+    var m = byId(MODELS, selModel.value), ctxK = +selCtx.value, targetN = +selN.value, tps = +selTps.value;
+    var q = m.mainQ || m.quants[0];
+    var cond = m.name + " · " + q + " · " + (ctxK >= 1024 ? "1M" : ctxK + "K") + " · " + targetN + " 路 · ≥" + tps + " tok/s";
+    var altHtml = "", mainHtml = "", foot = "";
+
+    if (ctxK > m.ctxN) {
+      mainHtml = "<div class='ans-hero'><div class='ans-detail'><div class='ans-line1'>超出该模型原生上下文上限</div>"
+        + "<div class='ans-line2'>" + cond + "（原生 " + (m.ctxN >= 1000 ? "1M" : m.ctxN + "K") + "）· 请降低上下文档位或换长上下文模型</div></div></div>";
+      foot = "上下文超出上限，未给出卡数结论。";
+    } else if (m.kvNoB || !q || !C.kvOf(m)) {
+      var loads = CARDS.map(function (c) { return { c: c, load: C.loadCards(m, q, c) }; })
+        .filter(function (x) { return x.load > 0; }).sort(function (a, b) { return a.load - b.load; });
+      var lb = loads[0];
+      mainHtml = "<div class='ans-hero'><div class='ans-num'><span class='lab'>容量下限（仅装卡数）</span><b>" + (lb ? lb.load : "—") + "</b><span class='unit'>张卡</span></div>"
+        + "<div class='ans-detail'><div class='ans-line1'>该模型 KV 结构未公开，无法测算并发" + (lb ? "（按 " + lb.c.label + " 口径）" : "") + "</div>"
+        + "<div class='ans-line2'>" + cond + " ｜ 只能回答「至少几张卡能加载」，不能回答「几张卡能服务」</div>"
+        + "<div class='ans-bt bt-X'>证据不足 · 需实测 KV/token 后补算</div>"
+        + "<div class='ans-why'>权重 " + fmt(C.weightGB(m, q), 1) + "GB ÷ 单卡可用显存；按各卡型最小装卡数排序如下。</div></div></div>";
+      altHtml = loads.map(function (x) {
+        return "<button class='alt t-na' data-card='" + x.c.id + "'><span class='alt-name'>" + x.c.label + "</span>"
+          + "<span class='alt-num'>" + x.load + " 卡</span><span class='alt-sub'>仅容量口径</span></button>";
+      }).join("");
+      foot = "仅容量口径：不参与 ① 区并发推导，附录表B 同样留空。";
+    } else {
+      var rows = CARDS.map(function (c) { return { c: c, r: plan(m, q, c, ctxK, targetN, tps) }; });
+      var ok = rows.filter(function (x) { return x.r; }).sort(function (a, b) { return a.r.total - b.r.total || b.r.perGroup - a.r.perGroup; });
+      var bad = rows.filter(function (x) { return !x.r; });
+      var best = ok[0];
+      if (!cardTouched && best) {          /* 首屏结论与 ① 区显存账用同一张卡，避免口径打架 */
+        selCard.value = best.c.id;
+        renderCards(); markCur();
+      }
+      if (!best) {
+        mainHtml = "<div class='ans-hero'><div class='ans-detail'><div class='ans-line1'>该速度目标下所有卡型都不可达</div>"
+          + "<div class='ans-line2'>" + cond + " ｜ 单流速度天花板低于 ≥" + tps + " tok/s</div>"
+          + "<div class='ans-bt bt-X'>需降低速度目标、降权重字节或换更高带宽卡</div></div></div>";
+      } else {
+        var r = best.r, s0 = C.solve(m, q, best.c, ctxK);
+        var seq = s0.status === "ok" ? s0.seqKVGB : 0;
+        var why = "每卡可用 " + fmt(C.usable(best.c), 1) + "GB，权重 " + fmt(C.weightGB(m, q), 1)
+          + "GB 后剩 KV 池 " + fmt(r.s.pool / r.group, 1) + "GB；" + (ctxK >= 1024 ? "1M" : ctxK + "K")
+          + " 单序列 KV " + fmt(seq, 2) + "GB → 每组约 " + fmt(r.perGroup, 0) + " 路，需 " + r.groups + " 组 × " + r.group + " 卡。";
+        var tpUp = 1; while (tpUp < r.group) tpUp *= 2;
+        var tpNote = (PO2.indexOf(r.group) < 0 && tpUp <= 64)
+          ? " 注意：组度数 " + r.group + " 非常规，实际部署建议向上取 " + tpUp + " 卡/组（跨卡通信另有折扣）。"
+          : "";
+        mainHtml = "<div class='ans-hero'><div class='ans-num'><span class='lab'>最少需要</span><b>" + r.total + "</b><span class='unit'>张卡</span></div>"
+          + "<div class='ans-detail'><div class='ans-line1'>" + best.c.label + " · " + r.group + " 卡/组 × " + r.groups + " 组"
+          + (r.total > r.load ? "（装载下限 " + r.load + " 卡）" : "") + "</div>"
+          + "<div class='ans-line2'>" + cond + "</div>"
+          + "<div class='ans-bt " + (r.bt === "B" ? "bt-B" : "bt-C") + "'>" + r.bt + " · " + btText(r.bt) + "</div>"
+          + "<div class='ans-why'>" + why + tpNote + "</div></div></div>";
+        foot = "同一目标下按总卡数升序排列 —— 未计单卡价格、功耗与跨卡通信开销，故「卡数最少」不等于「成本最低」；组内并行度候选受限在装载下限与 2/4/8/16 常规度内，详见附录 ⑦。";
+      }
+      altHtml = ok.concat(bad).map(function (x) {
+        var rr = x.r, cls = rr ? (rr.bt === "B" ? "t-b" : "t-c") : "t-x";
+        return "<button class='alt " + cls + "' data-card='" + x.c.id + "'><span class='alt-name'>" + x.c.label + "</span>"
+          + "<span class='alt-num'>" + (rr ? rr.total + " 卡" : "×") + "</span>"
+          + "<span class='alt-sub'>" + (rr ? fmt(rr.perGroup, 0) + " 路/组 · " + rr.bt : "速度不可达") + "</span></button>";
+      }).join("");
+    }
+    $("answer-main").innerHTML = mainHtml;
+    $("answer-alts").innerHTML = altHtml;
+    $("answer-foot").textContent = foot + " ① 区显存账当前基准卡：" + byId(CARDS, selCard.value).label + "（可在条件条切换）。";
+    Array.prototype.forEach.call(document.querySelectorAll("#answer-alts .alt"), function (btn) {
+      btn.onclick = function () { cardTouched = true; selCard.value = btn.getAttribute("data-card"); renderCards(); markCur(); };
+    });
+    markCur();
+  }
+  function markCur() {
+    Array.prototype.forEach.call(document.querySelectorAll("#answer-alts .alt"), function (b) {
+      if (b.getAttribute("data-card") === selCard.value) b.classList.add("cur"); else b.classList.remove("cur");
+    });
+  }
+
+  /* ---------- ① B 区：模型卡片 ---------- */
+  function renderCards() {
+    var c = byId(CARDS, selCard.value);
+    $("cards-base").textContent = c.label + " · " + c.mem + "GB";
+    var u = C.usable(c), h = "";
+    MODELS.forEach(function (m) {
+      var q = m.mainQ || m.quants[0];
+      var w = C.weightGB(m, q);
+      var load = C.loadCards(m, q, c);
+      var total = Math.max(load, 1) * c.mem;
+      var pool = Math.max(0, Math.max(load, 1) * u - (w || 0));
+      var sys = Math.max(0, total - (w || 0) - pool);
+      var pW = Math.min(100, (w || 0) / total * 100), pP = Math.min(100 - pW, pool / total * 100), pS = Math.max(0, 100 - pW - pP);
+      var K = (!m.kvNoB && m.kv) ? C.kvOf(m) : null;
+      var perTok = K ? K.perTok / 1e6 : null;
+      var kvName = K ? (m.kv.type === "GQA" ? "GQA " + m.kv.L + "层" : m.kv.type === "MLA" ? "MLA " + m.kv.L + "层" : "混合压缩") : "KV 未公开";
+
+      var ctxHtml = C.CTXS.map(function (ctxK) {
+        var lab = ctxK + "K";
+        if (!K) return "<div class='ctxbox t-na'><div class='ctx-t'>" + lab + "</div><div class='ctx-n'>—</div><div class='ctx-s'>KV 结构未公开</div></div>";
+        if (ctxK > m.ctxN) return "<div class='ctxbox t-na'><div class='ctx-t'>" + lab + "</div><div class='ctx-n'>超出</div><div class='ctx-s'>" + (m.ctxNote ? m.ctxNote : "超过模型原生上限") + "</div></div>";
+        var s = C.solve(m, q, c, ctxK);
+        if (s.status !== "ok") return "<div class='ctxbox t-na'><div class='ctx-t'>" + lab + "</div><div class='ctx-n'>—</div><div class='ctx-s'>权重超出口径</div></div>";
+        var n60 = s.tps1 >= 60 ? s.n60 : null;
+        return "<div class='ctxbox " + tone(s.n30) + "'><div class='ctx-t'>" + lab + " · 每套 " + s.load + " 卡</div>"
+          + "<div class='ctx-n'>" + fmtN(s.n30, true) + "<span> 路 @30</span></div>"
+          + "<div class='ctx-s'>@60 " + fmtN(n60, true) + " · 瓶颈 <b>" + s.bt30 + "</b></div></div>";
+      }).join("");
+
+      var tps1 = (w && q) ? C.singleTps(m, q, c) : null;
+      var p100 = K ? C.minCardsFor(m, q, c, 32, 100) : null;
+      var why = K ? ("KV " + fmt(perTok, 3) + "MB/token · 32K 单序列 " + fmt(perTok * 32 * 1024 / 1e3 + (K.fixedMB || 0) / 1e3, 2) + "GB · " + btText(C.solve(m, q, c, 32).status === "ok" ? C.solve(m, q, c, 32).bt30 : "C"))
+                  : "KV 结构未公开，只给容量口径；并发需实测后补算";
+      h += "<div class='mcard'><div class='hd'><div><div class='name'>" + m.name
+        + (q ? "<span class='badge b-blue'>" + q + "</span>" : "") + "</div>"
+        + "<div class='spec'>" + m.totalB + "B" + (m.actB ? "-" + m.actB + "B 激活" : " 稠密") + " · " + kvName
+        + " · 原生 " + (m.ctxN >= 1000 ? "1M" : m.ctxN + "K") + " · " + m.org + "</div></div>"
+        + "<div class='loadbig'>装卡下限<b>" + (load > 0 ? load : "—") + " 卡</b></div></div>"
+        + "<div class='stack'><span class='sw-w' style='width:" + pW + "%'></span><span class='sw-p' style='width:" + pP + "%'></span><span class='sw-s' style='width:" + pS + "%'></span></div>"
+        + "<div class='stack-legend'><span><i class='sw-w'></i>权重 " + fmt(w, 1) + "GB</span>"
+        + "<span><i class='sw-p'></i>KV 池 " + fmt(pool, 1) + "GB</span>"
+        + "<span><i class='sw-s'></i>系统预留 " + fmt(sys, 1) + "GB</span>"
+        + "<span style='color:var(--text-3)'>合计 " + fmt(total, 0) + "GB（" + Math.max(load, 1) + " × " + c.mem + "GB 标称）</span></div>"
+        + "<div class='ctxrow'>" + ctxHtml + "</div>"
+        + "<div class='mfoot'><span>单流上限 <b>" + (tps1 ? fmt(tps1, 1) : "—") + "</b> tok/s</span>"
+        + "<span>100 路 @32K 需 <b>" + (p100 ? p100.total : "—") + "</b> 卡</span>"
+        + "<span class='why'>" + why + "</span></div></div>";
+    });
+    $("model-cards").innerHTML = h;
+  }
+
+  /* ---------- 附录：静态矩阵（与 v1.1 完全一致） ---------- */
+  (function () {
+    var h = "";
+    MODELS.forEach(function (m) {
+      var K = m.kv ? (m.kv.type === "HYB" ? { perTok: m.kv.perTokByte, fixedMB: m.kv.fixedMB || 0 } : C.kvOf(m)) : null;
+      var perTok = K ? (K.perTok / 1e6) : null;
+      var seq32 = K ? (perTok * 32 * 1024 / 1e3 + (K.fixedMB || 0) / 1e3) : null;
+      var kvStruct = m.kvNoB ? "<span class='na'>未公开</span>"
+        : m.kv.type === "GQA" ? m.kv.L + " 层 × " + m.kv.kvH + " KV头 × " + m.kv.hd
+        : m.kv.type === "MLA" ? m.kv.L + " 层 MLA<br><span style='font-weight:400'>lora " + m.kv.lat + " + rope " + m.kv.rope + "</span>"
+        : (m.kv.src ? m.kv.src.replace(/（/g, "<br>（") : "混合");
+      var kvName = m.kvNoB ? "<span class='na'>—</span>" : m.kv.type === "GQA" ? "GQA" : m.kv.type === "MLA" ? "MLA" : "混合架构";
+      var wsHtml = "";
+      if (m.wsB) Object.keys(m.wsB).forEach(function (q) {
+        wsHtml += "<span class='badge " + (m.mainQ === q ? "b-blue" : "b-gray") + "'>" + q + " " + fmt(m.wsB[q], 1) + "GB</span> ";
+      });
+      h += "<tr><td class='model'>" + m.name + "<span class='sub'>" + m.org + (m.fam === "moe" ? " · MoE" : " · 稠密") + "</span></td>"
+        + "<td class='num ws-nw'>" + m.totalB + "B" + (m.actB ? "-<b>" + m.actB + "B</b>" : "") + "</td>"
+        + "<td>" + kvName + "</td><td style='font-size:11px;color:var(--text-2);white-space:normal;line-height:1.4'>" + kvStruct + "</td>"
+        + "<td class='num ws-nw'>" + (perTok ? fmt(perTok, 3) + " MB" : "<span class='na'>—</span>") + (K && K.fixedMB ? "<span class='note-tok'>+" + fmt(K.fixedMB, 0) + " MB/路固定</span>" : "") + "</td>"
+        + "<td class='num ws-nw'>" + (seq32 ? fmt(seq32, 2) + " GB" : "<span class='na'>—</span>") + "</td>"
+        + "<td class='num ws-nw'>" + (m.ctxN >= 1000 ? "1M" : m.ctxN + "K") + "</td>"
+        + "<td style='line-height:2;white-space:normal'>" + wsHtml + "<span class='note-tok'>" + (m.ctxNote ? m.ctxNote + " · " : "") + m.note + "</span></td></tr>";
+    });
+    $("tbody-dict").innerHTML = h;
+  })();
+
+  (function () {
+    var h = "";
+    CARDS.forEach(function (c) {
+      var u = C.usable(c);
+      h += "<tr><td class='model'>" + c.full + "</td>"
+        + "<td class='num ws-nw'>" + c.mem + "GB</td>"
+        + "<td class='num ws-nw'><b>" + fmt(u, 1) + "GB</b></td>"
+        + "<td class='num ws-nw'>" + (c.bw / 1000) + "TB/s</td>"
+        + "<td><span class='badge " + (c.q1 === "FP8" ? "b-ok" : "b-warn") + "'>" + c.q1 + "</span></td>"
+        + "<td><span class='badge " + (c.q4 === "NVFP4" || c.q4 === "MXFP4" ? "b-ok" : (c.q4 === "—" ? "b-danger" : "b-gray")) + "'>" + c.q4 + "</span></td>"
+        + "<td style='font-size:11px;white-space:nowrap'>" + c.link + "</td>"
+        + "<td style='font-size:11px;color:var(--text-2);white-space:normal;min-width:170px;line-height:1.45'>" + c.note + "</td></tr>";
+    });
+    $("tbody-cards").innerHTML = h;
+  })();
+
+  (function () {
+    var ths = document.querySelectorAll("table thead .ca");
+    CARDS.forEach(function (c, i) { ths[i].innerHTML = c.label; });
+    var GRPS = [
+      { t: "稠密（9 行）", sub: "Llama-70B / Qwen3-32B / 8B — 权重即全量读取，解码带宽账最重", ids: ["llama70", "qwen32", "qwen8"] },
+      { t: "MoE 经典 + 百亿级（4 模型）", sub: "235B-A22B / V4.1-Flash / gpt-oss-120b / ERNIE 4.5", ids: ["qwen235", "dsv41f", "gptoss", "ernie45"] },
+      { t: "500B-1T 旗舰（4 模型）", sub: "GLM-5.3 / Muse Spark Open / MiniMax-M1 / Llama-4 Maverick", ids: ["glm53", "muse", "m1", "llama4mv"] },
+      { t: "1T 以上超大（3 模型）", sub: "DeepSeek-V4-Pro / Kimi K3 / Qwen3.8-Max — 权重本身就是机柜级预算", ids: ["dsv4", "k3", "qwen38max"] }
+    ];
+    var h = "";
+    GRPS.forEach(function (g) {
+      h += "<tr class='grp'><td colspan='12'>" + g.t + "<span class='gsub'>" + g.sub + "</span></td></tr>";
+      g.ids.forEach(function (mid) {
+        var m = byId(MODELS, mid);
+        m.quants.forEach(function (q) {
+          var w = C.weightGB(m, q);
+          h += "<tr><td class='model col-sticky'>" + m.name + " · " + q + (m.mainQ === q ? " <span class='badge b-blue'>主精度</span>" : "") + "</td>"
+            + "<td class='num'><b>" + fmt(w, 1) + "</b></td>";
+          CARDS.forEach(function (c) {
+            var load = C.loadCards(m, q, c), sug = tpSuggest(load);
+            var alt = (q === "FP8" && c.q1 !== "FP8" && c.q1) ? c.q1 : null;
+            var alt4 = ((q === "NVFP4" || q === "INT4" || q === "QAT-MXFP4") && c.q4 !== "NVFP4" && c.q4 !== "MXFP4") ? c.q4 : null;
+            var cls = (load === 1) ? "" : (load > 16 ? " style='color:var(--danger)'" : "");
+            var notes = [];
+            if (sug && q !== "BF16" && q !== "INT4") notes.push("建议 TP" + sug);
+            else if (sug) notes.push("就近 TP" + sug);
+            if (alt) notes.push("该卡走 " + alt);
+            if (alt4) notes.push("该卡走 " + alt4);
+            h += "<td class='num'" + cls + "><span class='mrow'>" + (load === 1 ? "<b>1</b>" : fmt(load)) + "</span>"
+              + (notes.length ? "<span class='note-tok'>" + notes.join(" · ") + "</span>" : "") + "</td>";
+          });
+          h += "</tr>";
+        });
+      });
+    });
+    $("tbody-a").innerHTML = h;
+  })();
+
+  function renderB(ctxK, tbodyId) {
+    var ths = $(tbodyId).closest("table").querySelectorAll("thead .b-th");
+    CARDS.forEach(function (c, i) { ths[i].innerHTML = c.label; });
+    var h = "";
+    C.B_MODELS.forEach(function (mid) {
+      var m = byId(MODELS, mid), q = m.mainQ, overCtx = ctxK > m.ctxN;
+      h += "<tr><td class='model col-sticky'>" + m.name + "<span class='sub'>" + q + "</span></td>";
+      CARDS.forEach(function (c) {
+        if (overCtx) { h += "<td class='num'><span class='na'>超出</span></td>"; return; }
+        var s = C.solve(m, q, c, ctxK);
+        if (s.status !== "ok") { h += "<td class='na'>—</td>"; return; }
+        var t60cap = s.tps1 >= 60;
+        var v30 = fmtN(s.n30, true), v60 = t60cap ? fmtN(s.n60, true) : "×";
+        var bt30 = s.n30 >= 0.5 ? " <span class='bt-" + s.bt30 + "'>" + s.bt30 + "</span>" : "";
+        var bt60 = (t60cap && s.n60 >= 0.5) ? " <span class='bt-" + s.bt60 + "'>" + s.bt60 + "</span>" : "";
+        var highlight = (c.id === "H200" || c.id === "B300" || c.id === "910C") ? " background:#f6faff" : "";
+        h += "<td class='num' style='" + highlight + "'><span class='mrow'><b>" + v30 + "</b>" + bt30 + " / <span style='color:var(--text-2)'>" + v60 + "</span>" + bt60 + "</span>"
+          + "<span class='note-tok'>" + s.load + " 卡 · 池 " + fmt(s.pool, 0) + "G</span></td>";
+      });
+      h += "</tr>";
+    });
+    $(tbodyId).innerHTML = h;
+  }
+  renderB(4, "tbody-b4"); renderB(32, "tbody-b32"); renderB(128, "tbody-b128");
+
+  (function () {
+    var ths = document.querySelectorAll("table thead .cc");
+    C.C_CARDS.forEach(function (cid, i) { ths[i].innerHTML = byId(CARDS, cid).label; });
+    var h = "";
+    C.B_MODELS.forEach(function (mid) {
+      var m = byId(MODELS, mid);
+      h += "<tr><td class='model col-sticky'>" + m.name + "<span class='sub'>" + m.mainQ + " @32K</span></td>";
+      C.C_CARDS.forEach(function (cid) {
+        var c = byId(CARDS, cid), r100 = C.minCardsFor(m, m.mainQ, c, 32, 100);
+        if (!r100) { h += "<td class='na'>—</td>"; return; }
+        var load = C.loadCards(m, m.mainQ, c);
+        h += "<td class='num'><span class='mrow'><b>" + r100.total + " 卡</b> → 100 路</span><span class='note-tok'>"
+          + r100.group + " 卡/组 × " + r100.groups + " 组 · 单组 " + fmt(r100.perGroup, 0) + " 路"
+          + " · 装载下限 " + load + "</span></td>";
+      });
+      h += "</tr>";
+    });
+    $("tbody-c").innerHTML = h;
+  })();
+
+  /* ---------- 附录：校验 fixture ---------- */
+  (function () {
+    var M = function (id) { return byId(MODELS, id); }, CD = function (id) { return byId(CARDS, id); };
+    var l70 = M("llama70"), H200 = CD("H200"), B300 = CD("B300"), C910 = CD("910C"), s;
+    s = C.solve(l70, "FP8", H200, 8);
+    $("fx1").textContent = fmt(s.n30, 1) + " / " + fmt(s.n60, 1);
+    $("fx1r").innerHTML = (s.n30 >= 18.4 && s.n30 < 19.6 && s.n60 > 0.5 && s.n60 < 4.6) ? "<span class='pass'>✓ 达标（±1）</span>" : "<span class='dpass'>✗</span>";
+    s = C.solve(l70, "FP8", H200, 32);
+    $("fx2").textContent = fmt(s.n30, 1) + " / " + fmt(s.n60, 2);
+    $("fx2r").innerHTML = (s.n30 >= 4 && s.n30 <= 5.2 && s.n60 >= 0.5 && s.n60 < 1.5) ? "<span class='pass'>✓ 达标（±1）</span>" : "<span class='dpass'>✗</span>";
+    s = C.solve(l70, "FP8", B300, 8);
+    $("fx3").textContent = fmt(s.n30, 1) + " / " + (s.tps1 >= 60 ? fmt(s.n60, 1) : "×");
+    $("fx3r").innerHTML = (s.n30 >= 67 && s.n30 <= 69 && Math.abs(s.n60 - 24) <= 1.5) ? "<span class='pass'>✓ 达标（±1）</span>" : "<span class='dpass'>✗</span>";
+    s = C.solve(l70, "FP8", B300, 32);
+    $("fx4").textContent = fmt(s.n30, 2) + " / " + fmt(s.n60, 1);
+    $("fx4r").innerHTML = (Math.abs(s.n30 - 17.1) <= 1 && Math.abs(s.n60 - 6) <= 1) ? "<span class='pass'>✓ 达标（±1）</span>" : "<span class='dpass'>✗</span>";
+    s = C.solve(l70, "FP8", C910, 8);
+    $("fx5").textContent = fmt(s.n30, 2);
+    $("fx5r").innerHTML = (Math.abs(s.n30 - 14) <= 1.5) ? "<span class='pass'>✓ 达标（±1）</span>" : "<span class='dpass'>✗</span>";
+    s = C.solve(l70, "FP8", C910, 32);
+    $("fx6").textContent = fmt(s.n30, 2);
+    $("fx6r").innerHTML = (Math.abs(s.n30 - 3) <= 1) ? "<span class='pass'>✓ 达标（±1）</span>" : "<span class='dpass'>✗</span>";
+    var tps = C.singleTps(l70, "FP8", C910);
+    $("fx7").textContent = fmt(tps, 1) + " tok/s";
+    $("fx7r").innerHTML = (Math.abs(tps - 46) <= 2) ? "<span class='pass'>✓ 达标</span>" : "<span class='dpass'>✗</span>";
+    s = C.solve(M("qwen235"), "NVFP4", B300, 32);
+    $("fx8").textContent = fmt(s.n30, 1) + " 路";
+    $("fx8r").innerHTML = (Math.abs(s.n30 - 21) <= 1.5) ? "<span class='pass'>✓ 达标</span>" : "<span class='dpass'>✗</span>";
+    var histRef = { totalB: 671, actB: 37, type: "moe", wsB: { FP8: 671 }, kv: { type: "MLA", L: 61, lat: 512, rope: 64 } };
+    s = C.solve(histRef, "FP8", B300, 32);
+    $("fx9").textContent = fmt(s.n30, 0) + " 路（池 " + fmt(s.pool, 0) + "GB）";
+    $("fx9r").innerHTML = (Math.abs(s.n30 - 36) <= 3) ? "<span class='pass'>✓ 达标（±3：文章按 83GB 口径）</span>" : "<span class='dpass'>✗</span>";
+    tps = C.singleTps(l70, "FP8", H200);
+    $("fx10").textContent = fmt(tps, 1) + " tok/s";
+    $("fx10r").innerHTML = (Math.abs(tps - 69) <= 2) ? "<span class='pass'>✓ 达标</span>" : "<span class='dpass'>✗</span>";
+  })();
+
+  /* ---------- 事件绑定 ---------- */
+  [selModel, selCtx, selN, selTps].forEach(function (el) { el.onchange = renderAnswer; });
+  selCard.onchange = function () { cardTouched = true; renderCards(); markCur(); };
+  renderAnswer();
+  renderCards();
+
+  /* 目录高亮（能力检测降级） */
+  (function () {
+    if (typeof IntersectionObserver === "undefined") return;
+    var links = document.querySelectorAll("#toc a");
+    links.forEach(function (a) {
+      var t = document.querySelector(a.getAttribute("href"));
+      if (!t) return;
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) { links.forEach(function (x) { x.classList.remove("cur"); }); a.classList.add("cur"); }
+        });
+      }, { rootMargin: "-30% 0px -60% 0px" }).observe(t);
+    });
+  })();
+
+  /* 打印时展开全部附录，打印完恢复 */
+  window.addEventListener("beforeprint", function () {
+    document.querySelectorAll("details.appendix").forEach(function (d) { d.setAttribute("data-wasopen", d.open ? "1" : ""); d.open = true; });
+  });
+  window.addEventListener("afterprint", function () {
+    document.querySelectorAll("details.appendix").forEach(function (d) { if (!d.getAttribute("data-wasopen")) d.open = false; });
+  });
+})();
+</script>
+</body>
+</html>
